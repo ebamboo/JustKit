@@ -10,7 +10,7 @@ class TabViewController: UITabBarController {
         super.viewDidLoad()
         let vcInfoList: [(vc: UIViewController, title: String)] = [
             (ExperienceHomeViewController(), "经验方案"),
-            (UIViewController(), "项目工具"),
+            (ServiceHomeViewController(), "项目工具"),
             (UIViewController(), "通用工具"),
         ]
         vcInfoList.forEach { couple in
