@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24412" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24405"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="GradienViewTestViewController" customModule="JustKit" customModuleProvider="target">
+            <connections>
+                <outlet property="testView1" destination="VT5-SA-rQf" id="U5v-QE-gFJ"/>
+                <outlet property="testView2" destination="boS-rT-Q03" id="3QP-TF-gea"/>
+                <outlet property="testView3" destination="DPh-Fm-9Us" id="5ow-oA-pIw"/>
+                <outlet property="testView4" destination="bcy-dU-QVV" id="xHc-Nd-Upy"/>
+                <outlet property="testView5" destination="Rzl-zS-Cqs" id="rWU-hk-c0D"/>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="QJP-GI-T9P">
+                    <rect key="frame" x="0.0" y="118" width="393" height="666"/>
+                    <subviews>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="VT5-SA-rQf" customClass="GradientView" customModule="JustKit" customModuleProvider="target">
+                            <rect key="frame" x="0.0" y="0.0" width="393" height="125.33333333333333"/>
+                            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        </view>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="boS-rT-Q03" customClass="GradientView" customModule="JustKit" customModuleProvider="target">
+                            <rect key="frame" x="0.0" y="135.33333333333334" width="393" height="125.00000000000003"/>
+                            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        </view>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="DPh-Fm-9Us" customClass="GradientView" customModule="JustKit" customModuleProvider="target">
+                            <rect key="frame" x="0.0" y="270.33333333333331" width="393" height="125.33333333333331"/>
+                            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        </view>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="bcy-dU-QVV" customClass="GradientView" customModule="JustKit" customModuleProvider="target">
+                            <rect key="frame" x="0.0" y="405.66666666666663" width="393" height="125"/>
+                            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        </view>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Rzl-zS-Cqs" customClass="GradientView" customModule="JustKit" customModuleProvider="target">
+                            <rect key="frame" x="0.0" y="540.66666666666663" width="393" height="125.33333333333337"/>
+                            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        </view>
+                    </subviews>
+                </stackView>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>
+            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+            <constraints>
+                <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="QJP-GI-T9P" secondAttribute="trailing" id="1sx-hg-nRu"/>
+                <constraint firstItem="fnl-2z-Ty3" firstAttribute="bottom" secondItem="QJP-GI-T9P" secondAttribute="bottom" id="6tw-ZM-8GG"/>
+                <constraint firstItem="QJP-GI-T9P" firstAttribute="top" secondItem="fnl-2z-Ty3" secondAttribute="top" id="aUe-mP-KZi"/>
+                <constraint firstItem="QJP-GI-T9P" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" id="sm4-cY-idt"/>
+            </constraints>
+            <point key="canvasLocation" x="-211" y="99"/>
+        </view>
+    </objects>
+    <resources>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>
