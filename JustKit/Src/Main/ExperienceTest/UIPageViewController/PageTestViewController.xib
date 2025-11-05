@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24412" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24405"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="PageTestViewController" customModule="JustKit" customModuleProvider="target">
+            <connections>
+                <outlet property="contentView" destination="HGO-Yk-5js" id="DXS-H1-W7S"/>
+                <outlet property="indexLabel" destination="D26-q1-6V0" id="1zu-yv-Yne"/>
+                <outlet property="view" destination="jrE-lh-DGS" id="7kp-fg-Ms2"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="jrE-lh-DGS">
+            <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="HGO-Yk-5js">
+                    <rect key="frame" x="0.0" y="226" width="393" height="400"/>
+                    <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="400" id="jnK-t6-3zV"/>
+                    </constraints>
+                </view>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="tto-Y6-JaT">
+                    <rect key="frame" x="81.666666666666671" y="714" width="30" height="30"/>
+                    <state key="normal" title="后退"/>
+                    <connections>
+                        <action selector="backAction:" destination="-1" eventType="touchUpInside" id="fic-op-tEj"/>
+                    </connections>
+                </button>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ppb-1V-aoY">
+                    <rect key="frame" x="281.66666666666669" y="714" width="30" height="30"/>
+                    <state key="normal" title="前进"/>
+                    <connections>
+                        <action selector="forwardAction:" destination="-1" eventType="touchUpInside" id="qPb-qO-auA"/>
+                    </connections>
+                </button>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="D26-q1-6V0">
+                    <rect key="frame" x="191.33333333333334" y="158" width="10.333333333333343" height="21"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                    <nil key="textColor"/>
+                    <nil key="highlightedColor"/>
+                </label>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="bln-W2-d9B"/>
+            <color key="backgroundColor" systemColor="systemGroupedBackgroundColor"/>
+            <constraints>
+                <constraint firstItem="D26-q1-6V0" firstAttribute="centerX" secondItem="jrE-lh-DGS" secondAttribute="centerX" id="1T1-tS-rZ2"/>
+                <constraint firstItem="HGO-Yk-5js" firstAttribute="leading" secondItem="bln-W2-d9B" secondAttribute="leading" id="7AM-Z6-zFh"/>
+                <constraint firstItem="bln-W2-d9B" firstAttribute="bottom" secondItem="tto-Y6-JaT" secondAttribute="bottom" constant="40" id="OzK-KB-PIu"/>
+                <constraint firstItem="HGO-Yk-5js" firstAttribute="centerY" secondItem="jrE-lh-DGS" secondAttribute="centerY" id="R7r-XJ-mR7"/>
+                <constraint firstItem="tto-Y6-JaT" firstAttribute="centerX" secondItem="jrE-lh-DGS" secondAttribute="centerX" constant="-100" id="WWe-en-FDN"/>
+                <constraint firstItem="bln-W2-d9B" firstAttribute="bottom" secondItem="Ppb-1V-aoY" secondAttribute="bottom" constant="40" id="XYK-L5-VcJ"/>
+                <constraint firstItem="Ppb-1V-aoY" firstAttribute="centerX" secondItem="jrE-lh-DGS" secondAttribute="centerX" constant="100" id="ajN-0R-0gs"/>
+                <constraint firstItem="bln-W2-d9B" firstAttribute="trailing" secondItem="HGO-Yk-5js" secondAttribute="trailing" id="gFi-lX-JLU"/>
+                <constraint firstItem="D26-q1-6V0" firstAttribute="top" secondItem="bln-W2-d9B" secondAttribute="top" constant="40" id="tXO-SL-0dY"/>
+            </constraints>
+            <point key="canvasLocation" x="-674" y="-565"/>
+        </view>
+    </objects>
+    <resources>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemGroupedBackgroundColor">
+            <color red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+    </resources>
+</document>

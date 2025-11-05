@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="TableChildViewController" customModule="Demo01" customModuleProvider="target">
+            <connections>
+                <outlet property="indexLabel" destination="6aI-sx-Urh" id="YNU-QB-lEU"/>
+                <outlet property="tableView" destination="XjV-Rd-QGa" id="4kS-Pe-kES"/>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" contentInsetAdjustmentBehavior="never" style="grouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" estimatedSectionHeaderHeight="-1" sectionFooterHeight="18" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="XjV-Rd-QGa" customClass="SubTableView" customModule="Demo01" customModuleProvider="target">
+                    <rect key="frame" x="100" y="0.0" width="314" height="896"/>
+                    <color key="backgroundColor" systemColor="systemGroupedBackgroundColor"/>
+                    <connections>
+                        <outlet property="dataSource" destination="-1" id="QfP-F7-rq1"/>
+                        <outlet property="delegate" destination="-1" id="mDi-yN-yzb"/>
+                    </connections>
+                </tableView>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6aI-sx-Urh">
+                    <rect key="frame" x="0.0" y="0.0" width="100" height="172"/>
+                    <string key="text">第
+1
+组</string>
+                    <fontDescription key="fontDescription" type="system" weight="black" pointSize="48"/>
+                    <nil key="textColor"/>
+                    <nil key="highlightedColor"/>
+                </label>
+            </subviews>
+            <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <constraints>
+                <constraint firstItem="XjV-Rd-QGa" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" constant="100" id="0hV-HC-aHt"/>
+                <constraint firstAttribute="bottom" secondItem="XjV-Rd-QGa" secondAttribute="bottom" id="719-Rz-Rbh"/>
+                <constraint firstItem="6aI-sx-Urh" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" id="KEk-9w-Ls7"/>
+                <constraint firstItem="6aI-sx-Urh" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="PV2-Fm-kHP"/>
+                <constraint firstItem="XjV-Rd-QGa" firstAttribute="leading" secondItem="6aI-sx-Urh" secondAttribute="trailing" id="in0-mW-9v1"/>
+                <constraint firstAttribute="trailing" secondItem="XjV-Rd-QGa" secondAttribute="trailing" id="va1-oF-aYZ"/>
+                <constraint firstItem="XjV-Rd-QGa" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" id="wE9-bY-L0r"/>
+            </constraints>
+            <point key="canvasLocation" x="139" y="154"/>
+        </view>
+    </objects>
+    <resources>
+        <systemColor name="systemGroupedBackgroundColor">
+            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+    </resources>
+</document>

@@ -9,7 +9,7 @@ class TabViewController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         let vcInfoList: [(vc: UIViewController, title: String)] = [
-            (UIViewController(), "经验方案"),
+            (ExperienceHomeViewController(), "经验方案"),
             (UIViewController(), "项目工具"),
             (UIViewController(), "通用工具"),
         ]
