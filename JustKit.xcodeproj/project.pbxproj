@@ -20,6 +20,9 @@
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
 		EA15E44F2EBB632500C6F153 /* Exceptions for "JustKit" folder in "JustKit" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			additionalCompilerFlagsByRelativePath = {
+				Src/Utils/Foundation/OrientationButton.swift = "-Wno-deprecated-declarations";
+			};
 			membershipExceptions = (
 				Info.plist,
 			);
