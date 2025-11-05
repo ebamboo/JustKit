@@ -1,0 +1,34 @@
+PODS:
+  - Alamofire (5.10.2)
+  - BBPlayerView (1.2.1)
+  - HandyJSON (5.0.2)
+  - MBProgressHUD (1.2.0)
+  - SDWebImage (5.20.0):
+    - SDWebImage/Core (= 5.20.0)
+  - SDWebImage/Core (5.20.0)
+
+DEPENDENCIES:
+  - Alamofire
+  - BBPlayerView
+  - HandyJSON
+  - MBProgressHUD
+  - SDWebImage
+
+SPEC REPOS:
+  https://mirrors.tuna.tsinghua.edu.cn/git/CocoaPods/Specs.git:
+    - Alamofire
+    - BBPlayerView
+    - HandyJSON
+    - MBProgressHUD
+    - SDWebImage
+
+SPEC CHECKSUMS:
+  Alamofire: 7193b3b92c74a07f85569e1a6c4f4237291e7496
+  BBPlayerView: 34a46cf2cf375d7e4b127e3be34e3d8262cd47d8
+  HandyJSON: 9e4e236f5d2dbefad5155a77417bbea438201c03
+  MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
+  SDWebImage: 73c6079366fea25fa4bb9640d5fb58f0893facd8
+
+PODFILE CHECKSUM: 581ecdf7796b29a7b98deef629fd01a7b5576e79
+
+COCOAPODS: 1.16.2

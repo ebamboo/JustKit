@@ -1,7 +1,4 @@
 //
-//  SceneDelegate.swift
-//  JustKit
-//
 //  Created by 姚旭 on 2025/11/5.
 //
 
@@ -15,7 +12,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: windowScene)
-        window?.rootViewController = RootViewController()
+        window?.rootViewController = UINavigationController(
+            rootViewController: TabViewController()
+        )
         window?.makeKeyAndVisible()
     }
 

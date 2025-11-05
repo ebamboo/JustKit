@@ -8,9 +8,10 @@ class TabViewController: UITabBarController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        let vcInfoList: [(vc: UINavigationController, title: String)] = [
-            (UINavigationController(rootViewController: UtilsTestViewController()), "Utils"),
-            (UINavigationController(rootViewController: ToolsTestViewController()), "Tools"),
+        let vcInfoList: [(vc: UIViewController, title: String)] = [
+            (UIViewController(), "经验方案"),
+            (UIViewController(), "项目工具"),
+            (UIViewController(), "通用工具"),
         ]
         vcInfoList.forEach { couple in
             couple.vc.tabBarItem = UITabBarItem(title: couple.title, image: nil, selectedImage: nil)
