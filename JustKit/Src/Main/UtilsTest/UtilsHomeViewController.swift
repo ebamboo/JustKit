@@ -51,7 +51,7 @@ extension UtilsHomeViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: false)
         if indexPath.row == 0 {
-            navigationController?.pushViewController(KeychainViewController(), animated: true)
+            navigationController?.pushViewController(KeychainTestViewController(), animated: true)
             return
         }
         if indexPath.row == 1 {
