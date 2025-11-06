@@ -7,6 +7,16 @@ import AVFoundation
 
 class CustomCameraViewController: UIViewController {
     
+    ///
+    /// 使用相机时，系统要求应用必须全屏，因此在实际需要使用打开相机之前，判断是否全屏。
+    /// 判断应用是否全屏展示
+    ///
+    var isFullScreen: Bool {
+        guard let window = view.window, let screen = window.windowScene?.screen else { return false }
+        let windowFrame = window.convert(window.bounds, to: screen.coordinateSpace)
+        return windowFrame.equalTo(screen.bounds)
+    }
+    
     private var preview: CustomCameraView {
         view as! CustomCameraView
     }
