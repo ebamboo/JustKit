@@ -95,7 +95,6 @@ extension NSCollectionLayoutSection {
         self.init(group: group as! NSCollectionLayoutGroup)
         self.boundarySupplementaryItems = boundarySupplementaryItems
         self.decorationItems = decorationItems
-        self.orthogonalScrollingBehavior = .continuousGroupLeadingBoundary
     }
     
 }

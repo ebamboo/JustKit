@@ -10,7 +10,8 @@ class UtilsHomeViewController: UIViewController {
         "Keychain", "ModelAnimator", "渐变视图测试",
         "自定义虚线视图DashView", "自定义UIView每个圆角大小RoundView", "仿UISwitch控件CommonSwitch",
         "UIImage+Transform 测试", "自定义 Stepper", "自定义渐变圆角边框/渐变文字",
-        "标签样式CollectionViewTagLayout", "Popover弹窗工具测试", "普通视图支持上下文菜单"
+        "标签样式CollectionViewTagLayout", "Popover弹窗工具测试", "普通视图支持上下文菜单",
+        "UICollectionView新布局便利方法"
     ]
     
     lazy var tableView: UITableView = {
@@ -96,6 +97,10 @@ extension UtilsHomeViewController: UITableViewDataSource, UITableViewDelegate {
         }
         if indexPath.row == 11 {
             navigationController?.pushViewController(ContextMenuTestViewController(), animated: true)
+            return
+        }
+        if indexPath.row == 12 {
+            navigationController?.pushViewController(NSCollectionLayoutTestViewController(), animated: true)
             return
         }
     }
