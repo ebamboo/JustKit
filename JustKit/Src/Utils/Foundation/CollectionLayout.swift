@@ -144,7 +144,7 @@ class CollectionSection: CollectionBase {
         let decorationItems = items.compactMap { item in
             item as? CollectionBackground
         }
-        guard let group = group as? CollectionGroup else { fatalError("section 缺失 group") }
+        guard let group = group as? CollectionGroup else { fatalError("section 中必须定义 group") }
         let realSection: NSCollectionLayoutSection = .init(group: group.realValue)
         realSection.boundarySupplementaryItems = boundaryItems.map({ $0.realValue })
         realSection.decorationItems = decorationItems.map({ $0.realValue })
