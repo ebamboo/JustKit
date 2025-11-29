@@ -26,7 +26,7 @@ public extension UIView {
                 objc_setAssociatedObject(self, key, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
             }
             interactions.removeAll { interaction in
-                interaction.isKind(of: ContextMenuInteraction.self)
+                interaction is ContextMenuInteraction
             }
             guard let newValue else { return }
             let interaction = ContextMenuInteraction(menu: newValue)

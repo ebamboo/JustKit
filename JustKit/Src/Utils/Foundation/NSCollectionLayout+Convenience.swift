@@ -84,7 +84,7 @@ extension NSCollectionLayoutSection {
     ) {
         let items = subitemsBuilder()
         let group = items.first { item in
-            item.isKind(of: NSCollectionLayoutGroup.self)
+            item is NSCollectionLayoutGroup
         }
         let boundarySupplementaryItems = items.compactMap { item in
             item as? NSCollectionLayoutBoundarySupplementaryItem
