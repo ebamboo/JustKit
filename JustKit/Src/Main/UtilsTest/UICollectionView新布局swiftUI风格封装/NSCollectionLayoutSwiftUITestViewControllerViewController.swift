@@ -106,7 +106,7 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
     static let ShopSctionBackKind = "ShopSction.Back"
     
     var layout: UICollectionViewLayout {
-        let layout = UICollectionViewCompositionalLayout { [weak self] sectionIndex, _ in
+        let layout = UICollectionViewCompositionalLayout.custom { [weak self] sectionIndex, _ in
             guard let self, !self.testData.isEmpty else { return nil }
             guard self.testData.count > sectionIndex else { return nil }
             let section = self.testData[sectionIndex]
@@ -123,29 +123,12 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
         return layout
     }
     
-    var bannerSection: NSCollectionLayoutSection {
-        NSCollectionLayoutSection {
+    var bannerSection: CollectionSection {
+        CollectionSection {
             
-            NSCollectionLayoutGroup.vertical(
-                layoutSize: .init(widthDimension: .absolute(100), heightDimension: .absolute(210))
-            ) {
+            CollectionVGroup(width: .absolute(100), height: .absolute(210)) {
                 
-                NSCollectionLayoutItem(
-                    layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .fractionalHeight(0.5))
-                ) {
-                    NSCollectionLayoutSupplementaryItem(
-                        layoutSize: .init(widthDimension: .absolute(20), heightDimension: .absolute(20)),
-                        elementKind: Self.BannerSctionBadgeKind,
-                        containerAnchor: .init(
-                            edges: [.top, .trailing],
-                            absoluteOffset: .init(x: 0, y: 0)
-                        ),
-                        itemAnchor: .init(
-                            edges: [.bottom, .leading],
-                            absoluteOffset: .init(x: -10, y: 10)
-                        )
-                    )
-                }
+                CollectionItem(width: .fractionalWidth(1), height: .fractionalHeight(0.5))
                 
             }
             .setup { group in
@@ -155,40 +138,27 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
         }
         .setup { section in
             section.interGroupSpacing = 10
-            /// ！！！！！！！！！！！ 想要 section 内容水平滚动必须设置该属性 ！！！！！！！！！！！！
             section.orthogonalScrollingBehavior = .continuous
         }
     }
     
-    var hotSection: NSCollectionLayoutSection {
-        NSCollectionLayoutSection {
+    var hotSection: CollectionSection {
+        CollectionSection {
             
             if needHotHeadder {
-                NSCollectionLayoutBoundarySupplementaryItem(
-                    layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(60)),
-                    elementKind: Self.HotSctionHeaderKind,
-                    alignment: .top
-                )
-                .setup { header in
-                    header.pinToVisibleBounds = true // 可以吸附 header
-                }
+                CollectionBoundary(kind: Self.HotSctionHeaderKind, alignment: .top)
+                    .setup { header in
+                        header.pinToVisibleBounds = true
+                    }
             }
             
-            NSCollectionLayoutGroup.horizontal(
-                layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(200))
-            ) {
+            CollectionHGroup(width: .fractionalWidth(1), height: .estimated(200)) {
                 
-                NSCollectionLayoutItem(
-                    layoutSize: .init(widthDimension: .fractionalWidth(0.08), heightDimension: .absolute(160))
-                )
+                CollectionItem(width: .fractionalWidth(0.08), height: .absolute(160))
                 
-                NSCollectionLayoutItem(
-                    layoutSize: .init(widthDimension: .fractionalWidth(0.12), heightDimension: .absolute(160))
-                )
+                CollectionItem(width: .fractionalWidth(0.12), height: .absolute(160))
                 
-                NSCollectionLayoutItem(
-                    layoutSize: .init(widthDimension: .fractionalWidth(0.18), heightDimension: .absolute(160))
-                )
+                CollectionItem(width: .fractionalWidth(0.18), height: .absolute(160))
                 
             }
             .setup { group in
@@ -196,11 +166,7 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
             }
             
             if needHotFooter {
-                NSCollectionLayoutBoundarySupplementaryItem(
-                    layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(60)),
-                    elementKind: Self.HotSctionFooterKind,
-                    alignment: .bottom
-                )
+                CollectionBoundary(kind: Self.HotSctionFooterKind, alignment: .bottom)
             }
             
         }
@@ -209,16 +175,12 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
         }
     }
     
-    var shopSection: NSCollectionLayoutSection {
-        NSCollectionLayoutSection {
+    var shopSection: CollectionSection {
+        CollectionSection {
             
-            NSCollectionLayoutGroup.horizontal(
-                layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(200))
-            ) {
+            CollectionHGroup(width: .fractionalWidth(1), height: .estimated(200)) {
                 
-                NSCollectionLayoutItem(
-                    layoutSize: .init(widthDimension: .fractionalWidth(0.5), heightDimension: .fractionalWidth(0.5))
-                )
+                CollectionItem(width: .fractionalWidth(0.5), height: .fractionalWidth(0.5))
                 
             }
             .setup { group in
@@ -226,9 +188,8 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
             }
             
             if needBack {
-                NSCollectionLayoutDecorationItem.background(elementKind: Self.ShopSctionBackKind)
+                CollectionBackground(kind: Self.ShopSctionBackKind)
                     .setup { back in
-                        // 通过注释和反注释以下代码观察 insets 效果
                         back.contentInsets = .init(top: 10, leading: 10, bottom: 10, trailing: 10)
                     }
             }
