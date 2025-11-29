@@ -22,12 +22,12 @@ class NSCollectionLayoutSwiftUITestViewControllerViewController: UIViewControlle
             )
             collectionView.register(
                 ConvenienceCollectionViewTestSectionHeaderView.self,
-                forSupplementaryViewOfKind: Self.HotSctionHeaderKind,
+                forSupplementaryViewOfKind: .sectionHeader,
                 withReuseIdentifier: "ConvenienceCollectionViewTestSectionHeaderView"
             )
             collectionView.register(
                 ConvenienceCollectionViewTestSectionFooterView.self,
-                forSupplementaryViewOfKind: Self.HotSctionFooterKind,
+                forSupplementaryViewOfKind: .sectionFooter,
                 withReuseIdentifier: "ConvenienceCollectionViewTestSectionFooterView"
             )
             
@@ -95,11 +95,6 @@ class NSCollectionLayoutSwiftUITestViewControllerViewController: UIViewControlle
 
 extension NSCollectionLayoutSwiftUITestViewControllerViewController {
     
-    static let BannerSctionBadgeKind = "BannerSction.Badge"
-    static let HotSctionHeaderKind = "HotSction.Header"
-    static let HotSctionFooterKind = "HotSction.Footer"
-    static let ShopSctionBackKind = "ShopSction.Back"
-    
     var layout: UICollectionViewLayout {
         let layout = UICollectionViewCompositionalLayout.custom { [weak self] sectionIndex, _ in
             guard let self, !self.testData.isEmpty else { return nil }
@@ -113,7 +108,7 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
         }
         layout.register(
             ConvenienceCollectionViewTestSectionBackView.self,
-            forDecorationViewOfKind: Self.ShopSctionBackKind
+            forDecorationViewOfKind: "ConvenienceCollectionViewTestSectionBackView"
         )
         return layout
     }
@@ -141,7 +136,7 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
         CollectionSection {
             
             if needHotHeadder {
-                CollectionBoundary(kind: Self.HotSctionHeaderKind, alignment: .top)
+                CollectionBoundary(kind: .sectionHeader, alignment: .top)
                     .setup { header in
                         header.pinToVisibleBounds = true
                     }
@@ -161,7 +156,7 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
             }
             
             if needHotFooter {
-                CollectionBoundary(kind: Self.HotSctionFooterKind, alignment: .bottom)
+                CollectionBoundary(kind: .sectionFooter, alignment: .bottom)
             }
             
         }
@@ -183,7 +178,7 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
             }
             
             if needBack {
-                CollectionBackground(kind: Self.ShopSctionBackKind)
+                CollectionBackground(kind: "ConvenienceCollectionViewTestSectionBackView")
                     .setup { back in
                         back.contentInsets = .init(top: 10, leading: 10, bottom: 10, trailing: 10)
                     }
@@ -208,9 +203,10 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
             cell.nameLabel.text = "\(indexPath.item+1)"
             return cell
         }
-        dataSource.supplementaryViewProvider = { collectionView, kind, indexPath -> UICollectionReusableView? in
-            switch kind {
-            case Self.HotSctionHeaderKind:
+        dataSource.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath -> UICollectionReusableView? in
+            guard let self else { return nil }
+            switch (kind, self.testData[indexPath.section]) {
+            case (.sectionHeader, .hot):
                 let header = collectionView.dequeueReusableSupplementaryView(
                     ofKind: kind,
                     withReuseIdentifier: "ConvenienceCollectionViewTestSectionHeaderView",
@@ -218,7 +214,7 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
                 ) as! ConvenienceCollectionViewTestSectionHeaderView
                 header.configure(title: "Hot Section Header")
                 return header
-            case Self.HotSctionFooterKind:
+            case (.sectionFooter, .hot):
                 let footer = collectionView.dequeueReusableSupplementaryView(
                     ofKind: kind,
                     withReuseIdentifier: "ConvenienceCollectionViewTestSectionFooterView",

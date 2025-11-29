@@ -16,10 +16,15 @@ extension CollectionBaseSetup {
     }
 }
 
-class CollectionBase {
+class CollectionBase: CollectionBaseSetup {
     var contentInsets: NSDirectionalEdgeInsets = .zero
 }
-extension CollectionBase: CollectionBaseSetup {}
+
+typealias ElementKind = String
+extension ElementKind {
+    static let sectionHeader = UICollectionView.elementKindSectionHeader
+    static let sectionFooter = UICollectionView.elementKindSectionFooter
+}
 
 // MARK: - UICollectionViewLayout convenience
 
@@ -126,6 +131,7 @@ class CollectionSection: CollectionBase {
     
     let items: [CollectionBase]
     var interGroupSpacing: CGFloat = 0
+    /// 设置该属性才会使得 section 横向滑动
     var orthogonalScrollingBehavior: UICollectionLayoutSectionOrthogonalScrollingBehavior = .none
     
     init(
@@ -159,14 +165,15 @@ class CollectionSection: CollectionBase {
 class CollectionBoundary: CollectionBase {
     
     let layoutSize: NSCollectionLayoutSize
-    let kind: String
+    let kind: ElementKind
     let alignment: NSRectAlignment
+    /// 是否吸附
     var pinToVisibleBounds: Bool = false
     
     init(
         width: NSCollectionLayoutDimension = .fractionalWidth(1),
         height: NSCollectionLayoutDimension = .estimated(80),
-        kind: String,
+        kind: ElementKind,
         alignment: NSRectAlignment
     ) {
         self.layoutSize = .init(widthDimension: width, heightDimension: height)
@@ -200,6 +207,7 @@ class CollectionBackground: CollectionBase {
         /// DecorationView （section背景）通过 UICollectionViewLayout 进行注册
         /// Each type of decoration item must have a unique element kind
         /// 例如: Section1BackGroundView 和 Section2BackGroundView 要注册为两个不同的 kind，并把 kind 当作 identifier 使用
+        /// 一般以类名作为 kind
         let realDecoration = NSCollectionLayoutDecorationItem.background(
             elementKind: kind
         )
