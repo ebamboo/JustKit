@@ -21,11 +21,6 @@ class NSCollectionLayoutSwiftUITestViewControllerViewController: UIViewControlle
                 forCellWithReuseIdentifier: "ConvenienceCollectionViewTestCell"
             )
             collectionView.register(
-                ConvenienceCollectionViewTestBadegView.self,
-                forSupplementaryViewOfKind: Self.BannerSctionBadgeKind,
-                withReuseIdentifier: "ConvenienceCollectionViewTestBadegView"
-            )
-            collectionView.register(
                 ConvenienceCollectionViewTestSectionHeaderView.self,
                 forSupplementaryViewOfKind: Self.HotSctionHeaderKind,
                 withReuseIdentifier: "ConvenienceCollectionViewTestSectionHeaderView"
@@ -215,13 +210,6 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
         }
         dataSource.supplementaryViewProvider = { collectionView, kind, indexPath -> UICollectionReusableView? in
             switch kind {
-            case Self.BannerSctionBadgeKind:
-                let badge = collectionView.dequeueReusableSupplementaryView(
-                    ofKind: kind,
-                    withReuseIdentifier: "ConvenienceCollectionViewTestBadegView",
-                    for: indexPath
-                ) as! ConvenienceCollectionViewTestBadegView
-                return badge
             case Self.HotSctionHeaderKind:
                 let header = collectionView.dequeueReusableSupplementaryView(
                     ofKind: kind,

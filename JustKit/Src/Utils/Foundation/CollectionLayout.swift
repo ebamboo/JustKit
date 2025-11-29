@@ -197,6 +197,9 @@ class CollectionBackground: CollectionBase {
     }
     
     var realValue: NSCollectionLayoutDecorationItem {
+        /// DecorationView （section背景）通过 UICollectionViewLayout 进行注册
+        /// Each type of decoration item must have a unique element kind
+        /// 例如: Section1BackGroundView 和 Section2BackGroundView 要注册为两个不同的 kind，并把 kind 当作 identifier 使用
         let realDecoration = NSCollectionLayoutDecorationItem.background(
             elementKind: kind
         )
