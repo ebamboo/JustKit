@@ -11,8 +11,7 @@ protocol CollectionBaseSetup {
 }
 extension CollectionBaseSetup {
     func setup(_ block: (Self) -> Void) -> Self {
-        block(self)
-        return self
+        block(self); return self
     }
 }
 
@@ -162,6 +161,13 @@ class CollectionSection: CollectionBase {
     
 }
 
+/// 如果多个 section 的 header 通过不同的 UIView 实现，则为每一个 HeaderView 注册不同的 kind（一般用类名）
+/// 这样其实可以通过 kind 就可以确定具体哪个 HeaderView 了
+/// 如果所有的 section 使用同一个类型 UIView 实现，则只需为该 HeaderView 注册一次，且 kind 推荐为 .sectionHeader
+///
+/// 一个 BoundaryView 类型可以注册多次，但是 kind 不能相同，例如：
+/// register(BoundaryView.self, forSupplementaryViewOfKind: .sectionHeader, withReuseIdentifier: "BoundaryView")
+/// register(BoundaryView.self, forSupplementaryViewOfKind: .sectionFooter, withReuseIdentifier: "BoundaryView")
 class CollectionBoundary: CollectionBase {
     
     let layoutSize: NSCollectionLayoutSize

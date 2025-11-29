@@ -33,8 +33,7 @@ protocol NSCollectionLayoutItemSetup {
 }
 extension NSCollectionLayoutItemSetup {
     func setup(_ block: (Self) -> Void) -> Self {
-        block(self)
-        return self
+        block(self); return self
     }
 }
 extension NSCollectionLayoutItem: NSCollectionLayoutItemSetup {}
