@@ -6,17 +6,13 @@ import UIKit
 
 // MARK: - base
 
-protocol CollectionBaseSetup {
+protocol CollectionElement {
     func setup(_ block: (Self) -> Void) -> Self
 }
-extension CollectionBaseSetup {
+extension CollectionElement{
     func setup(_ block: (Self) -> Void) -> Self {
         block(self); return self
     }
-}
-
-class CollectionBase: CollectionBaseSetup {
-    var contentInsets: NSDirectionalEdgeInsets = .zero
 }
 
 typealias ElementKind = String
@@ -25,7 +21,7 @@ extension ElementKind {
     static let sectionFooter = UICollectionView.elementKindSectionFooter
 }
 
-// MARK: - UICollectionViewLayout convenience
+// MARK: - convenience
 
 extension UICollectionViewCompositionalLayout {
     
@@ -42,9 +38,11 @@ extension UICollectionViewCompositionalLayout {
 
 // MARK: - components
 
-class CollectionItem: CollectionBase {
+class CollectionItem: CollectionElement {
     
     let layoutSize: NSCollectionLayoutSize
+    
+    var contentInsets: NSDirectionalEdgeInsets = .zero
     
     init(
         width: NSCollectionLayoutDimension,
@@ -65,16 +63,18 @@ protocol CollectionGroup {
     var realValue: NSCollectionLayoutGroup { get }
 }
 
-class CollectionHGroup: CollectionBase, CollectionGroup {
+class CollectionHGroup: CollectionElement, CollectionGroup {
     
     let layoutSize: NSCollectionLayoutSize
     let subitems: [CollectionItem]
+    
+    var contentInsets: NSDirectionalEdgeInsets = .zero
     var interItemSpacing: NSCollectionLayoutSpacing?
     
     init(
         width: NSCollectionLayoutDimension,
         height: NSCollectionLayoutDimension,
-        @CollectionBuilder<CollectionItem> subitems: () -> [CollectionItem]
+        @CollectionElementBuilder<CollectionItem> subitems: () -> [CollectionItem]
     ) {
         self.layoutSize = .init(widthDimension: width, heightDimension: height)
         self.subitems = subitems()
@@ -92,16 +92,18 @@ class CollectionHGroup: CollectionBase, CollectionGroup {
     
 }
 
-class CollectionVGroup: CollectionBase, CollectionGroup {
+class CollectionVGroup: CollectionElement, CollectionGroup {
     
     let layoutSize: NSCollectionLayoutSize
     let subitems: [CollectionItem]
+    
+    var contentInsets: NSDirectionalEdgeInsets = .zero
     var interItemSpacing: NSCollectionLayoutSpacing?
     
     init(
         width: NSCollectionLayoutDimension,
         height: NSCollectionLayoutDimension,
-        @CollectionBuilder<CollectionItem> subitems: () -> [CollectionItem]
+        @CollectionElementBuilder<CollectionItem> subitems: () -> [CollectionItem]
     ) {
         self.layoutSize = .init(widthDimension: width, heightDimension: height)
         self.subitems = subitems()
@@ -118,13 +120,14 @@ class CollectionVGroup: CollectionBase, CollectionGroup {
     }
 }
 
-class CollectionSection: CollectionBase {
+class CollectionSection: CollectionElement {
     
     let group: CollectionGroup
     let header: [CollectionBoundary]
     let footer: [CollectionBoundary]
     let background: [CollectionBackground]
     
+    var contentInsets: NSDirectionalEdgeInsets = .zero
     var interGroupSpacing: CGFloat = 0
     /// 设置该属性才会使得 section 横向滑动
     var orthogonalScrollingBehavior: UICollectionLayoutSectionOrthogonalScrollingBehavior = .none
@@ -140,7 +143,7 @@ class CollectionSection: CollectionBase {
     
     init(
         group: () -> CollectionGroup,
-        @CollectionBuilder<CollectionBackground> background: () -> [CollectionBackground]
+        @CollectionElementBuilder<CollectionBackground> background: () -> [CollectionBackground]
     ) {
         self.group = group()
         self.header = []
@@ -150,7 +153,7 @@ class CollectionSection: CollectionBase {
     
     init(
         group: () -> CollectionGroup,
-        @CollectionBuilder<CollectionBoundary> header: () -> [CollectionBoundary]
+        @CollectionElementBuilder<CollectionBoundary> header: () -> [CollectionBoundary]
     ) {
         self.group = group()
         self.header = header()
@@ -160,7 +163,7 @@ class CollectionSection: CollectionBase {
     
     init(
         group: () -> CollectionGroup,
-        @CollectionBuilder<CollectionBoundary> footer: () -> [CollectionBoundary]
+        @CollectionElementBuilder<CollectionBoundary> footer: () -> [CollectionBoundary]
     ) {
         self.group = group()
         self.header = []
@@ -170,8 +173,8 @@ class CollectionSection: CollectionBase {
     
     init(
         group: () -> CollectionGroup,
-        @CollectionBuilder<CollectionBoundary> header: () -> [CollectionBoundary],
-        @CollectionBuilder<CollectionBoundary> footer: () -> [CollectionBoundary]
+        @CollectionElementBuilder<CollectionBoundary> header: () -> [CollectionBoundary],
+        @CollectionElementBuilder<CollectionBoundary> footer: () -> [CollectionBoundary]
     ) {
         self.group = group()
         self.header = header()
@@ -181,9 +184,9 @@ class CollectionSection: CollectionBase {
     
     init(
         group: () -> CollectionGroup,
-        @CollectionBuilder<CollectionBoundary> header: () -> [CollectionBoundary],
-        @CollectionBuilder<CollectionBoundary> footer: () -> [CollectionBoundary],
-        @CollectionBuilder<CollectionBackground> background: () -> [CollectionBackground]
+        @CollectionElementBuilder<CollectionBoundary> header: () -> [CollectionBoundary],
+        @CollectionElementBuilder<CollectionBoundary> footer: () -> [CollectionBoundary],
+        @CollectionElementBuilder<CollectionBackground> background: () -> [CollectionBackground]
     ) {
         self.group = group()
         self.header = header()
@@ -210,11 +213,13 @@ class CollectionSection: CollectionBase {
 /// 一个 BoundaryView 类型可以注册多次，但是 kind 不能相同，例如：
 /// register(BoundaryView.self, forSupplementaryViewOfKind: .sectionHeader, withReuseIdentifier: "BoundaryView")
 /// register(BoundaryView.self, forSupplementaryViewOfKind: .sectionFooter, withReuseIdentifier: "BoundaryView")
-class CollectionBoundary: CollectionBase {
+class CollectionBoundary: CollectionElement {
     
     let layoutSize: NSCollectionLayoutSize
     let kind: ElementKind
     let alignment: NSRectAlignment
+    
+    var contentInsets: NSDirectionalEdgeInsets = .zero
     /// 是否吸附
     var pinToVisibleBounds: Bool = false
     
@@ -242,9 +247,12 @@ class CollectionBoundary: CollectionBase {
     
 }
 
-class CollectionBackground: CollectionBase {
+class CollectionBackground: CollectionElement {
     
     let kind: String
+    
+    var contentInsets: NSDirectionalEdgeInsets = .zero
+    
     init(
         kind: String
     ) {
@@ -268,7 +276,7 @@ class CollectionBackground: CollectionBase {
 // MARK: - support
 
 @resultBuilder
-struct CollectionBuilder<Expression: CollectionBase> {
+struct CollectionElementBuilder<Expression: CollectionElement> {
     
     typealias Component = [Expression]
     
