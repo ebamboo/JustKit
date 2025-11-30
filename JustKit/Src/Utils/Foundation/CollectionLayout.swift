@@ -29,11 +29,11 @@ open func register(_ nib: UINib?, forSupplementaryViewOfKind kind: String, withR
 // MARK: - base
 
 protocol CollectionElement {
-    func setup(_ block: (Self) -> Void) -> Self
+    func setup(_ block: (inout Self) -> Void) -> Self
 }
 extension CollectionElement{
-    func setup(_ block: (Self) -> Void) -> Self {
-        block(self); return self
+    func setup(_ block: (inout Self) -> Void) -> Self {
+        var copy = self;  block(&copy); return copy
     }
 }
 
@@ -60,7 +60,7 @@ extension UICollectionViewCompositionalLayout {
 
 // MARK: - components
 
-class CollectionItem: CollectionElement {
+struct CollectionItem: CollectionElement {
     
     let layoutSize: NSCollectionLayoutSize
     
@@ -81,7 +81,7 @@ class CollectionItem: CollectionElement {
     
 }
 
-class CollectionGroup: CollectionElement {
+struct CollectionGroup: CollectionElement {
     
     enum Axis {
         case horizontal
@@ -127,7 +127,7 @@ class CollectionGroup: CollectionElement {
     
 }
 
-class CollectionSection: CollectionElement {
+struct CollectionSection: CollectionElement {
     
     let groups: [CollectionGroup]
     let boundarys: [CollectionBoundary]
@@ -194,7 +194,7 @@ class CollectionSection: CollectionElement {
 /// 一个 BoundaryView 类型可以注册多次，但是 kind 不能相同，例如：
 /// register(BoundaryView.self, forSupplementaryViewOfKind: .sectionHeader, withReuseIdentifier: "BoundaryView")
 /// register(BoundaryView.self, forSupplementaryViewOfKind: .sectionFooter, withReuseIdentifier: "BoundaryView")
-class CollectionBoundary: CollectionElement {
+struct CollectionBoundary: CollectionElement {
     
     let layoutSize: NSCollectionLayoutSize
     let kind: ElementKind
@@ -228,7 +228,7 @@ class CollectionBoundary: CollectionElement {
     
 }
 
-class CollectionBackground: CollectionElement {
+struct CollectionBackground: CollectionElement {
     
     let kind: String
     
