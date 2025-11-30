@@ -22,12 +22,6 @@ extension CollectionElement{
     }
 }
 
-typealias ElementKind = String
-extension ElementKind {
-    static let sectionHeader = UICollectionView.elementKindSectionHeader
-    static let sectionFooter = UICollectionView.elementKindSectionFooter
-}
-
 // MARK: - convenience
 
 extension UICollectionViewCompositionalLayout {
@@ -245,7 +239,7 @@ struct CollectionBadge: CollectionElement {
 struct CollectionBoundary: CollectionElement {
     
     let layoutSize: NSCollectionLayoutSize
-    let kind: ElementKind
+    let kind: String
     let alignment: NSRectAlignment
     
     var contentInsets: NSDirectionalEdgeInsets = .zero
@@ -256,7 +250,7 @@ struct CollectionBoundary: CollectionElement {
     init(
         width: NSCollectionLayoutDimension = .fractionalWidth(1),
         height: NSCollectionLayoutDimension = .estimated(80),
-        kind: ElementKind,
+        kind: String,
         alignment: NSRectAlignment
     ) {
         self.layoutSize = .init(widthDimension: width, heightDimension: height)

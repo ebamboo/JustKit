@@ -26,20 +26,20 @@ class NSCollectionLayoutSwiftUITestViewControllerViewController: UIViewControlle
             )
             collectionView.register(
                 ConvenienceCollectionViewTestBadegView.self,
-                forSupplementaryViewOfKind: "ConvenienceCollectionViewTestBadegView1",
+                forSupplementaryViewOfKind: "badge-1",
                 withReuseIdentifier: "ConvenienceCollectionViewTestBadegView")
             collectionView.register(
                 ConvenienceCollectionViewTestBadegView.self,
-                forSupplementaryViewOfKind: "ConvenienceCollectionViewTestBadegView2",
+                forSupplementaryViewOfKind: "badge-2",
                 withReuseIdentifier: "ConvenienceCollectionViewTestBadegView")
             collectionView.register(
                 ConvenienceCollectionViewTestSectionHeaderView.self,
-                forSupplementaryViewOfKind: .sectionHeader,
+                forSupplementaryViewOfKind: "section-header",
                 withReuseIdentifier: "ConvenienceCollectionViewTestSectionHeaderView"
             )
             collectionView.register(
                 ConvenienceCollectionViewTestSectionFooterView.self,
-                forSupplementaryViewOfKind: .sectionFooter,
+                forSupplementaryViewOfKind: "section-footer",
                 withReuseIdentifier: "ConvenienceCollectionViewTestSectionFooterView"
             )
             collectionView.dataSource = self
@@ -103,7 +103,7 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
                     CollectionBadge(
                         width: .absolute(20),
                         height: .absolute(20),
-                        kind: "ConvenienceCollectionViewTestBadegView1",
+                        kind: "badge-1",
                         alignment: [.top, .trailing],
                         offset: .fractional(.init(x: -0.5, y: 0))
                     ).setup { badge in
@@ -112,7 +112,7 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
                     CollectionBadge(
                         width: .absolute(20),
                         height: .absolute(20),
-                        kind: "ConvenienceCollectionViewTestBadegView2",
+                        kind: "badge-2",
                         alignment: [.top, .trailing],
                         offset: .fractional(.init(x: 0, y: 0))
                     ).setup { badge in
@@ -145,13 +145,13 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
             }
         } boundarys: {
             if needHotHeadder {
-                CollectionBoundary(kind: .sectionHeader, alignment: .top)
+                CollectionBoundary(kind: "section-header", alignment: .top)
                     .setup { header in
                         header.pinToVisibleBounds = true
                     }
             }
             if needHotFooter {
-                CollectionBoundary(kind: .sectionFooter, alignment: .bottom)
+                CollectionBoundary(kind: "section-footer", alignment: .bottom)
             }
         } backgrounds: {
             
@@ -214,7 +214,7 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController: UICollectio
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         switch (kind, testData[indexPath.section]) {
-        case ("ConvenienceCollectionViewTestBadegView1", .banner):
+        case ("badge-1", .banner):
             let badge = collectionView.dequeueReusableSupplementaryView(
                 ofKind: kind,
                 withReuseIdentifier: "ConvenienceCollectionViewTestBadegView",
@@ -222,7 +222,7 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController: UICollectio
             ) as! ConvenienceCollectionViewTestBadegView
             badge.backgroundColor = .brown
             return badge
-        case ("ConvenienceCollectionViewTestBadegView2", .banner):
+        case ("badge-2", .banner):
             let badge = collectionView.dequeueReusableSupplementaryView(
                 ofKind: kind,
                 withReuseIdentifier: "ConvenienceCollectionViewTestBadegView",
@@ -230,7 +230,7 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController: UICollectio
             ) as! ConvenienceCollectionViewTestBadegView
             badge.backgroundColor = .red
             return badge
-        case (.sectionHeader, .hot):
+        case ("section-header", .hot):
             let header = collectionView.dequeueReusableSupplementaryView(
                 ofKind: kind,
                 withReuseIdentifier: "ConvenienceCollectionViewTestSectionHeaderView",
@@ -238,13 +238,13 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController: UICollectio
             ) as! ConvenienceCollectionViewTestSectionHeaderView
             header.configure(title: "Hot Section Header")
             return header
-        case (.sectionFooter, .hot):
+        case ("section-footer", .hot):
             let footer = collectionView.dequeueReusableSupplementaryView(
                 ofKind: kind,
                 withReuseIdentifier: "ConvenienceCollectionViewTestSectionFooterView",
                 for: indexPath
             ) as! ConvenienceCollectionViewTestSectionFooterView
-            footer.configure(title: "Hot Section Header:\nfsjfksjflslfkjlsfjklsdkfjd;afkds;fjkdf;asfdksjfkdsfdsjfkalsdfjdslf;asdfjdskfdsjdksdsfkkasasf")
+            footer.configure(title: "Hot Section Header:\nsubtitle1\nsubtitle2\nsubtitle3")
             return footer
         default:
             return UICollectionReusableView()
