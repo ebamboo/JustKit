@@ -115,7 +115,6 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
     
     var bannerSection: CollectionSection {
         CollectionSection {
-            
             CollectionVGroup(width: .absolute(100), height: .absolute(210)) {
                 
                 CollectionItem(width: .fractionalWidth(1), height: .fractionalHeight(0.5))
@@ -124,7 +123,6 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
             .setup { group in
                 group.interItemSpacing = .fixed(10)
             }
-            
         }
         .setup { section in
             section.interGroupSpacing = 10
@@ -134,14 +132,6 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
     
     var hotSection: CollectionSection {
         CollectionSection {
-            
-            if needHotHeadder {
-                CollectionBoundary(kind: .sectionHeader, alignment: .top)
-                    .setup { header in
-                        header.pinToVisibleBounds = true
-                    }
-            }
-            
             CollectionHGroup(width: .fractionalWidth(1), height: .estimated(200)) {
                 
                 CollectionItem(width: .fractionalWidth(0.08), height: .absolute(160))
@@ -154,10 +144,18 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
             .setup { group in
                 group.interItemSpacing = .fixed(10)
             }
-            
+        } header: {
+            if needHotHeadder {
+                CollectionBoundary(kind: .sectionHeader, alignment: .top)
+                    .setup { header in
+                        header.pinToVisibleBounds = true
+                    }
+            }
+        } footer: {
             if needHotFooter {
                 CollectionBoundary(kind: .sectionFooter, alignment: .bottom)
             }
+        } background: {
             
         }
         .setup { section in
@@ -167,7 +165,6 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
     
     var shopSection: CollectionSection {
         CollectionSection {
-            
             CollectionHGroup(width: .fractionalWidth(1), height: .estimated(200)) {
                 
                 CollectionItem(width: .fractionalWidth(0.5), height: .fractionalWidth(0.5))
@@ -175,15 +172,14 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
             }
             .setup { group in
                 group.interItemSpacing = .fixed(10)
-            }
-            
+            } 
+        } background: {
             if needBack {
                 CollectionBackground(kind: "ConvenienceCollectionViewTestSectionBackView")
                     .setup { back in
                         back.contentInsets = .init(top: 10, leading: 10, bottom: 10, trailing: 10)
                     }
             }
-            
         }
         .setup { section in
             section.contentInsets = .init(top: 40, leading: 40, bottom: 40, trailing: 40)

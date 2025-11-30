@@ -74,14 +74,10 @@ class CollectionHGroup: CollectionBase, CollectionGroup {
     init(
         width: NSCollectionLayoutDimension,
         height: NSCollectionLayoutDimension,
-        @CollectionBuilder subitemsBuilder: () -> [CollectionBase]
+        @CollectionBuilder<CollectionItem> subitems: () -> [CollectionItem]
     ) {
         self.layoutSize = .init(widthDimension: width, heightDimension: height)
-        let items = subitemsBuilder()
-        let subitems = items.compactMap { item in
-            item as? CollectionItem
-        }
-        self.subitems = subitems
+        self.subitems = subitems()
     }
     
     var realValue: NSCollectionLayoutGroup {
@@ -105,14 +101,10 @@ class CollectionVGroup: CollectionBase, CollectionGroup {
     init(
         width: NSCollectionLayoutDimension,
         height: NSCollectionLayoutDimension,
-        @CollectionBuilder subitemsBuilder: () -> [CollectionBase]
+        @CollectionBuilder<CollectionItem> subitems: () -> [CollectionItem]
     ) {
         self.layoutSize = .init(widthDimension: width, heightDimension: height)
-        let items = subitemsBuilder()
-        let subitems = items.compactMap { item in
-            item as? CollectionItem
-        }
-        self.subitems = subitems
+        self.subitems = subitems()
     }
     
     var realValue: NSCollectionLayoutGroup {
@@ -128,31 +120,81 @@ class CollectionVGroup: CollectionBase, CollectionGroup {
 
 class CollectionSection: CollectionBase {
     
-    let items: [CollectionBase]
+    let group: CollectionGroup
+    let header: [CollectionBoundary]
+    let footer: [CollectionBoundary]
+    let background: [CollectionBackground]
+    
     var interGroupSpacing: CGFloat = 0
     /// 设置该属性才会使得 section 横向滑动
     var orthogonalScrollingBehavior: UICollectionLayoutSectionOrthogonalScrollingBehavior = .none
     
     init(
-        @CollectionBuilder itemsBuilder: () -> [CollectionBase]
+        group: () -> CollectionGroup
     ) {
-        self.items = itemsBuilder()
+        self.group = group()
+        self.header = []
+        self.footer = []
+        self.background = []
+    }
+    
+    init(
+        group: () -> CollectionGroup,
+        @CollectionBuilder<CollectionBackground> background: () -> [CollectionBackground]
+    ) {
+        self.group = group()
+        self.header = []
+        self.footer = []
+        self.background = background()
+    }
+    
+    init(
+        group: () -> CollectionGroup,
+        @CollectionBuilder<CollectionBoundary> header: () -> [CollectionBoundary]
+    ) {
+        self.group = group()
+        self.header = header()
+        self.footer = []
+        self.background = []
+    }
+    
+    init(
+        group: () -> CollectionGroup,
+        @CollectionBuilder<CollectionBoundary> footer: () -> [CollectionBoundary]
+    ) {
+        self.group = group()
+        self.header = []
+        self.footer = footer()
+        self.background = []
+    }
+    
+    init(
+        group: () -> CollectionGroup,
+        @CollectionBuilder<CollectionBoundary> header: () -> [CollectionBoundary],
+        @CollectionBuilder<CollectionBoundary> footer: () -> [CollectionBoundary]
+    ) {
+        self.group = group()
+        self.header = header()
+        self.footer = footer()
+        self.background = []
+    }
+    
+    init(
+        group: () -> CollectionGroup,
+        @CollectionBuilder<CollectionBoundary> header: () -> [CollectionBoundary],
+        @CollectionBuilder<CollectionBoundary> footer: () -> [CollectionBoundary],
+        @CollectionBuilder<CollectionBackground> background: () -> [CollectionBackground]
+    ) {
+        self.group = group()
+        self.header = header()
+        self.footer = footer()
+        self.background = background()
     }
     
     var realValue: NSCollectionLayoutSection {
-        let group = items.first { item in
-            item is CollectionGroup
-        }
-        let boundaryItems = items.compactMap { item in
-            item as? CollectionBoundary
-        }
-        let decorationItems = items.compactMap { item in
-            item as? CollectionBackground
-        }
-        guard let group = group as? CollectionGroup else { fatalError("section 中必须定义 group") }
         let realSection: NSCollectionLayoutSection = .init(group: group.realValue)
-        realSection.boundarySupplementaryItems = boundaryItems.map({ $0.realValue })
-        realSection.decorationItems = decorationItems.map({ $0.realValue })
+        realSection.boundarySupplementaryItems = header.map({ $0.realValue }) + footer.map({ $0.realValue })
+        realSection.decorationItems = background.map({ $0.realValue })
         realSection.contentInsets = contentInsets
         realSection.interGroupSpacing = interGroupSpacing
         realSection.orthogonalScrollingBehavior = orthogonalScrollingBehavior
@@ -226,13 +268,16 @@ class CollectionBackground: CollectionBase {
 // MARK: - support
 
 @resultBuilder
-struct CollectionBuilder {
+struct CollectionBuilder<Expression: CollectionBase> {
     
-    typealias Expression = CollectionBase
-    typealias Component = [CollectionBase]
+    typealias Component = [Expression]
     
     static func buildExpression(_ expression: Expression) -> Component {
         [expression]
+    }
+    
+    static func buildBlock() -> Component {
+        []
     }
     
     static func buildBlock(_ components: Component...) -> Component {
