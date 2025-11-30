@@ -203,6 +203,7 @@ struct CollectionBoundary: CollectionElement {
     var contentInsets: NSDirectionalEdgeInsets = .zero
     /// 是否吸附
     var pinToVisibleBounds: Bool = false
+    var zIndex: Int = 0
     
     init(
         width: NSCollectionLayoutDimension = .fractionalWidth(1),
@@ -223,6 +224,7 @@ struct CollectionBoundary: CollectionElement {
         )
         realBoundary.contentInsets = contentInsets
         realBoundary.pinToVisibleBounds = pinToVisibleBounds
+        realBoundary.zIndex = zIndex
         return realBoundary
     }
     
@@ -233,6 +235,7 @@ struct CollectionBackground: CollectionElement {
     let kind: String
     
     var contentInsets: NSDirectionalEdgeInsets = .zero
+    var zIndex: Int = 0
     
     init(
         kind: String
@@ -249,6 +252,7 @@ struct CollectionBackground: CollectionElement {
             elementKind: kind
         )
         realDecoration.contentInsets = contentInsets
+        realDecoration.zIndex = zIndex
         return realDecoration
     }
     
