@@ -25,6 +25,14 @@ class NSCollectionLayoutSwiftUITestViewControllerViewController: UIViewControlle
                 forCellWithReuseIdentifier: "ConvenienceCollectionViewTestCell"
             )
             collectionView.register(
+                ConvenienceCollectionViewTestBadegView.self,
+                forSupplementaryViewOfKind: "ConvenienceCollectionViewTestBadegView1",
+                withReuseIdentifier: "ConvenienceCollectionViewTestBadegView")
+            collectionView.register(
+                ConvenienceCollectionViewTestBadegView.self,
+                forSupplementaryViewOfKind: "ConvenienceCollectionViewTestBadegView2",
+                withReuseIdentifier: "ConvenienceCollectionViewTestBadegView")
+            collectionView.register(
                 ConvenienceCollectionViewTestSectionHeaderView.self,
                 forSupplementaryViewOfKind: .sectionHeader,
                 withReuseIdentifier: "ConvenienceCollectionViewTestSectionHeaderView"
@@ -91,7 +99,26 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
         CollectionSection {
             CollectionGroup(axis: .vertical, width: .absolute(100), height: .absolute(210)) {
                 
-                CollectionItem(width: .fractionalWidth(1), height: .fractionalHeight(0.5))
+                CollectionItem(width: .fractionalWidth(1), height: .fractionalHeight(0.5)) {
+                    CollectionBadge(
+                        width: .absolute(20),
+                        height: .absolute(20),
+                        kind: "ConvenienceCollectionViewTestBadegView1",
+                        alignment: [.top, .trailing],
+                        offset: .fractional(.init(x: -0.5, y: 0))
+                    ).setup { badge in
+                        badge.zIndex = 7
+                    }
+                    CollectionBadge(
+                        width: .absolute(20),
+                        height: .absolute(20),
+                        kind: "ConvenienceCollectionViewTestBadegView2",
+                        alignment: [.top, .trailing],
+                        offset: .fractional(.init(x: 0, y: 0))
+                    ).setup { badge in
+                        badge.zIndex = 6
+                    }
+                }
                 
             }
             .setup { group in
@@ -187,6 +214,22 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController: UICollectio
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         switch (kind, testData[indexPath.section]) {
+        case ("ConvenienceCollectionViewTestBadegView1", .banner):
+            let badge = collectionView.dequeueReusableSupplementaryView(
+                ofKind: kind,
+                withReuseIdentifier: "ConvenienceCollectionViewTestBadegView",
+                for: indexPath
+            ) as! ConvenienceCollectionViewTestBadegView
+            badge.backgroundColor = .brown
+            return badge
+        case ("ConvenienceCollectionViewTestBadegView2", .banner):
+            let badge = collectionView.dequeueReusableSupplementaryView(
+                ofKind: kind,
+                withReuseIdentifier: "ConvenienceCollectionViewTestBadegView",
+                for: indexPath
+            ) as! ConvenienceCollectionViewTestBadegView
+            badge.backgroundColor = .red
+            return badge
         case (.sectionHeader, .hot):
             let header = collectionView.dequeueReusableSupplementaryView(
                 ofKind: kind,

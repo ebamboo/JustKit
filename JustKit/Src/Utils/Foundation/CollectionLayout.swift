@@ -7,7 +7,6 @@ import UIKit
 ///
 /// DecorationView （section背景）通过 UICollectionViewLayout 进行注册
 /// Each type of decoration item must have a unique element kind
-/// 例如: Section1BackGroundView 和 Section2BackGroundView 要注册为两个不同的 kind，并把 kind 当作 identifier 使用
 ///
 /// SupplementaryView（角标、section头部、section尾部）通过 UICollectionView 进行注册
 ///
@@ -49,6 +48,7 @@ extension UICollectionViewCompositionalLayout {
 struct CollectionItem: CollectionElement {
     
     let layoutSize: NSCollectionLayoutSize
+    let badges: [CollectionBadge]
     
     var contentInsets: NSDirectionalEdgeInsets = .zero
     
@@ -57,10 +57,23 @@ struct CollectionItem: CollectionElement {
         height: NSCollectionLayoutDimension
     ) {
         self.layoutSize = .init(widthDimension: width, heightDimension: height)
+        self.badges = []
+    }
+    
+    init(
+        width: NSCollectionLayoutDimension,
+        height: NSCollectionLayoutDimension,
+        @CollectionElementBuilder<CollectionBadge> badges: () -> [CollectionBadge]
+    ) {
+        self.layoutSize = .init(widthDimension: width, heightDimension: height)
+        self.badges = badges()
     }
     
     var realValue: NSCollectionLayoutItem {
-        let realItem: NSCollectionLayoutItem = .init(layoutSize: layoutSize)
+        let realItem = NSCollectionLayoutItem(
+            layoutSize: layoutSize,
+            supplementaryItems: badges.map({ $0.realValue })
+        )
         realItem.contentInsets = contentInsets
         return realItem
     }
@@ -183,14 +196,14 @@ struct CollectionBadge: CollectionElement {
     let layoutSize: NSCollectionLayoutSize
     let kind: String
     let alignment: NSDirectionalRectEdge
-    let offset: Offset
+    let offset: Offset // 对齐之后，进行偏移
     
     var contentInsets: NSDirectionalEdgeInsets = .zero
     var zIndex: Int = 0
     
     init(
-        width: NSCollectionLayoutDimension = .fractionalWidth(1),
-        height: NSCollectionLayoutDimension = .estimated(80),
+        width: NSCollectionLayoutDimension,
+        height: NSCollectionLayoutDimension,
         kind: String,
         alignment: NSDirectionalRectEdge,
         offset: Offset
@@ -279,10 +292,6 @@ struct CollectionBackground: CollectionElement {
     }
     
     var realValue: NSCollectionLayoutDecorationItem {
-        /// DecorationView （section背景）通过 UICollectionViewLayout 进行注册
-        /// Each type of decoration item must have a unique element kind
-        /// 例如: Section1BackGroundView 和 Section2BackGroundView 要注册为两个不同的 kind，并把 kind 当作 identifier 使用
-        /// 一般以类名作为 kind
         let realDecoration = NSCollectionLayoutDecorationItem.background(
             elementKind: kind
         )
