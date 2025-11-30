@@ -4,6 +4,28 @@
 
 import UIKit
 
+///
+/// DecorationView （section背景）通过 UICollectionViewLayout 进行注册
+/// Each type of decoration item must have a unique element kind
+/// 例如: Section1BackGroundView 和 Section2BackGroundView 要注册为两个不同的 kind，并把 kind 当作 identifier 使用
+///
+/// SupplementaryView（角标、section头部、section尾部）通过 UICollectionView 进行注册
+///
+
+/*
+ UICollectionViewLayout 相关注册方法
+open func register(_ viewClass: AnyClass?, forDecorationViewOfKind elementKind: String)
+open func register(_ nib: UINib?, forDecorationViewOfKind elementKind: String)
+*/
+
+/*
+ UICollectionView 相关注册方法
+open func register(_ cellClass: AnyClass?, forCellWithReuseIdentifier identifier: String)
+open func register(_ nib: UINib?, forCellWithReuseIdentifier identifier: String)
+open func register(_ viewClass: AnyClass?, forSupplementaryViewOfKind elementKind: String, withReuseIdentifier identifier: String)
+open func register(_ nib: UINib?, forSupplementaryViewOfKind kind: String, withReuseIdentifier identifier: String)
+*/
+
 // MARK: - base
 
 protocol CollectionElement {

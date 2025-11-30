@@ -11,7 +11,7 @@ class UtilsHomeViewController: UIViewController {
         "自定义虚线视图DashView", "自定义UIView每个圆角大小RoundView", "仿UISwitch控件CommonSwitch",
         "UIImage+Transform 测试", "自定义 Stepper", "自定义渐变圆角边框/渐变文字",
         "标签样式CollectionViewTagLayout", "Popover弹窗工具测试", "普通视图支持上下文菜单",
-        "UICollectionView新布局便利方法", "SwiftUI风格封装UICollectionView新布局"
+        "SwiftUI风格封装UICollectionView新布局"
     ]
     
     lazy var tableView: UITableView = {
@@ -100,10 +100,6 @@ extension UtilsHomeViewController: UITableViewDataSource, UITableViewDelegate {
             return
         }
         if indexPath.row == 12 {
-            navigationController?.pushViewController(NSCollectionLayoutTestViewController(), animated: true)
-            return
-        }
-        if indexPath.row == 13 {
             navigationController?.pushViewController(NSCollectionLayoutSwiftUITestViewControllerViewController(), animated: true)
             return
         }

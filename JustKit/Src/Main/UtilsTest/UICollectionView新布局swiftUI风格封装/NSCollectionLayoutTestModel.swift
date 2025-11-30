@@ -10,20 +10,20 @@ enum HomeSection {
     case shop
 }
 
-enum HomeItem: Hashable {
+enum HomeItem {
     case banner(BannerModel)
     case hot(HotModel)
     case shop(ShopModel)
 }
 
-struct BannerModel: Hashable {
+struct BannerModel {
     let id: Int
 }
 
-struct HotModel: Hashable {
+struct HotModel {
     let id: Int
 }
 
-struct ShopModel: Hashable {
+struct ShopModel {
     let id: Int
 }
