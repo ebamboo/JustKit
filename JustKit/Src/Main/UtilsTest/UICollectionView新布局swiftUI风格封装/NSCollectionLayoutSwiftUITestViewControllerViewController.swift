@@ -89,7 +89,7 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
     
     var bannerSection: CollectionSection {
         CollectionSection {
-            CollectionVGroup(width: .absolute(100), height: .absolute(210)) {
+            CollectionGroup(axis: .vertical, width: .absolute(100), height: .absolute(210)) {
                 
                 CollectionItem(width: .fractionalWidth(1), height: .fractionalHeight(0.5))
                 
@@ -106,7 +106,7 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
     
     var hotSection: CollectionSection {
         CollectionSection {
-            CollectionHGroup(width: .fractionalWidth(1), height: .estimated(200)) {
+            CollectionGroup(width: .fractionalWidth(1), height: .estimated(200)) {
                 
                 CollectionItem(width: .fractionalWidth(0.08), height: .absolute(160))
                 
@@ -139,7 +139,7 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
     
     var shopSection: CollectionSection {
         CollectionSection {
-            CollectionHGroup(width: .fractionalWidth(1), height: .estimated(200)) {
+            CollectionGroup(width: .fractionalWidth(1), height: .estimated(200)) {
                 
                 CollectionItem(width: .fractionalWidth(0.5), height: .fractionalWidth(0.5))
                 

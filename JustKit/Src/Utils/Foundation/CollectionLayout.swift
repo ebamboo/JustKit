@@ -81,12 +81,14 @@ class CollectionItem: CollectionElement {
     
 }
 
-protocol CollectionGroup {
-    var realValue: NSCollectionLayoutGroup { get }
-}
-
-class CollectionHGroup: CollectionElement, CollectionGroup {
+class CollectionGroup: CollectionElement {
     
+    enum Axis {
+        case horizontal
+        case vertical
+    }
+    
+    let axis: Axis
     let layoutSize: NSCollectionLayoutSize
     let subitems: [CollectionItem]
     
@@ -94,52 +96,35 @@ class CollectionHGroup: CollectionElement, CollectionGroup {
     var interItemSpacing: NSCollectionLayoutSpacing?
     
     init(
+        axis: Axis = .horizontal,
         width: NSCollectionLayoutDimension,
         height: NSCollectionLayoutDimension,
         @CollectionElementBuilder<CollectionItem> subitems: () -> [CollectionItem]
     ) {
+        self.axis = axis
         self.layoutSize = .init(widthDimension: width, heightDimension: height)
         self.subitems = subitems()
     }
     
     var realValue: NSCollectionLayoutGroup {
-        let realGroup = NSCollectionLayoutGroup.horizontal(
-            layoutSize: layoutSize,
-            subitems: subitems.map({ $0.realValue })
-        )
+        let realGroup: NSCollectionLayoutGroup
+        switch axis {
+        case .horizontal:
+            realGroup = NSCollectionLayoutGroup.horizontal(
+                layoutSize: layoutSize,
+                subitems: subitems.map({ $0.realValue })
+            )
+        case .vertical:
+            realGroup = NSCollectionLayoutGroup.vertical(
+                layoutSize: layoutSize,
+                subitems: subitems.map({ $0.realValue })
+            )
+        }
         realGroup.contentInsets = contentInsets
         realGroup.interItemSpacing = interItemSpacing
         return realGroup
     }
     
-}
-
-class CollectionVGroup: CollectionElement, CollectionGroup {
-    
-    let layoutSize: NSCollectionLayoutSize
-    let subitems: [CollectionItem]
-    
-    var contentInsets: NSDirectionalEdgeInsets = .zero
-    var interItemSpacing: NSCollectionLayoutSpacing?
-    
-    init(
-        width: NSCollectionLayoutDimension,
-        height: NSCollectionLayoutDimension,
-        @CollectionElementBuilder<CollectionItem> subitems: () -> [CollectionItem]
-    ) {
-        self.layoutSize = .init(widthDimension: width, heightDimension: height)
-        self.subitems = subitems()
-    }
-    
-    var realValue: NSCollectionLayoutGroup {
-        let realGroup = NSCollectionLayoutGroup.vertical(
-            layoutSize: layoutSize,
-            subitems: subitems.map({ $0.realValue })
-        )
-        realGroup.contentInsets = contentInsets
-        realGroup.interItemSpacing = interItemSpacing
-        return realGroup
-    }
 }
 
 class CollectionSection: CollectionElement {
