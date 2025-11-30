@@ -12,20 +12,6 @@ import UIKit
 /// SupplementaryView（角标、section头部、section尾部）通过 UICollectionView 进行注册
 ///
 
-/*
- UICollectionViewLayout 相关注册方法
-open func register(_ viewClass: AnyClass?, forDecorationViewOfKind elementKind: String)
-open func register(_ nib: UINib?, forDecorationViewOfKind elementKind: String)
-*/
-
-/*
- UICollectionView 相关注册方法
-open func register(_ cellClass: AnyClass?, forCellWithReuseIdentifier identifier: String)
-open func register(_ nib: UINib?, forCellWithReuseIdentifier identifier: String)
-open func register(_ viewClass: AnyClass?, forSupplementaryViewOfKind elementKind: String, withReuseIdentifier identifier: String)
-open func register(_ nib: UINib?, forSupplementaryViewOfKind kind: String, withReuseIdentifier identifier: String)
-*/
-
 // MARK: - base
 
 protocol CollectionElement {
@@ -187,6 +173,55 @@ struct CollectionSection: CollectionElement {
     
 }
 
+struct CollectionBadge: CollectionElement {
+    
+    enum Offset {
+        case absolute(CGPoint)
+        case fractional(CGPoint)
+    }
+    
+    let layoutSize: NSCollectionLayoutSize
+    let kind: String
+    let alignment: NSDirectionalRectEdge
+    let offset: Offset
+    
+    var contentInsets: NSDirectionalEdgeInsets = .zero
+    var zIndex: Int = 0
+    
+    init(
+        width: NSCollectionLayoutDimension = .fractionalWidth(1),
+        height: NSCollectionLayoutDimension = .estimated(80),
+        kind: String,
+        alignment: NSDirectionalRectEdge,
+        offset: Offset
+    ) {
+        self.layoutSize = .init(widthDimension: width, heightDimension: height)
+        self.kind = kind
+        self.alignment = alignment
+        self.offset = offset
+    }
+    
+    var realValue: NSCollectionLayoutSupplementaryItem {
+        let containerAnchor: NSCollectionLayoutAnchor = {
+            switch offset {
+            case .absolute(let point):
+                return .init(edges: alignment, absoluteOffset: point)
+            case .fractional(let point):
+                return .init(edges: alignment, fractionalOffset: point)
+            }
+        }()
+        let realBadge = NSCollectionLayoutSupplementaryItem(
+            layoutSize: layoutSize,
+            elementKind: kind,
+            containerAnchor: containerAnchor
+        )
+        realBadge.contentInsets = contentInsets
+        realBadge.zIndex = zIndex
+        return realBadge
+    }
+    
+}
+
 /// 如果多个 section 的 header 通过不同的 UIView 实现，则为每一个 HeaderView 注册不同的 kind（一般用类名）
 /// 这样其实可以通过 kind 就可以确定具体哪个 HeaderView 了
 /// 如果所有的 section 使用同一个类型 UIView 实现，则只需为该 HeaderView 注册一次，且 kind 推荐为 .sectionHeader
@@ -201,9 +236,9 @@ struct CollectionBoundary: CollectionElement {
     let alignment: NSRectAlignment
     
     var contentInsets: NSDirectionalEdgeInsets = .zero
+    var zIndex: Int = 0
     /// 是否吸附
     var pinToVisibleBounds: Bool = false
-    var zIndex: Int = 0
     
     init(
         width: NSCollectionLayoutDimension = .fractionalWidth(1),
@@ -223,8 +258,8 @@ struct CollectionBoundary: CollectionElement {
             alignment: alignment
         )
         realBoundary.contentInsets = contentInsets
-        realBoundary.pinToVisibleBounds = pinToVisibleBounds
         realBoundary.zIndex = zIndex
+        realBoundary.pinToVisibleBounds = pinToVisibleBounds
         return realBoundary
     }
     
