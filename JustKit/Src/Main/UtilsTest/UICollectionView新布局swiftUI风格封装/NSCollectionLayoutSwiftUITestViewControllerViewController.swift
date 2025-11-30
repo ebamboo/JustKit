@@ -83,14 +83,14 @@ class NSCollectionLayoutSwiftUITestViewControllerViewController: UIViewControlle
 extension NSCollectionLayoutSwiftUITestViewControllerViewController {
     
     func createCollectionLayout() -> UICollectionViewLayout {
-        UICollectionViewCompositionalLayout.custom { [weak self] sectionIndex, _ in
+        UICollectionViewCompositionalLayout { [weak self] sectionIndex, _ in
             guard let self, !self.testData.isEmpty else { return nil }
             guard self.testData.count > sectionIndex else { return nil }
             let section = self.testData[sectionIndex]
             switch section {
-            case .banner: return self.bannerSection
-            case .hot: return self.hotSection
-            case .shop: return self.shopSection
+            case .banner: return self.bannerSection.realValue
+            case .hot: return self.hotSection.realValue
+            case .shop: return self.shopSection.realValue
             }
         }
     }

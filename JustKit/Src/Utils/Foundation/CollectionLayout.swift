@@ -22,21 +22,6 @@ extension CollectionElement{
     }
 }
 
-// MARK: - convenience
-
-extension UICollectionViewCompositionalLayout {
-    
-    static func custom(
-        _ sectionProvider: @escaping (Int, any NSCollectionLayoutEnvironment) -> CollectionSection?
-    ) -> Self {
-        Self.init { sectionIndex, environment in
-            guard let section = sectionProvider(sectionIndex, environment) else { return nil }
-            return section.realValue
-        }
-    }
-    
-}
-
 // MARK: - components
 
 struct CollectionItem: CollectionElement {
