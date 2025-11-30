@@ -108,28 +108,25 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
         CollectionSection {
             CollectionGroup(width: .fractionalWidth(1), height: .estimated(200)) {
                 
-                CollectionItem(width: .fractionalWidth(0.08), height: .absolute(160))
-                
-                CollectionItem(width: .fractionalWidth(0.12), height: .absolute(160))
-                
-                CollectionItem(width: .fractionalWidth(0.18), height: .absolute(160))
+                for w in [0.08, 0.12, 0.18] {
+                    CollectionItem(width: .fractionalWidth(w), height: .absolute(160))
+                }
                 
             }
             .setup { group in
                 group.interItemSpacing = .fixed(10)
             }
-        } header: {
+        } boundarys: {
             if needHotHeadder {
                 CollectionBoundary(kind: .sectionHeader, alignment: .top)
                     .setup { header in
                         header.pinToVisibleBounds = true
                     }
             }
-        } footer: {
             if needHotFooter {
                 CollectionBoundary(kind: .sectionFooter, alignment: .bottom)
             }
-        } background: {
+        } backgrounds: {
             
         }
         .setup { section in
@@ -147,7 +144,7 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
             .setup { group in
                 group.interItemSpacing = .fixed(10)
             } 
-        } background: {
+        } backgrounds: {
             if needBack {
                 CollectionBackground(kind: "ConvenienceCollectionViewTestSectionBackView")
                     .setup { back in

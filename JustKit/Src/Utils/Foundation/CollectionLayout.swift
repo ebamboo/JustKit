@@ -129,10 +129,9 @@ class CollectionGroup: CollectionElement {
 
 class CollectionSection: CollectionElement {
     
-    let group: CollectionGroup
-    let header: [CollectionBoundary]
-    let footer: [CollectionBoundary]
-    let background: [CollectionBackground]
+    let groups: [CollectionGroup]
+    let boundarys: [CollectionBoundary]
+    let backgrounds: [CollectionBackground]
     
     var contentInsets: NSDirectionalEdgeInsets = .zero
     var interGroupSpacing: CGFloat = 0
@@ -140,71 +139,46 @@ class CollectionSection: CollectionElement {
     var orthogonalScrollingBehavior: UICollectionLayoutSectionOrthogonalScrollingBehavior = .none
     
     init(
-        group: () -> CollectionGroup
+        @CollectionElementBuilder<CollectionGroup> groups: () -> [CollectionGroup]
     ) {
-        self.group = group()
-        self.header = []
-        self.footer = []
-        self.background = []
+        self.groups = groups()
+        self.boundarys = []
+        self.backgrounds = []
     }
     
     init(
-        group: () -> CollectionGroup,
-        @CollectionElementBuilder<CollectionBackground> background: () -> [CollectionBackground]
+        @CollectionElementBuilder<CollectionGroup> groups: () -> [CollectionGroup],
+        @CollectionElementBuilder<CollectionBoundary> boundarys: () -> [CollectionBoundary]
     ) {
-        self.group = group()
-        self.header = []
-        self.footer = []
-        self.background = background()
+        self.groups = groups()
+        self.boundarys = boundarys()
+        self.backgrounds = []
     }
     
     init(
-        group: () -> CollectionGroup,
-        @CollectionElementBuilder<CollectionBoundary> header: () -> [CollectionBoundary]
+        @CollectionElementBuilder<CollectionGroup> groups: () -> [CollectionGroup],
+        @CollectionElementBuilder<CollectionBackground> backgrounds: () -> [CollectionBackground]
     ) {
-        self.group = group()
-        self.header = header()
-        self.footer = []
-        self.background = []
+        self.groups = groups()
+        self.boundarys = []
+        self.backgrounds = backgrounds()
     }
     
     init(
-        group: () -> CollectionGroup,
-        @CollectionElementBuilder<CollectionBoundary> footer: () -> [CollectionBoundary]
+        @CollectionElementBuilder<CollectionGroup> groups: () -> [CollectionGroup],
+        @CollectionElementBuilder<CollectionBoundary> boundarys: () -> [CollectionBoundary],
+        @CollectionElementBuilder<CollectionBackground> backgrounds: () -> [CollectionBackground]
     ) {
-        self.group = group()
-        self.header = []
-        self.footer = footer()
-        self.background = []
-    }
-    
-    init(
-        group: () -> CollectionGroup,
-        @CollectionElementBuilder<CollectionBoundary> header: () -> [CollectionBoundary],
-        @CollectionElementBuilder<CollectionBoundary> footer: () -> [CollectionBoundary]
-    ) {
-        self.group = group()
-        self.header = header()
-        self.footer = footer()
-        self.background = []
-    }
-    
-    init(
-        group: () -> CollectionGroup,
-        @CollectionElementBuilder<CollectionBoundary> header: () -> [CollectionBoundary],
-        @CollectionElementBuilder<CollectionBoundary> footer: () -> [CollectionBoundary],
-        @CollectionElementBuilder<CollectionBackground> background: () -> [CollectionBackground]
-    ) {
-        self.group = group()
-        self.header = header()
-        self.footer = footer()
-        self.background = background()
+        self.groups = groups()
+        self.boundarys = boundarys()
+        self.backgrounds = backgrounds()
     }
     
     var realValue: NSCollectionLayoutSection {
+        guard let group = groups.first else { fatalError("section 中必须定义 group") }
         let realSection: NSCollectionLayoutSection = .init(group: group.realValue)
-        realSection.boundarySupplementaryItems = header.map({ $0.realValue }) + footer.map({ $0.realValue })
-        realSection.decorationItems = background.map({ $0.realValue })
+        realSection.boundarySupplementaryItems = boundarys.map({ $0.realValue })
+        realSection.decorationItems = backgrounds.map({ $0.realValue })
         realSection.contentInsets = contentInsets
         realSection.interGroupSpacing = interGroupSpacing
         realSection.orthogonalScrollingBehavior = orthogonalScrollingBehavior
