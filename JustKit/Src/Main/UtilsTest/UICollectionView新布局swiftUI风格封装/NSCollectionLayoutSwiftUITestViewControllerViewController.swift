@@ -13,8 +13,12 @@ class NSCollectionLayoutSwiftUITestViewControllerViewController: UIViewControlle
     
     @IBOutlet weak var collectionView: UICollectionView! {
         didSet {
-            
-            collectionView.collectionViewLayout = collectionLayout
+            let layout = createCollectionLayout()
+            layout.register(
+                ConvenienceCollectionViewTestSectionBackView.self,
+                forDecorationViewOfKind: "ConvenienceCollectionViewTestSectionBackView"
+            )
+            collectionView.collectionViewLayout = layout
             
             collectionView.register(
                 ConvenienceCollectionViewTestCell.self,
@@ -30,11 +34,9 @@ class NSCollectionLayoutSwiftUITestViewControllerViewController: UIViewControlle
                 forSupplementaryViewOfKind: .sectionFooter,
                 withReuseIdentifier: "ConvenienceCollectionViewTestSectionFooterView"
             )
-            
+            collectionView.dataSource = self
         }
     }
-    lazy var collectionLayout = layout
-    lazy var collectionDataSource = dataSource
     
     // MARK: - test data
     
@@ -66,37 +68,14 @@ class NSCollectionLayoutSwiftUITestViewControllerViewController: UIViewControlle
     var needHotHeadder = true
     var needHotFooter = true
     
-    // MARK: - life
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        var snapshot = NSDiffableDataSourceSnapshot<HomeSection, HomeItem>()
-        snapshot.appendSections(testData)
-        testData.forEach { section in
-            let items: [HomeItem]
-            switch section {
-            case .banner:
-                items = testBanners
-            case .hot:
-                items = testhots
-            case .shop:
-                items = testshops
-            }
-            snapshot.appendItems(items, toSection: section)
-        }
-        collectionDataSource.apply(snapshot)
-        
-    }
-
 }
 
 // MARK: - collection layout
 
 extension NSCollectionLayoutSwiftUITestViewControllerViewController {
     
-    var layout: UICollectionViewLayout {
-        let layout = UICollectionViewCompositionalLayout.custom { [weak self] sectionIndex, _ in
+    func createCollectionLayout() -> UICollectionViewLayout {
+        UICollectionViewCompositionalLayout.custom { [weak self] sectionIndex, _ in
             guard let self, !self.testData.isEmpty else { return nil }
             guard self.testData.count > sectionIndex else { return nil }
             let section = self.testData[sectionIndex]
@@ -106,11 +85,6 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
             case .shop: return self.shopSection
             }
         }
-        layout.register(
-            ConvenienceCollectionViewTestSectionBackView.self,
-            forDecorationViewOfKind: "ConvenienceCollectionViewTestSectionBackView"
-        )
-        return layout
     }
     
     var bannerSection: CollectionSection {
@@ -191,38 +165,50 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
 
 // MARK: -  collection data source
 
-extension NSCollectionLayoutSwiftUITestViewControllerViewController {
+extension NSCollectionLayoutSwiftUITestViewControllerViewController: UICollectionViewDataSource {
     
-    var dataSource: UICollectionViewDiffableDataSource<HomeSection, HomeItem> {
-        let dataSource = UICollectionViewDiffableDataSource<HomeSection, HomeItem>(collectionView: collectionView) { collectionView, indexPath, itemIdentifier in
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "ConvenienceCollectionViewTestCell", for: indexPath) as! ConvenienceCollectionViewTestCell
-            cell.nameLabel.text = "\(indexPath.item+1)"
-            return cell
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        testData.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        switch testData[section] {
+        case .banner:
+            testBanners.count
+        case .hot:
+            testhots.count
+        case .shop:
+            testshops.count
         }
-        dataSource.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath -> UICollectionReusableView? in
-            guard let self else { return nil }
-            switch (kind, self.testData[indexPath.section]) {
-            case (.sectionHeader, .hot):
-                let header = collectionView.dequeueReusableSupplementaryView(
-                    ofKind: kind,
-                    withReuseIdentifier: "ConvenienceCollectionViewTestSectionHeaderView",
-                    for: indexPath
-                ) as! ConvenienceCollectionViewTestSectionHeaderView
-                header.configure(title: "Hot Section Header")
-                return header
-            case (.sectionFooter, .hot):
-                let footer = collectionView.dequeueReusableSupplementaryView(
-                    ofKind: kind,
-                    withReuseIdentifier: "ConvenienceCollectionViewTestSectionFooterView",
-                    for: indexPath
-                ) as! ConvenienceCollectionViewTestSectionFooterView
-                footer.configure(title: "Hot Section Header:\nfsjfksjflslfkjlsfjklsdkfjd;afkds;fjkdf;asfdksjfkdsfdsjfkalsdfjdslf;asdfjdskfdsjdksdsfkkasasf")
-                return footer
-            default:
-                return nil
-            }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "ConvenienceCollectionViewTestCell", for: indexPath) as! ConvenienceCollectionViewTestCell
+        cell.nameLabel.text = "\(indexPath.item+1)"
+        return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        switch (kind, testData[indexPath.section]) {
+        case (.sectionHeader, .hot):
+            let header = collectionView.dequeueReusableSupplementaryView(
+                ofKind: kind,
+                withReuseIdentifier: "ConvenienceCollectionViewTestSectionHeaderView",
+                for: indexPath
+            ) as! ConvenienceCollectionViewTestSectionHeaderView
+            header.configure(title: "Hot Section Header")
+            return header
+        case (.sectionFooter, .hot):
+            let footer = collectionView.dequeueReusableSupplementaryView(
+                ofKind: kind,
+                withReuseIdentifier: "ConvenienceCollectionViewTestSectionFooterView",
+                for: indexPath
+            ) as! ConvenienceCollectionViewTestSectionFooterView
+            footer.configure(title: "Hot Section Header:\nfsjfksjflslfkjlsfjklsdkfjd;afkds;fjkdf;asfdksjfkdsfdsjfkalsdfjdslf;asdfjdskfdsjdksdsfkkasasf")
+            return footer
+        default:
+            return UICollectionReusableView()
         }
-        return dataSource
     }
     
 }
