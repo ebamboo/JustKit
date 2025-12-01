@@ -21,6 +21,11 @@ extension CollectionElement{
     }
 }
 
+protocol CollectionGroupSubitem: CollectionElement {
+    associatedtype RealValue: NSCollectionLayoutItem
+    var realValue: RealValue { get }
+}
+
 // MARK: - components
 
 struct CollectionItem: CollectionElement {
@@ -112,7 +117,7 @@ struct CollectionSection: CollectionElement {
     
     var contentInsets: NSDirectionalEdgeInsets = .zero
     var interGroupSpacing: CGFloat = 0
-    /// 正交方向滚动行为；须设置该属性以使 section 横向滑动
+    /// 正交方向滚动行为；须设置该属性以使 section 可正交向滚动
     var orthogonalScrollingBehavior: UICollectionLayoutSectionOrthogonalScrollingBehavior = .none
     
     init(
@@ -281,6 +286,42 @@ struct CollectionBackground: CollectionElement {
 @resultBuilder
 struct CollectionElementBuilder<Expression: CollectionElement> {
     
+    typealias Component = [Expression]
+    
+    static func buildExpression(_ expression: Expression) -> Component {
+        [expression]
+    }
+    
+    static func buildBlock() -> Component {
+        []
+    }
+    
+    static func buildBlock(_ components: Component...) -> Component {
+        components.flatMap { $0 }
+    }
+    
+    static func buildOptional(_ component: Component?) -> Component {
+        component ?? []
+    }
+    
+    static func buildEither(first component: Component) -> Component {
+        component
+    }
+    
+    static func buildEither(second component: Component) -> Component {
+        component
+    }
+    
+    static func buildArray(_ components: [Component]) -> Component {
+        components.flatMap { $0 }
+    }
+    
+}
+
+@resultBuilder
+struct CollectionGroupSubitemBuilder {
+    
+    typealias Expression = any CollectionGroupSubitem
     typealias Component = [Expression]
     
     static func buildExpression(_ expression: Expression) -> Component {
