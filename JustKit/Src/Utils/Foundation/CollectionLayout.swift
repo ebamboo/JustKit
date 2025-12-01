@@ -6,7 +6,6 @@ import UIKit
 
 ///
 /// DecorationView （section背景）通过 UICollectionViewLayout 进行注册
-/// Each type of decoration item must have a unique element kind
 ///
 /// SupplementaryView（角标、section头部、section尾部）通过 UICollectionView 进行注册
 ///
@@ -113,7 +112,7 @@ struct CollectionSection: CollectionElement {
     
     var contentInsets: NSDirectionalEdgeInsets = .zero
     var interGroupSpacing: CGFloat = 0
-    /// 设置该属性才会使得 section 横向滑动
+    /// 正交方向滚动行为；须设置该属性以使 section 横向滑动
     var orthogonalScrollingBehavior: UICollectionLayoutSectionOrthogonalScrollingBehavior = .none
     
     init(
@@ -214,13 +213,6 @@ struct CollectionBadge: CollectionElement {
     
 }
 
-/// 如果多个 section 的 header 通过不同的 UIView 实现，则为每一个 HeaderView 注册不同的 kind（一般用类名）
-/// 这样其实可以通过 kind 就可以确定具体哪个 HeaderView 了
-/// 如果所有的 section 使用同一个类型 UIView 实现，则只需为该 HeaderView 注册一次，且 kind 推荐为 .sectionHeader
-///
-/// 一个 BoundaryView 类型可以注册多次，但是 kind 不能相同，例如：
-/// register(BoundaryView.self, forSupplementaryViewOfKind: .sectionHeader, withReuseIdentifier: "BoundaryView")
-/// register(BoundaryView.self, forSupplementaryViewOfKind: .sectionFooter, withReuseIdentifier: "BoundaryView")
 struct CollectionBoundary: CollectionElement {
     
     let layoutSize: NSCollectionLayoutSize
