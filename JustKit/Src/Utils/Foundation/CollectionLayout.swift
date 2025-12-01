@@ -226,6 +226,7 @@ struct CollectionBoundary: CollectionElement {
     let layoutSize: NSCollectionLayoutSize
     let kind: String
     let alignment: NSRectAlignment
+    let offset: CGPoint
     
     var contentInsets: NSDirectionalEdgeInsets = .zero
     var zIndex: Int = 0
@@ -236,18 +237,21 @@ struct CollectionBoundary: CollectionElement {
         width: NSCollectionLayoutDimension = .fractionalWidth(1),
         height: NSCollectionLayoutDimension = .estimated(80),
         kind: String,
-        alignment: NSRectAlignment
+        alignment: NSRectAlignment,
+        offset: CGPoint = .zero
     ) {
         self.layoutSize = .init(widthDimension: width, heightDimension: height)
         self.kind = kind
         self.alignment = alignment
+        self.offset = offset
     }
     
     var realValue: NSCollectionLayoutBoundarySupplementaryItem {
         let realBoundary = NSCollectionLayoutBoundarySupplementaryItem(
             layoutSize: layoutSize,
             elementKind: kind,
-            alignment: alignment
+            alignment: alignment,
+            absoluteOffset: offset
         )
         realBoundary.contentInsets = contentInsets
         realBoundary.zIndex = zIndex
