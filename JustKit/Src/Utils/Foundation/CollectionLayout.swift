@@ -175,7 +175,7 @@ struct CollectionBadge: CollectionElement {
     let layoutSize: NSCollectionLayoutSize
     let kind: String
     let alignment: NSDirectionalRectEdge
-    let offset: Offset // 对齐之后，进行偏移
+    let offset: Offset // 对齐之后，进行偏移; 只会影响 badge 位置，不会影响 cell 布局；
     
     var contentInsets: NSDirectionalEdgeInsets = .zero
     var zIndex: Int = 0
@@ -226,12 +226,11 @@ struct CollectionBoundary: CollectionElement {
     let layoutSize: NSCollectionLayoutSize
     let kind: String
     let alignment: NSRectAlignment
-    let offset: CGPoint
+    let offset: CGPoint // 对齐之后，进行偏移; 可能会影响 section 布局，以达到不会遮盖其他 section 内容；
     
     var contentInsets: NSDirectionalEdgeInsets = .zero
-    var zIndex: Int = 0
-    /// 是否吸附
-    var pinToVisibleBounds: Bool = false
+    var zIndex: Int = 0 // pinToVisibleBounds 为 true 时，zIndex 无效
+    var pinToVisibleBounds: Bool = false // 是否吸附
     
     init(
         width: NSCollectionLayoutDimension = .fractionalWidth(1),
