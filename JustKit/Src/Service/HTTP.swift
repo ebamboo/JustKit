@@ -46,6 +46,13 @@ struct HTTPResponse {
 /// HTTP 请求失败返回的错误信息
 typealias HTTPError = AFError
 
+extension Notification.Name {
+    /// HTTP 请求失败全局通知
+    /// 监听此通知，可选择性地统一处理某些失败情况
+    /// 例如：request.response?.statusCode == 401 表示未登录或登录失效可以提示用户登录
+    static let httpRequestDidFail = Notification.Name("HTTP-Request-Did-Fail")
+}
+
 extension HTTP {
     
     /// 普通数据请求
@@ -67,7 +74,7 @@ extension HTTP {
             parameters: request.body.params,
             encoding: request.body.encoding,
             headers: HTTPHeaders(request.headers),
-            interceptor: UnauthorizedInterceptor.shared,
+            interceptor: GlobalInterceptor.shared,
             requestModifier: requestModifier
         )
         task.validate()
@@ -107,7 +114,7 @@ extension HTTP {
                 to: request.url,
                 method: request.method,
                 headers: HTTPHeaders(request.headers),
-                interceptor: UnauthorizedInterceptor.shared,
+                interceptor: GlobalInterceptor.shared,
                 requestModifier: requestModifier
             )
         case .fileURL(let fileURL):
@@ -116,7 +123,7 @@ extension HTTP {
                 to: request.url,
                 method: request.method,
                 headers: HTTPHeaders(request.headers),
-                interceptor: UnauthorizedInterceptor.shared,
+                interceptor: GlobalInterceptor.shared,
                 requestModifier: requestModifier
             )
         default:
@@ -125,7 +132,7 @@ extension HTTP {
                 to: request.url,
                 method: request.method,
                 headers: HTTPHeaders(request.headers),
-                interceptor: UnauthorizedInterceptor.shared,
+                interceptor: GlobalInterceptor.shared,
                 requestModifier: requestModifier
             )
         }
@@ -169,7 +176,7 @@ extension HTTP {
             parameters: request.body.params,
             encoding: request.body.encoding,
             headers: HTTPHeaders(request.headers),
-            interceptor: UnauthorizedInterceptor.shared,
+            interceptor: GlobalInterceptor.shared,
             requestModifier: requestModifier,
             to: destination
         )
@@ -402,13 +409,15 @@ private extension HTTP {
         logResult(result, taskID: taskID)
     }
     
-    struct UnauthorizedInterceptor: RequestInterceptor {
-        static let shared = UnauthorizedInterceptor()
-        func retry(_ request: Request, for session: Session, dueTo error: any Error, completion: @escaping (RetryResult) -> Void) {
+    struct GlobalInterceptor: RequestInterceptor {
+        static let shared = GlobalInterceptor()
+        func retry(
+            _ request: Request,
+            for session: Session,
+            dueTo error: any Error,
+            completion: @escaping (RetryResult) -> Void
+        ) {
             completion(.doNotRetry)
-            if let statusCode = request.response?.statusCode, statusCode == 401 {
-                // 统一处理未登录情况
-            }
         }
     }
     
