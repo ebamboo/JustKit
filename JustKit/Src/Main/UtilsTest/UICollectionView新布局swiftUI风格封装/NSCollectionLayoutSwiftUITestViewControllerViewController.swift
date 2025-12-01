@@ -167,6 +167,13 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
                 
                 CollectionItem(width: .fractionalWidth(0.5), height: .fractionalWidth(0.5))
                 
+                CollectionGroup(axis: .vertical, width: .fractionalWidth(0.5), height: .fractionalWidth(0.5)) {
+                    CollectionItem(width: .fractionalWidth(1), height: .fractionalHeight(0.33333))
+                }
+                .setup { group in
+                    group.interItemSpacing = .fixed(10)
+                }
+                
             }
             .setup { group in
                 group.interItemSpacing = .fixed(10)

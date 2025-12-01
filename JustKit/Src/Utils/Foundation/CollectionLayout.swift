@@ -28,7 +28,7 @@ protocol CollectionGroupSubitem: CollectionElement {
 
 // MARK: - components
 
-struct CollectionItem: CollectionElement {
+struct CollectionItem: CollectionGroupSubitem {
     
     let layoutSize: NSCollectionLayoutSize
     let badges: [CollectionBadge]
@@ -63,7 +63,7 @@ struct CollectionItem: CollectionElement {
     
 }
 
-struct CollectionGroup: CollectionElement {
+struct CollectionGroup: CollectionGroupSubitem {
     
     enum Axis {
         case horizontal
@@ -72,7 +72,7 @@ struct CollectionGroup: CollectionElement {
     
     let axis: Axis
     let layoutSize: NSCollectionLayoutSize
-    let subitems: [CollectionItem]
+    let subitems: [any CollectionGroupSubitem]
     
     var contentInsets: NSDirectionalEdgeInsets = .zero
     var interItemSpacing: NSCollectionLayoutSpacing?
@@ -81,7 +81,7 @@ struct CollectionGroup: CollectionElement {
         axis: Axis = .horizontal,
         width: NSCollectionLayoutDimension,
         height: NSCollectionLayoutDimension,
-        @CollectionElementBuilder<CollectionItem> subitems: () -> [CollectionItem]
+        @CollectionGroupSubitemBuilder subitems: () -> [any CollectionGroupSubitem]
     ) {
         self.axis = axis
         self.layoutSize = .init(widthDimension: width, heightDimension: height)
