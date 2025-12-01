@@ -21,6 +21,16 @@ class NSCollectionLayoutSwiftUITestViewControllerViewController: UIViewControlle
             collectionView.collectionViewLayout = layout
             
             collectionView.register(
+                ConvenienceCollectionViewTestSectionHeaderView.self,
+                forSupplementaryViewOfKind: "header",
+                withReuseIdentifier: "ConvenienceCollectionViewTestSectionHeaderView"
+            )
+            collectionView.register(
+                ConvenienceCollectionViewTestSectionFooterView.self,
+                forSupplementaryViewOfKind: "footer",
+                withReuseIdentifier: "ConvenienceCollectionViewTestSectionFooterView"
+            )
+            collectionView.register(
                 ConvenienceCollectionViewTestCell.self,
                 forCellWithReuseIdentifier: "ConvenienceCollectionViewTestCell"
             )
@@ -82,8 +92,8 @@ class NSCollectionLayoutSwiftUITestViewControllerViewController: UIViewControlle
 
 extension NSCollectionLayoutSwiftUITestViewControllerViewController {
     
-    func createCollectionLayout() -> UICollectionViewLayout {
-        UICollectionViewCompositionalLayout { [weak self] sectionIndex, _ in
+    func createCollectionLayout() -> UICollectionViewCompositionalLayout {
+        let layout = UICollectionViewCompositionalLayout { [weak self] sectionIndex, _ in
             guard let self, !self.testData.isEmpty else { return nil }
             guard self.testData.count > sectionIndex else { return nil }
             let section = self.testData[sectionIndex]
@@ -93,6 +103,8 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
             case .shop: return self.shopSection.realValue
             }
         }
+        layout.configuration = config.realValue
+        return layout
     }
     
     var bannerSection: CollectionSection {
@@ -192,6 +204,13 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
         }
     }
     
+    var config: CollectionConfiguration {
+        CollectionConfiguration {
+            CollectionBoundary(kind: "header", alignment: .top)
+            CollectionBoundary(kind: "footer", alignment: .bottom)
+        }
+    }
+    
 }
 
 // MARK: -  collection data source
@@ -221,6 +240,24 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController: UICollectio
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         switch (kind, testData[indexPath.section]) {
+        case ("header", _):
+            let header = collectionView.dequeueReusableSupplementaryView(
+                ofKind: kind,
+                withReuseIdentifier: "ConvenienceCollectionViewTestSectionHeaderView",
+                for: indexPath
+            ) as! ConvenienceCollectionViewTestSectionHeaderView
+            header.configure(title: "Collection Header")
+            header.backgroundColor = .red
+            return header
+        case ("footer", _):
+            let footer = collectionView.dequeueReusableSupplementaryView(
+                ofKind: kind,
+                withReuseIdentifier: "ConvenienceCollectionViewTestSectionFooterView",
+                for: indexPath
+            ) as! ConvenienceCollectionViewTestSectionFooterView
+            footer.configure(title: "Collection Footer:\nsubtitle1\nsubtitle2\nsubtitle3")
+            footer.backgroundColor = .yellow
+            return footer
         case ("badge-1", .banner):
             let badge = collectionView.dequeueReusableSupplementaryView(
                 ofKind: kind,
@@ -251,7 +288,7 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController: UICollectio
                 withReuseIdentifier: "ConvenienceCollectionViewTestSectionFooterView",
                 for: indexPath
             ) as! ConvenienceCollectionViewTestSectionFooterView
-            footer.configure(title: "Hot Section Header:\nsubtitle1\nsubtitle2\nsubtitle3")
+            footer.configure(title: "Hot Section Footer:\n多行的动态高度的尾部")
             return footer
         default:
             return UICollectionReusableView()
