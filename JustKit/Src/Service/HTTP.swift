@@ -372,7 +372,7 @@ struct HTTP {
     /// 下载任务类型
     typealias DownloadTask = Alamofire.DownloadRequest
     
-        /// HTTP 请求失败上下文信息
+    /// HTTP 请求失败上下文信息
     struct RequestFailureContext {
         let request: Alamofire.Request
         let session: Alamofire.Session
