@@ -363,6 +363,13 @@ struct HTTP {
     /// 修改请求的闭包类型，可用于自定义请求配置
     typealias RequestModifier = Alamofire.Session.RequestModifier
    
+    /// HTTP 请求失败上下文信息
+    struct RequestFailureContext {
+        let request: Alamofire.Request
+        let session: Alamofire.Session
+        let error: any Error
+    }
+    
     /// 数据任务类型
     typealias DataTask = Alamofire.DataRequest
    
@@ -371,13 +378,6 @@ struct HTTP {
    
     /// 下载任务类型
     typealias DownloadTask = Alamofire.DownloadRequest
-    
-    /// HTTP 请求失败上下文信息
-    struct RequestFailureContext {
-        let request: Alamofire.Request
-        let session: Alamofire.Session
-        let error: any Error
-    }
 
 }
 
