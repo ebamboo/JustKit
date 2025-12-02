@@ -3,6 +3,7 @@
 //
 
 import Alamofire
+import Combine
 
 // MARK: - core
 
@@ -46,12 +47,10 @@ struct HTTPResponse {
 /// HTTP 请求失败返回的错误信息
 typealias HTTPError = AFError
 
-extension Notification.Name {
-    /// HTTP 请求失败全局通知
-    /// 监听此通知，可选择性地统一处理某些失败情况
-    /// 例如：request.response?.statusCode == 401 表示未登录或登录失效可以提示用户登录
-    static let httpRequestDidFail = Notification.Name("HTTP-Request-Did-Fail")
-}
+/// HTTP 请求失败全局发布者
+/// 订阅此消息，可选择性地统一处理某些失败情况
+/// 例如：request.response?.statusCode == 401 表示未登录或登录失效可以提示用户登录
+let httpRequestDidFail = PassthroughSubject<HTTP.RequestFailureContext, Never>()
 
 extension HTTP {
     
@@ -373,6 +372,13 @@ struct HTTP {
     /// 下载任务类型
     typealias DownloadTask = Alamofire.DownloadRequest
     
+        /// HTTP 请求失败上下文信息
+    struct RequestFailureContext {
+        let request: Alamofire.Request
+        let session: Alamofire.Session
+        let error: any Error
+    }
+
 }
 
 private extension HTTP {
@@ -417,6 +423,9 @@ private extension HTTP {
             dueTo error: any Error,
             completion: @escaping (RetryResult) -> Void
         ) {
+            httpRequestDidFail.send(
+                .init(request: request, session: session, error: error)
+            )
             completion(.doNotRetry)
         }
     }
