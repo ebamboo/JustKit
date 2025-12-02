@@ -117,7 +117,7 @@ struct CollectionSection: CollectionElement {
     
     var contentInsets: NSDirectionalEdgeInsets = .zero
     var interGroupSpacing: CGFloat = 0
-    /// 正交方向滚动行为；须设置该属性以使 section 可正交向滚动
+    /// 正交方向滚动行为；须设置该属性以使 section 可正交方向滚动
     var orthogonalScrollingBehavior: UICollectionLayoutSectionOrthogonalScrollingBehavior = .none
     
     init(
