@@ -42,6 +42,10 @@ struct HTTPResponse {
     /// - NOTE: 此字段为可选类型，因为某些响应可能没有主体（如 HEAD 请求或 204 No Content 响应）
     let body: Data?
     
+    /// 使用文件下载 `HTTP.downloadRequest` 方法时
+    /// 服务器返回数据的最终文件路径
+    let fileURL: URL?
+    
 }
 
 /// HTTP 请求失败返回的错误信息
@@ -49,8 +53,8 @@ typealias HTTPError = AFError
 
 /// HTTP 请求失败全局发布者
 /// 订阅此消息，可选择性地统一处理某些失败情况
-/// 例如：request.response?.statusCode == 401 表示未登录或登录失效可以提示用户登录
-let httpRequestDidFail = PassthroughSubject<HTTP.RequestFailureContext, Never>()
+/// 例如：response?.statusCode == 401 表示未登录或登录失效可以提示用户登录
+let httpRequestDidFail = PassthroughSubject<String, Never>()
 
 extension HTTP {
     
@@ -73,19 +77,20 @@ extension HTTP {
             parameters: request.body.params,
             encoding: request.body.encoding,
             headers: HTTPHeaders(request.headers),
-            interceptor: GlobalInterceptor.shared,
             requestModifier: requestModifier
         )
         task.validate()
         logRequest(request, taskID: task.id)
         task.response { [taskID = task.id] dataResponse in
-            handleResponse(
-                dataResponse.response,
-                data: dataResponse.data,
-                error: dataResponse.error,
-                taskID: taskID,
-                completion: completion
-            )
+            let result: Result<HTTPResponse, HTTPError>
+            if let error = dataResponse.error {
+                result = .failure(error)
+            } else {
+                let headers = dataResponse.response?.allHeaderFields as? [String: Any] ?? [:]
+                result = .success(.init(headers: headers, body: dataResponse.data, fileURL: nil))
+            }
+            completion(result)
+            logResult(result, taskID: taskID)
         }
         return task
     }
@@ -113,7 +118,6 @@ extension HTTP {
                 to: request.url,
                 method: request.method,
                 headers: HTTPHeaders(request.headers),
-                interceptor: GlobalInterceptor.shared,
                 requestModifier: requestModifier
             )
         case .fileURL(let fileURL):
@@ -122,7 +126,6 @@ extension HTTP {
                 to: request.url,
                 method: request.method,
                 headers: HTTPHeaders(request.headers),
-                interceptor: GlobalInterceptor.shared,
                 requestModifier: requestModifier
             )
         default:
@@ -131,7 +134,6 @@ extension HTTP {
                 to: request.url,
                 method: request.method,
                 headers: HTTPHeaders(request.headers),
-                interceptor: GlobalInterceptor.shared,
                 requestModifier: requestModifier
             )
         }
@@ -139,13 +141,15 @@ extension HTTP {
         task.uploadProgress(closure: progress)
         logRequest(request, taskID: task.id)
         task.response { [taskID = task.id] uploadResponse in
-            handleResponse(
-                uploadResponse.response,
-                data: uploadResponse.data,
-                error: uploadResponse.error,
-                taskID: taskID,
-                completion: completion
-            )
+            let result: Result<HTTPResponse, HTTPError>
+            if let error = uploadResponse.error {
+                result = .failure(error)
+            } else {
+                let headers = uploadResponse.response?.allHeaderFields as? [String: Any] ?? [:]
+                result = .success(.init(headers: headers, body: uploadResponse.data, fileURL: nil))
+            }
+            completion(result)
+            logResult(result, taskID: taskID)
         }
         return task
     }
@@ -175,7 +179,6 @@ extension HTTP {
             parameters: request.body.params,
             encoding: request.body.encoding,
             headers: HTTPHeaders(request.headers),
-            interceptor: GlobalInterceptor.shared,
             requestModifier: requestModifier,
             to: destination
         )
@@ -183,14 +186,15 @@ extension HTTP {
         task.downloadProgress(closure: progress)
         logRequest(request, taskID: task.id)
         task.response { [taskID = task.id] downloadResponse in
-            handleResponse(
-                downloadResponse.response,
-                // 对于下载请求，我们将文件 URL 转换为 Data 作为响应体
-                data: downloadResponse.fileURL?.absoluteString.data(using: .utf8),
-                error: downloadResponse.error,
-                taskID: taskID,
-                completion: completion
-            )
+            let result: Result<HTTPResponse, HTTPError>
+            if let error = downloadResponse.error {
+                result = .failure(error)
+            } else {
+                let headers = downloadResponse.response?.allHeaderFields as? [String: Any] ?? [:]
+                result = .success(.init(headers: headers, body: nil, fileURL: downloadResponse.fileURL))
+            }
+            completion(result)
+            logResult(result, taskID: taskID)
         }
         return task
     }
@@ -362,13 +366,6 @@ struct HTTP {
    
     /// 修改请求的闭包类型，可用于自定义请求配置
     typealias RequestModifier = Alamofire.Session.RequestModifier
-   
-    /// HTTP 请求失败上下文信息
-    struct RequestFailureContext {
-        let request: Alamofire.Request
-        let session: Alamofire.Session
-        let error: any Error
-    }
     
     /// 数据任务类型
     typealias DataTask = Alamofire.DataRequest
@@ -395,39 +392,6 @@ private extension HTTP {
         Debugger.printTaskResult(result, taskID: taskID)
         Debugger.updateTask(with: result, taskID: taskID)
         #endif
-    }
-    
-    static func handleResponse(
-        _ response: HTTPURLResponse?,
-        data: Data?,
-        error: HTTPError?,
-        taskID: UUID,
-        completion: @escaping (_ result: Result<HTTPResponse, HTTPError>) -> Void
-    ) {
-        let result: Result<HTTPResponse, HTTPError>
-        if let error {
-            result = .failure(error)
-        } else {
-            let headers = response?.allHeaderFields as? [String: Any] ?? [:]
-            result = .success(.init(headers: headers, body: data))
-        }
-        completion(result)
-        logResult(result, taskID: taskID)
-    }
-    
-    struct GlobalInterceptor: RequestInterceptor {
-        static let shared = GlobalInterceptor()
-        func retry(
-            _ request: Request,
-            for session: Session,
-            dueTo error: any Error,
-            completion: @escaping (RetryResult) -> Void
-        ) {
-            httpRequestDidFail.send(
-                .init(request: request, session: session, error: error)
-            )
-            completion(.doNotRetry)
-        }
     }
     
 }
