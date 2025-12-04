@@ -42,10 +42,6 @@ struct HTTPResponse {
     /// - NOTE: 此字段为可选类型，因为某些响应可能没有主体（如 HEAD 请求或 204 No Content 响应）
     let body: Data?
     
-    /// 使用文件下载 `HTTP.downloadRequest` 方法时
-    /// 服务器返回数据的最终文件路径
-    let fileURL: URL?
-    
 }
 
 /// HTTP 请求失败返回的错误信息
@@ -102,7 +98,8 @@ extension HTTP {
                 result = .failure(error)
             } else {
                 let headers = dataResponse.response?.allHeaderFields as? [String: Any] ?? [:]
-                result = .success(.init(headers: headers, body: dataResponse.data, fileURL: nil))
+                let body = dataResponse.data
+                result = .success(.init(headers: headers, body: body))
             }
             completion(result)
             logResult(result, taskID: taskID)
@@ -168,7 +165,8 @@ extension HTTP {
                 result = .failure(error)
             } else {
                 let headers = uploadResponse.response?.allHeaderFields as? [String: Any] ?? [:]
-                result = .success(.init(headers: headers, body: uploadResponse.data, fileURL: nil))
+                let body = uploadResponse.data
+                result = .success(.init(headers: headers, body: body))
             }
             completion(result)
             logResult(result, taskID: taskID)
@@ -220,7 +218,8 @@ extension HTTP {
                 result = .failure(error)
             } else {
                 let headers = downloadResponse.response?.allHeaderFields as? [String: Any] ?? [:]
-                result = .success(.init(headers: headers, body: nil, fileURL: downloadResponse.fileURL))
+                let body = "最终文件路径为 destination 所定义".data(using: .utf8)
+                result = .success(.init(headers: headers, body: body))
             }
             completion(result)
             logResult(result, taskID: taskID)
