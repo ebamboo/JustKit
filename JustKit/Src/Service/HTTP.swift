@@ -69,13 +69,27 @@ extension HTTP {
     ///   - requestModifier: 请求修改器，可用于自定义请求
     ///   - completion: 完成回调，返回结果或错误
     /// - Returns: 返回可管理的数据任务对象
-    /// - NOTE: `request.body` 不能是   `.multipart`、`.fileData` 、 `.fileURL` 任一类型，否则本次请求体为空
+    /// - NOTE: `request.body` 不能是   `.multipart`、`.fileData` 、 `.fileURL` 任一类型，否则本次请求取消
     @discardableResult
     static func dataRequest(
         _ request: HTTPRequest,
         requestModifier: RequestModifier? = nil,
         completion: @escaping (_ result: Result<HTTPResponse, HTTPError>) -> Void
-    ) -> DataTask {
+    ) -> DataTask? {
+        switch request.body {
+        case .multipart, .fileData, .fileURL:
+            HTTPRequestDidFail.send(
+                .init(
+                    error: .explicitlyCancelled,
+                    request: nil,
+                    response: nil
+                )
+            )
+            completion(.failure(.explicitlyCancelled))
+            return nil
+        default:
+            break
+        }
         let task = AF.request(
             request.url,
             method: request.method,
@@ -115,14 +129,14 @@ extension HTTP {
     ///   - progress: 上传进度回调
     ///   - completion: 完成回调，返回结果或错误
     /// - Returns: 返回可管理的上传任务对象
-    /// - NOTE: `request.body` 必须是  `.multipart`、`.fileData` 、 `.fileURL` 任一类型，否则本次请求体为空
+    /// - NOTE: `request.body` 必须是  `.multipart`、`.fileData` 、 `.fileURL` 任一类型，否则本次请求取消
     @discardableResult
     static func uploadRequest(
         _ request: HTTPRequest,
         requestModifier: RequestModifier? = nil,
         progress: @escaping (_ progress: Progress) -> Void = { _ in },
         completion: @escaping (_ result: Result<HTTPResponse, HTTPError>) -> Void
-    ) -> UploadTask {
+    ) -> UploadTask? {
         let task: UploadRequest
         switch request.body {
         case .fileData(let fileData):
@@ -141,7 +155,7 @@ extension HTTP {
                 headers: HTTPHeaders(request.headers),
                 requestModifier: requestModifier
             )
-        default:
+        case .multipart:
             task = AF.upload(
                 multipartFormData: { request.body.append(to: $0) },
                 to: request.url,
@@ -149,6 +163,16 @@ extension HTTP {
                 headers: HTTPHeaders(request.headers),
                 requestModifier: requestModifier
             )
+        default:
+            HTTPRequestDidFail.send(
+                .init(
+                    error: .explicitlyCancelled,
+                    request: nil,
+                    response: nil
+                )
+            )
+            completion(.failure(.explicitlyCancelled))
+            return nil
         }
         task.validate()
         task.uploadProgress(closure: progress)
@@ -185,7 +209,7 @@ extension HTTP {
     /// - Returns: 返回可管理的下载任务对象
     /// - NOTE:
     ///   1. 若成功则响应 body 为本地储存路径
-    ///   2. `request.body` 不能是  `.multipart`、`.fileData` 、 `.fileURL` 任一类型，否则本次请求体为空
+    ///   2. `request.body` 不能是  `.multipart`、`.fileData` 、 `.fileURL` 任一类型，否则本次请求取消
     @discardableResult
     static func downloadRequest(
         _ request: HTTPRequest,
@@ -193,7 +217,21 @@ extension HTTP {
         requestModifier: RequestModifier? = nil,
         progress: @escaping (_ progress: Progress) -> Void = { _ in },
         completion: @escaping (_ result: Result<HTTPResponse, HTTPError>) -> Void
-    ) -> DownloadTask {
+    ) -> DownloadTask? {
+        switch request.body {
+        case .multipart, .fileData, .fileURL:
+            HTTPRequestDidFail.send(
+                .init(
+                    error: .explicitlyCancelled,
+                    request: nil,
+                    response: nil
+                )
+            )
+            completion(.failure(.explicitlyCancelled))
+            return nil
+        default:
+            break
+        }
         let task = AF.download(
             request.url,
             method: request.method,
