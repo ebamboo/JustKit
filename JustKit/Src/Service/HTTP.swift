@@ -48,7 +48,7 @@ struct HTTPResponse {
 typealias HTTPError = AFError
 
 /// HTTP 请求失败全局发布者
-/// 订阅此消息，可选择性地统一处理某些失败情况
+/// 可选择性地订阅此消息，统一处理某些失败情况
 /// 例如：response?.statusCode == 401 表示未登录或登录失效可以提示用户登录
 let HTTPRequestDidFail = PassthroughSubject<HTTPRequestFailureContext, Never>()
 /// HTTP 请求失败上下文信息
@@ -219,7 +219,8 @@ extension HTTP {
                 result = .failure(error)
             } else {
                 let headers = downloadResponse.response?.allHeaderFields as? [String: String] ?? [:]
-                let body = "最终文件路径为 destination 所定义".data(using: .utf8)
+                let fileURLString = downloadResponse.fileURL?.absoluteString
+                let body = fileURLString.flatMap { $0.data(using: .utf8) }
                 result = .success(.init(headers: headers, body: body))
             }
             completion(result)
