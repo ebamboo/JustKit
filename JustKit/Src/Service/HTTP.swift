@@ -36,7 +36,7 @@ struct HTTPResponse {
     /// - NOTE: HTTP 头部字段的名称是不区分大小写的
     ///   例如 content-type， Content-Type, CONTENT-TYPE 是等价的
     ///   因此，在查询时统一转换为小写或大写
-    let headers: [String: Any]
+    let headers: [String: String]
     
     /// HTTP 响应体数据，原始二进制格式
     /// - NOTE: 此字段为可选类型，因为某些响应可能没有主体（如 HEAD 请求或 204 No Content 响应）
@@ -98,7 +98,7 @@ extension HTTP {
                 )
                 result = .failure(error)
             } else {
-                let headers = dataResponse.response?.allHeaderFields as? [String: Any] ?? [:]
+                let headers = dataResponse.response?.allHeaderFields as? [String: String] ?? [:]
                 let body = dataResponse.data
                 result = .success(.init(headers: headers, body: body))
             }
@@ -165,7 +165,7 @@ extension HTTP {
                 )
                 result = .failure(error)
             } else {
-                let headers = uploadResponse.response?.allHeaderFields as? [String: Any] ?? [:]
+                let headers = uploadResponse.response?.allHeaderFields as? [String: String] ?? [:]
                 let body = uploadResponse.data
                 result = .success(.init(headers: headers, body: body))
             }
@@ -218,7 +218,7 @@ extension HTTP {
                 )
                 result = .failure(error)
             } else {
-                let headers = downloadResponse.response?.allHeaderFields as? [String: Any] ?? [:]
+                let headers = downloadResponse.response?.allHeaderFields as? [String: String] ?? [:]
                 let body = "最终文件路径为 destination 所定义".data(using: .utf8)
                 result = .success(.init(headers: headers, body: body))
             }
