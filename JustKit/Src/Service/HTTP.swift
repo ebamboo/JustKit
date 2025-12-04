@@ -50,7 +50,8 @@ typealias HTTPError = AFError
 /// HTTP 请求失败全局发布者
 /// 订阅此消息，可选择性地统一处理某些失败情况
 /// 例如：response?.statusCode == 401 表示未登录或登录失效可以提示用户登录
-let httpRequestDidFail = PassthroughSubject<HTTPRequestFailureContext, Never>()
+let HTTPRequestDidFail = PassthroughSubject<HTTPRequestFailureContext, Never>()
+/// HTTP 请求失败上下文信息
 struct HTTPRequestFailureContext {
     /// Alamofire error
     let error: HTTPError
@@ -88,7 +89,7 @@ extension HTTP {
         task.response { [taskID = task.id] dataResponse in
             let result: Result<HTTPResponse, HTTPError>
             if let error = dataResponse.error {
-                httpRequestDidFail.send(
+                HTTPRequestDidFail.send(
                     .init(
                         error: error,
                         request: dataResponse.request,
@@ -155,7 +156,7 @@ extension HTTP {
         task.response { [taskID = task.id] uploadResponse in
             let result: Result<HTTPResponse, HTTPError>
             if let error = uploadResponse.error {
-                httpRequestDidFail.send(
+                HTTPRequestDidFail.send(
                     .init(
                         error: error,
                         request: uploadResponse.request,
@@ -208,7 +209,7 @@ extension HTTP {
         task.response { [taskID = task.id] downloadResponse in
             let result: Result<HTTPResponse, HTTPError>
             if let error = downloadResponse.error {
-                httpRequestDidFail.send(
+                HTTPRequestDidFail.send(
                     .init(
                         error: error,
                         request: downloadResponse.request,
