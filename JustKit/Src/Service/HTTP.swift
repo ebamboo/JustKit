@@ -54,7 +54,15 @@ typealias HTTPError = AFError
 /// HTTP 请求失败全局发布者
 /// 订阅此消息，可选择性地统一处理某些失败情况
 /// 例如：response?.statusCode == 401 表示未登录或登录失效可以提示用户登录
-let httpRequestDidFail = PassthroughSubject<String, Never>()
+let httpRequestDidFail = PassthroughSubject<HTTPRequestFailureContext, Never>()
+struct HTTPRequestFailureContext {
+    /// Alamofire error
+    let error: HTTPError
+    /// The URL request sent to the server.
+    let request: URLRequest?
+    /// The server's response to the URL request.
+    let response: HTTPURLResponse?
+}
 
 extension HTTP {
     
@@ -84,6 +92,13 @@ extension HTTP {
         task.response { [taskID = task.id] dataResponse in
             let result: Result<HTTPResponse, HTTPError>
             if let error = dataResponse.error {
+                httpRequestDidFail.send(
+                    .init(
+                        error: error,
+                        request: dataResponse.request,
+                        response: dataResponse.response
+                    )
+                )
                 result = .failure(error)
             } else {
                 let headers = dataResponse.response?.allHeaderFields as? [String: Any] ?? [:]
@@ -143,6 +158,13 @@ extension HTTP {
         task.response { [taskID = task.id] uploadResponse in
             let result: Result<HTTPResponse, HTTPError>
             if let error = uploadResponse.error {
+                httpRequestDidFail.send(
+                    .init(
+                        error: error,
+                        request: uploadResponse.request,
+                        response: uploadResponse.response
+                    )
+                )
                 result = .failure(error)
             } else {
                 let headers = uploadResponse.response?.allHeaderFields as? [String: Any] ?? [:]
@@ -188,6 +210,13 @@ extension HTTP {
         task.response { [taskID = task.id] downloadResponse in
             let result: Result<HTTPResponse, HTTPError>
             if let error = downloadResponse.error {
+                httpRequestDidFail.send(
+                    .init(
+                        error: error,
+                        request: downloadResponse.request,
+                        response: downloadResponse.response
+                    )
+                )
                 result = .failure(error)
             } else {
                 let headers = downloadResponse.response?.allHeaderFields as? [String: Any] ?? [:]
