@@ -99,8 +99,7 @@ extension HTTP {
             requestModifier: requestModifier
         )
         task.validate()
-        logRequest(request, taskID: task.id)
-        task.response { [taskID = task.id] dataResponse in
+        task.response { dataResponse in
             let result: Result<HTTPResponse, HTTPError>
             if let error = dataResponse.error {
                 HTTPRequestDidFail.send(
@@ -117,7 +116,6 @@ extension HTTP {
                 result = .success(.init(headers: headers, body: body))
             }
             completion(result)
-            logResult(result, taskID: taskID)
         }
         return task
     }
@@ -176,8 +174,7 @@ extension HTTP {
         }
         task.validate()
         task.uploadProgress(closure: progress)
-        logRequest(request, taskID: task.id)
-        task.response { [taskID = task.id] uploadResponse in
+        task.response { uploadResponse in
             let result: Result<HTTPResponse, HTTPError>
             if let error = uploadResponse.error {
                 HTTPRequestDidFail.send(
@@ -194,7 +191,6 @@ extension HTTP {
                 result = .success(.init(headers: headers, body: body))
             }
             completion(result)
-            logResult(result, taskID: taskID)
         }
         return task
     }
@@ -243,8 +239,7 @@ extension HTTP {
         )
         task.validate()
         task.downloadProgress(closure: progress)
-        logRequest(request, taskID: task.id)
-        task.response { [taskID = task.id] downloadResponse in
+        task.response { downloadResponse in
             let result: Result<HTTPResponse, HTTPError>
             if let error = downloadResponse.error {
                 HTTPRequestDidFail.send(
@@ -262,7 +257,6 @@ extension HTTP {
                 result = .success(.init(headers: headers, body: body))
             }
             completion(result)
-            logResult(result, taskID: taskID)
         }
         return task
     }
@@ -444,152 +438,4 @@ struct HTTP {
     /// 下载任务类型
     typealias DownloadTask = Alamofire.DownloadRequest
 
-}
-
-private extension HTTP {
-    
-    static func logRequest(_ request: HTTPRequest, taskID: UUID) {
-        #if DEBUG
-        Debugger.printTaskRequest(request, taskID: taskID)
-        Debugger.addTask(with: request, taskID: taskID)
-        #endif
-    }
-    
-    static func logResult(_ result: Result<HTTPResponse, HTTPError>, taskID: UUID) {
-        #if DEBUG
-        Debugger.printTaskResult(result, taskID: taskID)
-        Debugger.updateTask(with: result, taskID: taskID)
-        #endif
-    }
-    
-}
-
-// MARK: - debug
-
-class Debugger {
-    
-    class Task {
-        let id: UUID
-        let date: Date
-        let request: HTTPRequest
-        init(id: UUID, date: Date, request: HTTPRequest) {
-            self.id = id
-            self.date = date
-            self.request = request
-        }
-        var result: Result<HTTPResponse, HTTPError>?
-    }
-    
-    private(set) static var tasks: [Task] = []
-    
-    static func addTask(with request: HTTPRequest, taskID: UUID) {
-        let task = Task(id: taskID, date: Date(), request: request)
-        tasks.append(task)
-        if tasks.count > 100 { tasks.removeFirst(tasks.count-100)}
-    }
-    
-    static func updateTask(with result: Result<HTTPResponse, HTTPError>, taskID: UUID) {
-        let task = tasks.first { $0.id == taskID }
-        task?.result = result
-    }
-    
-    static func clearTasks() {
-        tasks = []
-    }
-    
-}
-
-extension Debugger {
-    
-    static func printTaskRequest(_ request: HTTPRequest, taskID: UUID) {
-        let id = {
-            taskID.uuidString
-        }()
-        print("request id = \(id)")
-        let line = {
-            "\(request.method.rawValue) \(request.url)"
-        }()
-        print("request line = \(line)")
-        let headers = {
-            let headersData = try! JSONSerialization.data(withJSONObject: request.headers, options: .prettyPrinted)
-            let headersString = String(data: headersData, encoding: .utf8)!
-            return headersString
-        }()
-        print("request headers = \(headers)")
-        let body = {
-            switch request.body {
-            case .none:
-                return "null"
-            case .binary:
-                return "binary 数据"
-            case .plain(let text, _):
-                return text
-            case .json(let params):
-                let paramsData = try! JSONSerialization.data(withJSONObject: params, options: .prettyPrinted)
-                let paramsString = String(data: paramsData, encoding: .utf8)!
-                return paramsString
-            case .form(let params):
-                let paramsList = params.keys.map { "\($0)=\(params[$0]!)" }
-                let paramsString = paramsList.joined(separator: "&")
-                return paramsString
-            case .multipart(let normals, let files):
-                var formDataList = normals
-                files.forEach { file in
-                    switch file {
-                    case .fileData(_, let name, _, _):
-                        formDataList[name] = "Data 方式上传的二进制数据"
-                    case .fileURL(_, let name, _, _):
-                        formDataList[name] = "URL 方式上传的二进制数据"
-                    }
-                }
-                let paramsData = try! JSONSerialization.data(withJSONObject: formDataList, options: .prettyPrinted)
-                let paramsString = String(data: paramsData, encoding: .utf8)!
-                return paramsString
-            case .fileData:
-                return "Data 方式上传的二进制数据"
-            case .fileURL(let fileURL):
-                return "URL 方式上传的二进制数据：\(fileURL.absoluteString)"
-            }
-        }()
-        print("request body = \(body)")
-    }
-    
-    static func printTaskResult(_ result: Result<HTTPResponse, HTTPError>, taskID: UUID) {
-        switch result {
-        case .success(let response):
-            let id = {
-                taskID.uuidString
-            }()
-            print("response id = \(id)")
-            let headers = {
-                let headersData = try! JSONSerialization.data(withJSONObject: response.headers, options: .prettyPrinted)
-                let headersString = String(data: headersData, encoding: .utf8)!
-                return headersString
-            }()
-            print("response headers = \(headers)")
-            let body = {
-                guard let bodyData = response.body, !bodyData.isEmpty else { return "null" }
-                if let jsonObject = try? JSONSerialization.jsonObject(with: bodyData, options: []) {
-                    let jsonData = try! JSONSerialization.data(withJSONObject: jsonObject, options: .prettyPrinted)
-                    let jsonString = String(data: jsonData, encoding: .utf8)!
-                    return jsonString
-                }
-                if let text = String(data: bodyData, encoding: .utf8) {
-                    return text
-                }
-                return "body 数据存在但无法转为 JSON 或者字符串"
-            }()
-            print("response body = \(body)")
-        case .failure(let error):
-            let id = {
-                taskID.uuidString
-            }()
-            print("response id = \(id)")
-            let error = {
-                error.errorDescription ?? "alamofire 未返回错误描述"
-            }()
-            print("response error = \(error)")
-        }
-    }
-    
 }
