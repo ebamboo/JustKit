@@ -38,6 +38,12 @@ extension Encodable {
         }
     }
     
+    func asDictionary() -> [String: Any]? {
+        jsonData.flatMap { data in
+            try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+        }
+    }
+    
 }
 
 extension Decodable {

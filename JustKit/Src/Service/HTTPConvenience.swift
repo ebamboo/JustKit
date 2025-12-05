@@ -11,6 +11,7 @@ struct BusinessBody<T: Decodable>: Decodable {
     let message: String?
     let data: T?
 }
+
 extension BusinessBody {
     enum CodingKeys: CodingKey {
         case code
@@ -30,6 +31,7 @@ enum BusinessError: Error {
     case decoding
     case network(error: HTTPError)
 }
+
 extension BusinessError {
     var toast: String {
         switch self {

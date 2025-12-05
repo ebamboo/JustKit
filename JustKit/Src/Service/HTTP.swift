@@ -67,7 +67,7 @@ extension HTTP {
     /// - Parameters:
     ///   - request: 遵循 HTTPRequest 协议的请求对象
     ///   - requestModifier: 请求修改器，可用于自定义请求
-    ///   - completion: 完成回调，返回结果或错误
+    ///   - completion: 完成回调，返回 HTTPResponse 或 HTTPError
     /// - Returns: 返回可管理的数据任务对象
     /// - NOTE: `request.body` 不能是   `.multipart`、`.fileData` 、 `.fileURL` 任一类型，否则本次请求取消
     @discardableResult
@@ -125,7 +125,7 @@ extension HTTP {
     ///   - request: 遵循 HTTPRequest 协议的请求对象
     ///   - requestModifier: 请求修改器，可用于自定义请求
     ///   - progress: 上传进度回调
-    ///   - completion: 完成回调，返回结果或错误
+    ///   - completion: 完成回调，返回 Body 或 HTTPError
     /// - Returns: 返回可管理的上传任务对象
     /// - NOTE: `request.body` 必须是  `.multipart`、`.fileData` 、 `.fileURL` 任一类型，否则本次请求取消
     @discardableResult
@@ -133,7 +133,7 @@ extension HTTP {
         _ request: HTTPRequest,
         requestModifier: RequestModifier? = nil,
         progress: @escaping (_ progress: Progress) -> Void = { _ in },
-        completion: @escaping (_ result: Result<HTTPResponse, HTTPError>) -> Void
+        completion: @escaping (_ result: Result<Data?, HTTPError>) -> Void
     ) -> UploadTask? {
         let task: UploadRequest
         switch request.body {
@@ -175,7 +175,7 @@ extension HTTP {
         task.validate()
         task.uploadProgress(closure: progress)
         task.response { uploadResponse in
-            let result: Result<HTTPResponse, HTTPError>
+            let result: Result<Data?, HTTPError>
             if let error = uploadResponse.error {
                 HTTPRequestDidFail.send(
                     .init(
@@ -186,9 +186,7 @@ extension HTTP {
                 )
                 result = .failure(error)
             } else {
-                let headers = uploadResponse.response?.allHeaderFields as? [String: String] ?? [:]
-                let body = uploadResponse.data
-                result = .success(.init(headers: headers, body: body))
+                result = .success(uploadResponse.data)
             }
             completion(result)
         }
@@ -201,7 +199,7 @@ extension HTTP {
     ///   - destination: 文件下载目标位置
     ///   - requestModifier: 请求修改器，可用于自定义请求
     ///   - progress: 下载进度回调
-    ///   - completion: 完成回调，返回结果或错误
+    ///   - completion: 完成回调，返回 fileURL 或 HTTPError
     /// - Returns: 返回可管理的下载任务对象
     /// - NOTE:
     ///   1. 若成功则响应 body 为本地储存路径
@@ -212,7 +210,7 @@ extension HTTP {
         to destination: DownloadFileDestination? = nil,
         requestModifier: RequestModifier? = nil,
         progress: @escaping (_ progress: Progress) -> Void = { _ in },
-        completion: @escaping (_ result: Result<HTTPResponse, HTTPError>) -> Void
+        completion: @escaping (_ result: Result<URL?, HTTPError>) -> Void
     ) -> DownloadTask? {
         switch request.body {
         case .multipart, .fileData, .fileURL:
@@ -240,7 +238,7 @@ extension HTTP {
         task.validate()
         task.downloadProgress(closure: progress)
         task.response { downloadResponse in
-            let result: Result<HTTPResponse, HTTPError>
+            let result: Result<URL?, HTTPError>
             if let error = downloadResponse.error {
                 HTTPRequestDidFail.send(
                     .init(
@@ -251,10 +249,7 @@ extension HTTP {
                 )
                 result = .failure(error)
             } else {
-                let headers = downloadResponse.response?.allHeaderFields as? [String: String] ?? [:]
-                let fileURLString = downloadResponse.fileURL?.absoluteString
-                let body = fileURLString.flatMap { $0.data(using: .utf8) }
-                result = .success(.init(headers: headers, body: body))
+                result = .success(downloadResponse.fileURL)
             }
             completion(result)
         }
