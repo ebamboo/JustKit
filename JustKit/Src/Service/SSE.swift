@@ -41,9 +41,9 @@ public class SSESession: NSObject, URLSessionDataDelegate {
     
     private lazy var session = {
         let configuration = URLSessionConfiguration.default
-        configuration.timeoutIntervalForRequest = 1200  // 20分钟 - 单个请求超时
-        configuration.timeoutIntervalForResource = 3600  // 1小时 - 整个资源请求超时
-        configuration.httpMaximumConnectionsPerHost = 1  // 每个主机最多1个连接
+        configuration.timeoutIntervalForRequest = 1200 // 20分钟 - 单个请求超时
+        configuration.timeoutIntervalForResource = 3600 // 1小时 - 整个资源请求超时
+        configuration.httpMaximumConnectionsPerHost = 1 // 每个主机最多1个连接
         configuration.requestCachePolicy = .reloadIgnoringLocalCacheData // 忽略缓存
         return URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
     }()
