@@ -39,7 +39,14 @@ public class SSESession: NSObject, URLSessionDataDelegate {
         return task
     }
     
-    private lazy var session = URLSession(configuration: .default, delegate: self, delegateQueue: nil)
+    private lazy var session = {
+        let configuration = URLSessionConfiguration.default
+        configuration.timeoutIntervalForRequest = 1200  // 20分钟 - 单个请求超时
+        configuration.timeoutIntervalForResource = 3600  // 1小时 - 整个资源请求超时
+        configuration.httpMaximumConnectionsPerHost = 1  // 每个主机最多1个连接
+        configuration.requestCachePolicy = .reloadIgnoringLocalCacheData // 忽略缓存
+        return URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
+    }()
     private var workList: [Int: SSESessionWork] = [:]
     
     public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
@@ -62,6 +69,7 @@ fileprivate class SSESessionWork {
     
     private let lock = NSLock()
     private var buffer = Data()
+    private let maxBufferSize: Int = 200 * 1024 * 1024
     
     init(
         onEvent: @escaping (URLSessionDataTask, SSEEvent) -> Void,
@@ -74,6 +82,10 @@ fileprivate class SSESessionWork {
     func didReceive(data: Data, dataTask: URLSessionDataTask) {
         lock.lock()
         defer { lock.unlock() }
+        if buffer.count + data.count > maxBufferSize {
+            dataTask.cancel()
+            return
+        }
         buffer.append(data)
         let delimiterData = "\n\n".data(using: .utf8)!
         while let delimiterRange = buffer.range(of: delimiterData) {
