@@ -4,7 +4,7 @@
 
 import UIKit
 
-public class CollectionViewFlowLayout: UICollectionViewFlowLayout {
+public class CollectionViewGridLayout: UICollectionViewFlowLayout {
 
     /// item size 获取方法作为一个属性
     /// 可以实现动态获取 item size
@@ -13,7 +13,7 @@ public class CollectionViewFlowLayout: UICollectionViewFlowLayout {
     
 }
 
-public extension CollectionViewFlowLayout {
+public extension CollectionViewGridLayout {
     
     override func prepare() {
         super.prepare()
