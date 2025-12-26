@@ -58,32 +58,39 @@ public extension CollectionViewTagLayout {
         _layoutAttributesForItems = []
         
         // 空
-        guard let numberOfItems = collectionView?.numberOfItems(inSection: 0), numberOfItems > 0 else { return }
+        guard let collectionView else { return }
+        let numberOfItems = collectionView.numberOfItems(inSection: 0)
+        guard numberOfItems > 0 else { return }
+        
         // 首项
         let firstIndexPath = IndexPath(item: 0, section: 0)
         let firstAttributes = UICollectionViewLayoutAttributes(forCellWith: firstIndexPath)
-        firstAttributes.frame = CGRect(x: 0, y: 0, width: _itemWidthReader(collectionView!, firstIndexPath), height: _itemHeight)
+        firstAttributes.frame = .init(x: 0, y: 0, width: _itemWidthReader(collectionView, firstIndexPath), height: _itemHeight)
         _contentHeight = _itemHeight
         _layoutAttributesForItems.append(firstAttributes)
+        
         // n + 1 项
         guard numberOfItems > 1 else { return }
         (1..<numberOfItems).forEach { i in
             let indexPath = IndexPath(item: i, section: 0)
+            let itemWidth = _itemWidthReader(collectionView, indexPath)
             let attributes = UICollectionViewLayoutAttributes(forCellWith: indexPath)
-            let lastAttributes = _layoutAttributesForItems[i-1]
-            let itemWidth = _itemWidthReader(collectionView!, indexPath)
-            if lastAttributes.frame.origin.x + lastAttributes.frame.size.width + _interitemSpacing + itemWidth <= collectionView!.bounds.size.width { // 本行尾部追加
-                attributes.frame = CGRect(
-                    x: lastAttributes.frame.origin.x + lastAttributes.frame.size.width + _interitemSpacing,
-                    y: lastAttributes.frame.origin.y,
+            let precedingAttributes = _layoutAttributesForItems[i-1]
+            // 如果本行尾部可以追加
+            if precedingAttributes.frame.maxX + _interitemSpacing + itemWidth <= collectionView.bounds.size.width {
+                attributes.frame = .init(
+                    x: precedingAttributes.frame.maxX + _interitemSpacing,
+                    y: precedingAttributes.frame.minY,
                     width: itemWidth,
                     height: _itemHeight
                 )
                 _layoutAttributesForItems.append(attributes)
-            } else { // 新开辟一行追加
+            }
+            // 否则新开辟一行追加
+            else {
                 attributes.frame = CGRect(
                     x: 0,
-                    y: lastAttributes.frame.origin.y + lastAttributes.frame.size.height + _lineSpacing,
+                    y: precedingAttributes.frame.maxY + _lineSpacing,
                     width: itemWidth,
                     height: _itemHeight
                 )
@@ -94,21 +101,23 @@ public extension CollectionViewTagLayout {
         
     }
     
-    override var collectionViewContentSize: CGSize {
-        return CGSize(width: collectionView!.bounds.size.width, height: _contentHeight)
-    }
-    
-    override func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {
-        return newBounds.width != collectionView?.bounds.width
-    }
-    
     override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
-        return _layoutAttributesForItems.filter { rect.intersects($0.frame) }
+        _layoutAttributesForItems.filter { rect.intersects($0.frame) }
     }
     
     override func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
-        if indexPath.item >= _layoutAttributesForItems.count { return nil }
+        guard indexPath.item < _layoutAttributesForItems.count else { return nil }
         return _layoutAttributesForItems[indexPath.item]
+    }
+    
+    override var collectionViewContentSize: CGSize {
+        guard let collectionView else { return .zero }
+        return .init(width: collectionView.bounds.width, height: _contentHeight)
+    }
+    
+    override func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {
+        guard let collectionView else { return false }
+        return newBounds.width != collectionView.bounds.width
     }
     
 }

@@ -4,23 +4,17 @@
 
 import UIKit
 
-class TagLayoutTestViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+class TagLayoutTestViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate {
 
     @IBOutlet weak var collectionView: UICollectionView! {
         didSet {
-            let layout = CollectionViewWrapLayout()
-//            layout.lineSpacing = 10
-//            layout.interitemSpacing = 30
-//            layout.itemHeight = 30
-//            layout.itemWidthReader { collectionView, indexPath in
-//                return CGFloat(Int.random(in: 44...110))
-//            }
-            
-            layout.minimumLineSpacing = 10
-            layout.minimumInteritemSpacing = 10
-            
-//            collectionView.contentInset = .init(top: 0, left: 30, bottom: 0, right: 30)
-            
+            let layout = CollectionViewTagLayout()
+            layout.lineSpacing = 10
+            layout.interitemSpacing = 10
+            layout.itemHeight = 30
+            layout.itemWidthReader { collectionView, indexPath in
+                return CGFloat(Int.random(in: 44...110))
+            }
             collectionView.collectionViewLayout = layout
             collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "Cell")
         }
@@ -37,11 +31,7 @@ class TagLayoutTestViewController: UIViewController, UICollectionViewDataSource,
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath)
         cell.backgroundColor = .red
-        print(cell.frame.origin)
         return cell
     }
     
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        .init(width: CGFloat(Int.random(in: 80...200)), height: 30)
-    }
 }
