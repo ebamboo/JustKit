@@ -22,8 +22,9 @@ public extension TestFlowLayout {
         }
     }
     
-    // 用于实现中心元素放大，两侧元素缩小
+    // 用于实现中心元素不缩放，两侧元素缩小
     // 注释该方法则没有放大缩小效果
+    // 以水平方向滚动的 collection view 为例进行如下说明:
     //
     //               ◄───────┐     ┌──────────►
     //  gradient scaling     │     │        gradient scaling
@@ -46,19 +47,46 @@ public extension TestFlowLayout {
               let originalAttributes = super.layoutAttributesForElements(in: rect),
               !originalAttributes.isEmpty else { return nil }
         
-        // 水平居中线
-        let centerLineX = collectionView.contentOffset.x + collectionView.bounds.width/2
+        // 计算视图中心点坐标
+        let viewCenter = CGPoint(
+            x: collectionView.contentOffset.x + collectionView.bounds.width / 2,
+            y: collectionView.contentOffset.y + collectionView.bounds.height / 2
+        )
         
-        // 渐变缩放区域
-        let gradientScalingDistance = itemSize.width + minimumLineSpacing
+        // 计算渐变缩放区域范围
+        let gradientRange: CGFloat
+        if scrollDirection == .horizontal {
+            gradientRange = itemSize.width + minimumLineSpacing
+        } else {
+            gradientRange = itemSize.height + minimumLineSpacing
+        }
         
-        originalAttributes.forEach { attributes in
-            let distance = abs(attributes.center.x - centerLineX)
-            if distance > gradientScalingDistance {
-                attributes.transform = CGAffineTransform(scaleX: minScale, y: minScale)
+        // 计算缩放差值（从1.0到minScale）
+        let scaleDifference = 1.0 - minScale
+        
+        // 遍历并更新每个元素的缩放变换
+        originalAttributes.forEach { attr in
+            // 计算元素中心到视图中心的距离
+            let distance: CGFloat
+            if scrollDirection == .horizontal {
+                distance = abs(attr.center.x - viewCenter.x)
             } else {
-                attributes.transform = CGAffineTransform(scaleX: 1-distance*0.2/gradientScalingDistance, y: 1-distance*0.2/gradientScalingDistance)
+                distance = abs(attr.center.y - viewCenter.y)
             }
+            
+            // 根据距离计算缩放比例
+            let calculatedScale: CGFloat
+            if distance >= gradientRange {
+                // 超出渐变范围，使用最小缩放
+                calculatedScale = minScale
+            } else {
+                // 在渐变范围内，线性插值计算缩放（1.0 -> minScale）
+                let progress = distance / gradientRange
+                calculatedScale = 1.0 - scaleDifference * progress
+            }
+            
+            // 应用缩放变换
+            attr.transform = CGAffineTransform(scaleX: calculatedScale, y: calculatedScale)
         }
         
         return originalAttributes
