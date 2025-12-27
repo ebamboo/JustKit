@@ -8,6 +8,8 @@ public class TestFlowLayout: UICollectionViewFlowLayout {
     
     var itemSizeReader: ((UICollectionView) -> CGSize) = { _ in .init(width: 60, height: 60) }
     
+    var minScale: CGFloat = 0.8
+    
 }
 
 public extension TestFlowLayout {
@@ -22,6 +24,23 @@ public extension TestFlowLayout {
     
     // 用于实现中心元素放大，两侧元素缩小
     // 注释该方法则没有放大缩小效果
+    //
+    //               ◄───────┐     ┌──────────►
+    //  gradient scaling     │     │        gradient scaling
+    //  minScale -- 1.0  │   │  │  │   │    minScale -- 1.0
+    //                   │◄──┴─►│◄─┴──►│
+    // ┌─────────────────┼──────┼──────┼─────────────────┐
+    // │┌─────┐┌─────┐┌──┼──┐┌──┼──┐┌──┼──┐┌─────┐┌─────┐│
+    // ││     ││     ││  │  ││  │  ││  │  ││     ││     ││
+    // ││     ││     ││  │  ││  │  ││  │  ││     ││     ││
+    // ││     ││     ││  │  ││  │  ││  │  ││     ││     ││
+    // │└─────┘└─────┘└──┼──┘└──┼──┘└──┼──┘└─────┘└─────┘│
+    // └─────────────────┼──────┼──────┼─────────────────┘
+    //    ◄──────────────┤      │      ├───────────────►
+    //       minScale    │      │      │       minScale
+    //                      center line
+    //                       no scaling
+    //
     override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
         guard let attributesList = super.layoutAttributesForElements(in: rect),
               !attributesList.isEmpty else { return nil }
