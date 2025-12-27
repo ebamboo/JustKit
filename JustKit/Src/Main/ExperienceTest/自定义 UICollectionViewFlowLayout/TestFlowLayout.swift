@@ -4,42 +4,43 @@
 
 import UIKit
 
-class TestFlowLayout: UICollectionViewFlowLayout {
-
-    var itemSizeReader: ((UICollectionView) -> CGSize)!
+public class TestFlowLayout: UICollectionViewFlowLayout {
     
-    /// 初始化或其他以下动态布局操作
+    var itemSizeReader: ((UICollectionView) -> CGSize) = { _ in .init(width: 60, height: 60) }
+    
+}
+
+public extension TestFlowLayout {
+    
+    // 使用 itemSizeReader 设置 itemSize
     override func prepare() {
         super.prepare()
-        /// 每次刷新布局都会调整 itemSize 大小
-        itemSize = itemSizeReader(collectionView!)
+        if let collectionView {
+            itemSize = itemSizeReader(collectionView)
+        }
     }
     
-    /// 布局变化时，是否刷新布局
-    override func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {
-        return true
+    // 用于实现中心元素放大，两侧元素缩小
+    // 注释该方法则没有放大缩小效果
+    override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
+        guard let attributesList = super.layoutAttributesForElements(in: rect),
+              attributesList.isEmpty == false
+        else { return [] }
+        
+        // 渐变缩放区域
+        let areaDistance = itemSize.width + minimumLineSpacing
+        // 水平居中线
+        let centerLineX = collectionView!.contentOffset.x + collectionView!.bounds.width/2
+        attributesList.forEach { attributes in
+            let distance = abs(attributes.center.x - centerLineX)
+            if distance > areaDistance {
+                attributes.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
+            } else {
+                attributes.transform = CGAffineTransform(scaleX: 1-distance*0.2/areaDistance, y: 1-distance*0.2/areaDistance)
+            }
+        }
+        return attributesList
     }
-    
-    /// 对每个 cell 对应的布局 attributes 做出说明或者修改
-//    override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
-//        guard let attributesList = super.layoutAttributesForElements(in: rect),
-//              attributesList.isEmpty == false
-//        else { return [] }
-//        
-//        // 渐变缩放区域
-//        let areaDistance = itemSize.width + minimumLineSpacing
-//        // 水平居中线
-//        let centerLineX = collectionView!.contentOffset.x + collectionView!.bounds.width/2
-//        attributesList.forEach { attributes in
-//            let distance = abs(attributes.center.x - centerLineX)
-//            if distance > areaDistance {
-//                attributes.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
-//            } else {
-//                attributes.transform = CGAffineTransform(scaleX: 1-distance*0.2/areaDistance, y: 1-distance*0.2/areaDistance)
-//            }
-//        }
-//        return attributesList
-//    }
     
     // 用于实现滑动结束时元素居中
     // 注释该方法则无居中效果
@@ -114,6 +115,11 @@ class TestFlowLayout: UICollectionViewFlowLayout {
             
         }
         
+    }
+    
+    // bounds 变化时，是否刷新布局
+    override func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {
+        true
     }
     
 }
