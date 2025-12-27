@@ -24,8 +24,7 @@ public extension TestFlowLayout {
     // 注释该方法则没有放大缩小效果
     override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
         guard let attributesList = super.layoutAttributesForElements(in: rect),
-              attributesList.isEmpty == false
-        else { return [] }
+              !attributesList.isEmpty else { return nil }
         
         // 渐变缩放区域
         let areaDistance = itemSize.width + minimumLineSpacing
