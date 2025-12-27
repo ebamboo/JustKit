@@ -42,22 +42,26 @@ public extension TestFlowLayout {
     //                       no scaling
     //
     override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
-        guard let attributesList = super.layoutAttributesForElements(in: rect),
-              !attributesList.isEmpty else { return nil }
+        guard let collectionView = collectionView,
+              let originalAttributes = super.layoutAttributesForElements(in: rect),
+              !originalAttributes.isEmpty else { return nil }
+        
+        // 水平居中线
+        let centerLineX = collectionView.contentOffset.x + collectionView.bounds.width/2
         
         // 渐变缩放区域
-        let areaDistance = itemSize.width + minimumLineSpacing
-        // 水平居中线
-        let centerLineX = collectionView!.contentOffset.x + collectionView!.bounds.width/2
-        attributesList.forEach { attributes in
+        let gradientScalingDistance = itemSize.width + minimumLineSpacing
+        
+        originalAttributes.forEach { attributes in
             let distance = abs(attributes.center.x - centerLineX)
-            if distance > areaDistance {
-                attributes.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
+            if distance > gradientScalingDistance {
+                attributes.transform = CGAffineTransform(scaleX: minScale, y: minScale)
             } else {
-                attributes.transform = CGAffineTransform(scaleX: 1-distance*0.2/areaDistance, y: 1-distance*0.2/areaDistance)
+                attributes.transform = CGAffineTransform(scaleX: 1-distance*0.2/gradientScalingDistance, y: 1-distance*0.2/gradientScalingDistance)
             }
         }
-        return attributesList
+        
+        return originalAttributes
     }
     
     // 用于实现滑动结束时元素居中
