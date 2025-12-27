@@ -12,13 +12,16 @@ class FLowLayoutTestViewController: UIViewController, UICollectionViewDataSource
         super.viewDidLoad()
         
         let layout = TestFlowLayout()
-        layout.scrollDirection = .horizontal
+        layout.scrollDirection = .vertical
         layout.minimumLineSpacing = 10
         layout.minimumInteritemSpacing = 10
-        layout.itemSizeReader = { view in
-            return CGSize(width: 100, height: view.bounds.height)
-        }
+//        layout.itemSizeReader = { view in
+//            return CGSize(width: 100, height: view.bounds.height)
+//        }
         
+        layout.itemSizeReader = { view in
+            return CGSize(width: view.bounds.width, height: 180)
+        }
         collectionView.collectionViewLayout = layout
         collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "Cell")
     }
