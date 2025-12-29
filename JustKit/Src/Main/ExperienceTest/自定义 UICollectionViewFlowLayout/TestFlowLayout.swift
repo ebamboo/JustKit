@@ -19,6 +19,13 @@ public extension TestFlowLayout {
         super.prepare()
         if let collectionView {
             itemSize = itemSizeReader(collectionView)
+            if scrollDirection == .horizontal {
+                let inset = collectionView.bounds.width / 2 - itemSize.width / 2
+                collectionView.contentInset = .init(top: 0, left: inset, bottom: 0, right: inset)
+            } else {
+                let inset = collectionView.bounds.height / 2 - itemSize.height / 2
+                collectionView.contentInset = .init(top: inset, left: 0, bottom: inset, right: 0)
+            }
         }
     }
     
