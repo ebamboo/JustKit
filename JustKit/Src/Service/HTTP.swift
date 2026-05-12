@@ -347,7 +347,7 @@ struct HTTP {
                 if let mimeType {
                     request.headers.update(.contentType(mimeType))
                 }
-                request.httpBody = text.data(using: .utf8)
+                request.httpBody = Data(text.utf8)
                 return request
             }
         }
@@ -357,7 +357,7 @@ struct HTTP {
             guard case .multipart(let normals, let files) = self else { return }
             // 添加普通表单字段
             normals.forEach { key, value in
-                formData.append(value.data(using: .utf8)!, withName: key)
+                formData.append(Data(value.utf8), withName: key)
             }
             // 添加文件表单数据
             files.forEach { file in
