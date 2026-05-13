@@ -10,18 +10,6 @@ struct BusinessBody<T: Decodable>: Decodable {
     let code: Int
     let message: String?
     let data: T?
-
-    enum CodingKeys: CodingKey {
-        case code
-        case message
-        case data
-    }
-    init(from decoder: any Decoder) throws {
-        let container: KeyedDecodingContainer<BusinessBody<T>.CodingKeys> = try decoder.container(keyedBy: BusinessBody<T>.CodingKeys.self)
-        self.code = try container.decode(Int.self, forKey: .code)
-        self.message = try? container.decodeIfPresent(String.self, forKey: .message)
-        self.data = try? container.decodeIfPresent(T.self, forKey: .data)
-    }
 }
 
 enum BusinessError: Error {
@@ -87,7 +75,7 @@ extension HTTP {
                         if let data = model.data {
                             completion(.success(data))
                         } else {
-                            completion(.failure(.decoding(reason: "响应数据字段缺失")))
+                            completion(.failure(.decoding(reason: "响应数据字段 data 缺失")))
                         }
                     } else {
                         completion(.failure(.business(message: model.message)))
