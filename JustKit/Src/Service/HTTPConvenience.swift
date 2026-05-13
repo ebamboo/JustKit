@@ -27,7 +27,7 @@ struct BusinessBody<T: Decodable>: Decodable {
 enum BusinessError: Error {
     case business(message: String)
     case decoding
-    case network(error: HTTPError)
+    case underlying(error: HTTPError)
 
     var toast: String {
         switch self {
@@ -35,7 +35,7 @@ enum BusinessError: Error {
             return message
         case .decoding:
             return "数据解析失败"
-        case .network(let error):
+        case .underlying(let error):
             return error.errorDescription ?? "未知网络库错误"
         }
     }
@@ -63,7 +63,7 @@ extension HTTP {
                     completion(.failure(.decoding))
                 }
             case .failure(let error):
-                completion(.failure(.network(error: error)))
+                completion(.failure(.underlying(error: error)))
             }
         }
     }
@@ -92,7 +92,7 @@ extension HTTP {
                     completion(.failure(.decoding))
                 }
             case .failure(let error):
-                completion(.failure(.network(error: error)))
+                completion(.failure(.underlying(error: error)))
             }
         }
     }
