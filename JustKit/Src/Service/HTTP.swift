@@ -76,6 +76,14 @@ extension HTTP {
         requestModifier: RequestModifier? = nil,
         completion: @escaping (_ result: Result<HTTPResponse, HTTPError>) -> Void
     ) -> DataTask {
+        assert(
+            {
+                switch request.body {
+                case .multipart, .fileData, .fileURL: false
+                default: true }
+            }(),
+            "dataRequest 不支持 .multipart、.fileData、.fileURL 类型的 body"
+        )
         let task = AF.request(
             request.url,
             method: request.method,
@@ -121,6 +129,14 @@ extension HTTP {
         progress: @escaping (_ progress: Progress) -> Void = { _ in },
         completion: @escaping (_ result: Result<Data?, HTTPError>) -> Void
     ) -> UploadTask {
+        assert(
+            {
+                switch request.body {
+                case .multipart, .fileData, .fileURL: true
+                default: false }
+            }(),
+            "uploadRequest 仅支持 .multipart、.fileData、.fileURL 类型的 body"
+        )
         let task: UploadRequest
         switch request.body {
         case .fileData(let fileData):
@@ -188,6 +204,14 @@ extension HTTP {
         progress: @escaping (_ progress: Progress) -> Void = { _ in },
         completion: @escaping (_ result: Result<URL?, HTTPError>) -> Void
     ) -> DownloadTask {
+        assert(
+            {
+                switch request.body {
+                case .multipart, .fileData, .fileURL: false
+                default: true }
+            }(),
+            "downloadRequest 不支持 .multipart、.fileData、.fileURL 类型的 body"
+        )
         let task = AF.download(
             request.url,
             method: request.method,
