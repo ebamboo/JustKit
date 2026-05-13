@@ -73,11 +73,11 @@ typealias HTTPError = AFError
 let HTTPRequestDidFail = PassthroughSubject<HTTPRequestFailureContext, Never>()
 /// HTTP 请求失败上下文信息
 struct HTTPRequestFailureContext {
-    /// Alamofire error
+    /// 由 Alamofire 产生的错误对象
     let error: HTTPError
-    /// The URL request sent to the server.
+    /// 实际发送给服务器的 URL 请求。请求创建阶段出错时可能为 nil
     let request: URLRequest?
-    /// The server's response to the URL request.
+    /// 服务器返回的 HTTP 响应。若请求未到达服务器、网络中断等情况下可能为 nil
     let response: HTTPURLResponse?
 }
 
