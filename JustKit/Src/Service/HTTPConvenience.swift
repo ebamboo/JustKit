@@ -25,14 +25,14 @@ struct BusinessBody<T: Decodable>: Decodable {
 }
 
 enum BusinessError: Error {
-    case business(message: String)
+    case business(message: String?)
     case decoding(reason: String)
     case underlying(error: HTTPError)
 
     var toast: String {
         switch self {
         case .business(let message):
-            return message
+            return message ?? "服务器未返回错误说明"
         case .decoding(let reason):
             return reason
         case .underlying(let error):
@@ -53,14 +53,14 @@ extension HTTP {
             switch result {
             case .success(let response):
                 guard let jsonData = response.body, !jsonData.isEmpty else {
-                    completion(.failure(.decoding(reason: "响应体为空")))
+                    completion(.failure(.decoding(reason: "响应数据为空")))
                     return
                 }
                 do {
                     let model = try JSONDecoder().decode(BusinessBody<Payload>.self, from: jsonData)
                     completion(.success(model))
                 } catch {
-                    completion(.failure(.decoding(reason: "响应数据与目标模型不匹配")))
+                    completion(.failure(.decoding(reason: "响应数据格式异常")))
                 }
             case .failure(let error):
                 completion(.failure(.underlying(error: error)))
@@ -78,7 +78,7 @@ extension HTTP {
             switch result {
             case .success(let response):
                 guard let jsonData = response.body, !jsonData.isEmpty else {
-                    completion(.failure(.decoding(reason: "响应体为空")))
+                    completion(.failure(.decoding(reason: "响应数据为空")))
                     return
                 }
                 do {
@@ -87,13 +87,13 @@ extension HTTP {
                         if let data = model.data {
                             completion(.success(data))
                         } else {
-                            completion(.failure(.decoding(reason: "业务成功但数据字段缺失")))
+                            completion(.failure(.decoding(reason: "响应数据字段缺失")))
                         }
                     } else {
-                        completion(.failure(.business(message: model.message ?? "服务器未返回错误说明")))
+                        completion(.failure(.business(message: model.message)))
                     }
                 } catch {
-                    completion(.failure(.decoding(reason: "响应数据与目标模型不匹配")))
+                    completion(.failure(.decoding(reason: "响应数据格式异常")))
                 }
             case .failure(let error):
                 completion(.failure(.underlying(error: error)))
