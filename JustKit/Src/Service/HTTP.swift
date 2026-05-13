@@ -14,11 +14,31 @@ protocol HTTPRequest {
     /// HTTP 请求方法（GET、POST、PUT、DELETE 等）
     var method: HTTP.Method { get }
     
-    /// HTTP 请求的完整 URL 地址
-    /// - NOTE:
-    ///   1. 若请求需要 query 参数或者 fragment 参数，请在此处拼接
-    ///   2. 请注意 url 中是否包含非法字符或者其他可能引起歧义的字符
-    ///   请根据实际业务需求进行百分号编码
+    /// HTTP 请求的完整 URL 地址（包含协议、域名、路径、查询参数和片段参数）
+    ///
+    /// - IMPORTANT: 核心设计说明
+    ///   此处故意使用 `String` 而非 `URL`/`URLComponents`，目的是将 URL 的**完全控制权交给调用方**。
+    ///   框架不会对传入的字符串做任何自动编码、转义、解析或修改操作，会**原样发送**给服务器。
+    ///   这避免了系统 `URL` 类型自动编码规则与后端约定不一致导致的签名失败、参数解析错误等隐蔽问题。
+    ///
+    /// - NOTE: 使用要求与注意事项
+    ///   1. 必须传入一个**完整且合法**的 URL 字符串
+    ///   2. 所有查询参数（?key=value）、片段参数（#fragment）必须在此处完整拼接
+    ///   3. 所有需要百分号编码的字符（中文、空格、特殊符号 `&?=#+%` 等）必须由调用方手动完成编码
+    ///   4. 禁止传入未编码的原始字符串，也不要重复编码（会导致后端解析失败）
+    ///   5. 请严格遵循与后端约定的 URL 格式和编码规范
+    ///
+    ///   ✅ 基础正确："https://api.example.com/user?name=%E5%BC%A0%E4%B8%89&age=20"
+    ///   ❌ 基础错误："https://api.example.com/user?name=张三&age=20"
+    ///   错误原因：中文未编码，会导致请求失败或后端解析乱码
+    ///
+    ///   ✅ 嵌套URL正确："https://api.example.com/redirect?target=https%3A%2F%2Fwww.google.com%3Fq%3Dswift%26hl%3Dzh-CN"
+    ///   ❌ 嵌套URL错误："https://api.example.com/redirect?target=https://www.google.com?q=swift&hl=zh-CN"
+    ///   错误原因：嵌套URL中的 `?` 和 `&` 会被解析为当前请求的参数分隔符，导致 target 参数被截断
+    ///
+    ///   ✅ 特殊字符正确："https://api.example.com/search?keyword=Swift%20%2B%20Objective-C"
+    ///   ❌ 特殊字符错误："https://api.example.com/search?keyword=Swift + Objective-C"
+    ///   错误原因：空格和加号未编码，加号会被部分服务器解析为空格
     var url: String { get }
     
     /// HTTP 请求头部字段字典
