@@ -18,9 +18,9 @@ struct BusinessBody<T: Decodable>: Decodable {
     }
     init(from decoder: any Decoder) throws {
         let container: KeyedDecodingContainer<BusinessBody<T>.CodingKeys> = try decoder.container(keyedBy: BusinessBody<T>.CodingKeys.self)
-        self.code = try container.decode(Int.self, forKey: BusinessBody<T>.CodingKeys.code)
-        self.message = try? container.decodeIfPresent(String.self, forKey: BusinessBody<T>.CodingKeys.message)
-        self.data = try? container.decodeIfPresent(T.self, forKey: BusinessBody<T>.CodingKeys.data)
+        self.code = try container.decode(Int.self, forKey: .code)
+        self.message = try? container.decodeIfPresent(String.self, forKey: .message)
+        self.data = try? container.decodeIfPresent(T.self, forKey: .data)
     }
 }
 
