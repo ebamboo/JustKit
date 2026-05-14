@@ -266,7 +266,7 @@ extension HTTP {
 
 // MARK: - support
 
-struct HTTP {
+enum HTTP {
     
     /// HTTP 请求方法类型
     typealias Method = Alamofire.HTTPMethod
