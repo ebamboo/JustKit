@@ -86,6 +86,7 @@ extension HTTP {
     /// 普通数据请求
     /// - Parameters:
     ///   - request: 遵循 HTTPRequest 协议的请求对象
+    ///   - interceptor: 请求拦截器，可用于注入 token 或 token 过期后自动刷新并重新请求
     ///   - requestModifier: 请求修改器，可用于自定义请求
     ///   - completion: 完成回调，返回 HTTPResponse 或 HTTPError
     /// - Returns: 返回可管理的数据任务对象
@@ -93,6 +94,7 @@ extension HTTP {
     @discardableResult
     static func dataRequest(
         _ request: HTTPRequest,
+        interceptor: (any RequestInterceptor)? = nil,
         requestModifier: RequestModifier? = nil,
         completion: @escaping (_ result: Result<HTTPResponse, HTTPError>) -> Void
     ) -> DataTask {
@@ -110,6 +112,7 @@ extension HTTP {
             parameters: request.body.params,
             encoding: request.body.encoding,
             headers: HTTPHeaders(request.headers),
+            interceptor: interceptor,
             requestModifier: requestModifier
         )
         task.validate()
@@ -137,6 +140,7 @@ extension HTTP {
     /// 文件上传请求
     /// - Parameters:
     ///   - request: 遵循 HTTPRequest 协议的请求对象
+    ///   - interceptor: 请求拦截器，可用于注入 token 或 token 过期后自动刷新并重新请求
     ///   - requestModifier: 请求修改器，可用于自定义请求
     ///   - progress: 上传进度回调
     ///   - completion: 完成回调，返回 Body 或 HTTPError
@@ -145,6 +149,7 @@ extension HTTP {
     @discardableResult
     static func uploadRequest(
         _ request: HTTPRequest,
+        interceptor: (any RequestInterceptor)? = nil,
         requestModifier: RequestModifier? = nil,
         progress: @escaping (_ progress: Progress) -> Void = { _ in },
         completion: @escaping (_ result: Result<Data?, HTTPError>) -> Void
@@ -165,6 +170,7 @@ extension HTTP {
                 to: request.url,
                 method: request.method,
                 headers: HTTPHeaders(request.headers),
+                interceptor: interceptor,
                 requestModifier: requestModifier
             )
         case .fileURL(let fileURL):
@@ -173,6 +179,7 @@ extension HTTP {
                 to: request.url,
                 method: request.method,
                 headers: HTTPHeaders(request.headers),
+                interceptor: interceptor,
                 requestModifier: requestModifier
             )
         default:
@@ -181,6 +188,7 @@ extension HTTP {
                 to: request.url,
                 method: request.method,
                 headers: HTTPHeaders(request.headers),
+                interceptor: interceptor,
                 requestModifier: requestModifier
             )
         }
@@ -209,6 +217,7 @@ extension HTTP {
     /// - Parameters:
     ///   - request: 遵循 HTTPRequest 协议的请求对象
     ///   - destination: 文件下载目标位置
+    ///   - interceptor: 请求拦截器，可用于注入 token 或 token 过期后自动刷新并重新请求
     ///   - requestModifier: 请求修改器，可用于自定义请求
     ///   - progress: 下载进度回调
     ///   - completion: 完成回调，返回 fileURL 或 HTTPError
@@ -220,6 +229,7 @@ extension HTTP {
     static func downloadRequest(
         _ request: HTTPRequest,
         to destination: DownloadFileDestination? = nil,
+        interceptor: (any RequestInterceptor)? = nil,
         requestModifier: RequestModifier? = nil,
         progress: @escaping (_ progress: Progress) -> Void = { _ in },
         completion: @escaping (_ result: Result<URL?, HTTPError>) -> Void
@@ -238,6 +248,7 @@ extension HTTP {
             parameters: request.body.params,
             encoding: request.body.encoding,
             headers: HTTPHeaders(request.headers),
+            interceptor: interceptor,
             requestModifier: requestModifier,
             to: destination
         )
@@ -426,17 +437,20 @@ enum HTTP {
     
     /// 设置文件下载目标位置的闭包类型
     typealias DownloadFileDestination = Alamofire.DownloadRequest.Destination
-   
+    
+    /// 请求拦截器类型（协议），可用于自定义拦截配置
+    typealias RequestInterceptor = Alamofire.RequestInterceptor
+    
     /// 修改请求的闭包类型，可用于自定义请求配置
     typealias RequestModifier = Alamofire.Session.RequestModifier
     
     /// 数据任务类型
     typealias DataTask = Alamofire.DataRequest
-   
+    
     /// 上传任务类型
     typealias UploadTask = Alamofire.UploadRequest
-   
+    
     /// 下载任务类型
     typealias DownloadTask = Alamofire.DownloadRequest
-
+    
 }

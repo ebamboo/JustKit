@@ -34,10 +34,11 @@ extension HTTP {
     static func dataRequestForBody<Payload: Decodable>(
         _ type: Payload.Type,
         _ request: HTTPRequest,
+        interceptor: (any RequestInterceptor)? = nil,
         requestModifier: RequestModifier? = nil,
         completion: @escaping (_ result: Result<BusinessBody<Payload>, BusinessError>) -> Void
     ) {
-        dataRequest(request, requestModifier: requestModifier) { result in
+        dataRequest(request, interceptor: interceptor, requestModifier: requestModifier) { result in
             switch result {
             case .success(let response):
                 guard let jsonData = response.body, !jsonData.isEmpty else {
@@ -59,10 +60,11 @@ extension HTTP {
     static func dataRequestForPayload<Payload: Decodable>(
         _ type: Payload.Type,
         _ request: HTTPRequest,
+        interceptor: (any RequestInterceptor)? = nil,
         requestModifier: RequestModifier? = nil,
         completion: @escaping (_ result: Result<Payload, BusinessError>) -> Void
     ) {
-        dataRequest(request, requestModifier: requestModifier) { result in
+        dataRequest(request, interceptor: interceptor, requestModifier: requestModifier) { result in
             switch result {
             case .success(let response):
                 guard let jsonData = response.body, !jsonData.isEmpty else {
