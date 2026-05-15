@@ -64,29 +64,20 @@ extension HTTP {
         requestModifier: RequestModifier? = nil,
         completion: @escaping (_ result: Result<Payload, BusinessError>) -> Void
     ) {
-        dataRequest(request, interceptor: interceptor, requestModifier: requestModifier) { result in
+        dataRequestForBody(type, request, interceptor: interceptor, requestModifier: requestModifier) { result in
             switch result {
-            case .success(let response):
-                guard let jsonData = response.body, !jsonData.isEmpty else {
-                    completion(.failure(.decoding(reason: "响应数据为空")))
-                    return
-                }
-                do {
-                    let model = try JSONDecoder().decode(BusinessBody<Payload>.self, from: jsonData)
-                    if model.code == 200 {
-                        if let data = model.data {
-                            completion(.success(data))
-                        } else {
-                            completion(.failure(.decoding(reason: "响应数据字段 data 缺失")))
-                        }
+            case .success(let body):
+                if body.code == 200 {
+                    if let data = body.data {
+                        completion(.success(data))
                     } else {
-                        completion(.failure(.business(message: model.message)))
+                        completion(.failure(.decoding(reason: "载荷数据为空")))
                     }
-                } catch {
-                    completion(.failure(.decoding(reason: "响应数据格式异常")))
+                } else {
+                    completion(.failure(.business(message: body.message)))
                 }
             case .failure(let error):
-                completion(.failure(.underlying(error: error)))
+                completion(.failure(error))
             }
         }
     }
