@@ -53,9 +53,6 @@ protocol HTTPRequest {
 struct HTTPResponse {
     
     /// HTTP 响应头部字段字典
-    /// - NOTE: HTTP 头部字段的名称是不区分大小写的
-    ///   例如 content-type， Content-Type, CONTENT-TYPE 是等价的
-    ///   因此，在查询时统一转换为小写或大写
     let headers: [String: String]
     
     /// HTTP 响应体数据，原始二进制格式
@@ -67,7 +64,7 @@ struct HTTPResponse {
 /// HTTP 请求失败返回的错误信息
 typealias HTTPError = AFError
 
-/// HTTP 请求失败全局发布者（在主线程发送）
+/// HTTP 请求失败全局发布者（工具内部已保证在主线程发送）
 /// 可选择性地订阅此消息，统一处理某些失败情况
 /// 例如：response?.statusCode == 401 表示未登录或登录失效可以提示用户登录
 let HTTPRequestDidFail = PassthroughSubject<HTTPRequestFailureContext, Never>()
