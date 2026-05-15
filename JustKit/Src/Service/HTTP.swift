@@ -14,31 +14,11 @@ protocol HTTPRequest {
     /// HTTP 请求方法（GET、POST、PUT、DELETE 等）
     var method: HTTP.Method { get }
     
-    /// HTTP 请求的完整 URL 地址（包含协议、域名、路径、查询参数和片段参数）
+    /// HTTP 请求的完整 URL 地址（协议 + 域名 + 路径 + query + fragment）
+    /// - Important: 框架不会对传入的字符串做任何编码、转义、解析或修改操作，请严格遵循与后端约定的 URL 格式和编码规范
     ///
-    /// - IMPORTANT: 核心设计说明
-    ///   此处故意使用 `String` 而非 `URL`/`URLComponents`，目的是将 URL 的**完全控制权交给调用方**。
-    ///   框架不会对传入的字符串做任何自动编码、转义、解析或修改操作，会**原样发送**给服务器。
-    ///   这避免了系统 `URL` 类型自动编码规则与后端约定不一致导致的签名失败、参数解析错误等隐蔽问题。
-    ///
-    /// - NOTE: 使用要求与注意事项
-    ///   1. 必须传入一个**完整且合法**的 URL 字符串
-    ///   2. 所有查询参数（?key=value）、片段参数（#fragment）必须在此处完整拼接
-    ///   3. 所有需要百分号编码的字符（中文、空格、特殊符号 `&?=#+%` 等）必须由调用方手动完成编码
-    ///   4. 禁止传入未编码的原始字符串，也不要重复编码（会导致后端解析失败）
-    ///   5. 请严格遵循与后端约定的 URL 格式和编码规范
-    ///
-    ///   ✅ 基础正确："https://api.example.com/user?name=%E5%BC%A0%E4%B8%89&age=20"
-    ///   ❌ 基础错误："https://api.example.com/user?name=张三&age=20"
-    ///   错误原因：中文未编码，会导致请求失败或后端解析乱码
-    ///
-    ///   ✅ 嵌套URL正确："https://api.example.com/redirect?target=https%3A%2F%2Fwww.google.com%3Fq%3Dswift%26hl%3Dzh-CN"
-    ///   ❌ 嵌套URL错误："https://api.example.com/redirect?target=https://www.google.com?q=swift&hl=zh-CN"
-    ///   错误原因：嵌套URL中的 `?` 和 `&` 会被解析为当前请求的参数分隔符，导致 target 参数被截断
-    ///
-    ///   ✅ 特殊字符正确："https://api.example.com/search?keyword=Swift%20%2B%20Objective-C"
-    ///   ❌ 特殊字符错误："https://api.example.com/search?keyword=Swift + Objective-C"
-    ///   错误原因：空格和加号未编码，加号会被部分服务器解析为空格
+    /// - ✅ `"https://api.example.com/redirect?target=https%3A%2F%2Fwww.google.com%3Fq%3Dswift%26hl%3Dzh-CN"`
+    /// - ❌ `"https://api.example.com/redirect?target=https://www.google.com?q=swift&hl=zh-CN"`
     var url: String { get }
     
     /// HTTP 请求头部字段字典
@@ -56,7 +36,7 @@ struct HTTPResponse {
     let headers: [String: String]
     
     /// HTTP 响应体数据，原始二进制格式
-    /// - NOTE: 此字段为可选类型，因为某些响应可能没有主体（如 HEAD 请求或 204 No Content 响应）
+    /// - Note: 此字段为可选类型，因为某些响应可能没有主体（如 HEAD 请求或 204 No Content 响应）
     let body: Data?
     
 }
@@ -87,7 +67,7 @@ extension HTTP {
     ///   - requestModifier: 请求修改器，可用于自定义请求
     ///   - completion: 完成回调，返回 HTTPResponse 或 HTTPError
     /// - Returns: 返回可管理的数据任务对象
-    /// - NOTE: `request.body` 不能是   `.multipart`、`.fileData` 、 `.fileURL` 任一类型，否则 Release 模式下本次请求体为空
+    /// - Note: `request.body` 不能是   `.multipart`、`.fileData` 、 `.fileURL` 任一类型，否则 Release 模式下本次请求体为空
     @discardableResult
     static func dataRequest(
         _ request: HTTPRequest,
@@ -142,7 +122,7 @@ extension HTTP {
     ///   - progress: 上传进度回调
     ///   - completion: 完成回调，返回 Body 或 HTTPError
     /// - Returns: 返回可管理的上传任务对象
-    /// - NOTE: `request.body` 必须是  `.multipart`、`.fileData` 、 `.fileURL` 任一类型，否则 Release 模式下本次请求体为空
+    /// - Note: `request.body` 必须是  `.multipart`、`.fileData` 、 `.fileURL` 任一类型，否则 Release 模式下本次请求体为空
     @discardableResult
     static func uploadRequest(
         _ request: HTTPRequest,
@@ -219,7 +199,7 @@ extension HTTP {
     ///   - progress: 下载进度回调
     ///   - completion: 完成回调，返回 fileURL 或 HTTPError
     /// - Returns: 返回可管理的下载任务对象
-    /// - NOTE:
+    /// - Note:
     ///   1. 若成功则响应 body 为本地储存路径
     ///   2. `request.body` 不能是  `.multipart`、`.fileData` 、 `.fileURL` 任一类型，否则 Release 模式下本次请求体为空
     @discardableResult
@@ -312,19 +292,19 @@ enum HTTP {
         ///   - normals: 普通表单字段字典
         ///   - files: 文件上传模型数组
         ///   会自动设置 Content-Type 为 "multipart/form-data" 并生成正确的边界标识
-        /// - NOTE: 该格式仅用于 `HTTP.uploadRequest` 方法
+        /// - Note: 该格式仅用于 `HTTP.uploadRequest` 方法
         case multipart(normals: [String: String], files: [UploadFileModel])
         
         /// 文件数据请求体
         /// - Parameter data: 文件的二进制数据内容
-        /// - NOTE:
+        /// - Note:
         ///   1. 不会自动设置 Content-Type
         ///   2. 该格式仅用于 `HTTP.uploadRequest` 方法
         case fileData(_ data: Data)
         
         /// 本地文件 URL 请求体
         /// - Parameter url: 本地文件 URL 地址
-        /// - NOTE:
+        /// - Note:
         ///   1. 不会自动设置 Content-Type
         ///   2. 该格式仅用于 `HTTP.uploadRequest` 方法
         case fileURL(_ url: URL)
