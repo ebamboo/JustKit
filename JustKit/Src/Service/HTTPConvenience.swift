@@ -24,7 +24,7 @@ enum BusinessError: Error {
         case .decoding(let reason):
             return reason
         case .underlying(let error):
-            return error.errorDescription ?? "未知网络库错误"
+            return error.errorDescription ?? "网络工具库未返回错误说明"
         }
     }
 }
