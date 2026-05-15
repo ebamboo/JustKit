@@ -15,10 +15,9 @@ protocol HTTPRequest {
     var method: HTTP.Method { get }
     
     /// HTTP 请求的完整 URL 地址（协议 + 域名 + 路径 + query + fragment）
-    /// - Important: 框架不会对传入的字符串做任何编码、转义、解析或修改操作，请严格遵循与后端约定的 URL 格式和编码规范
-    ///
     /// - ✅ `"https://api.example.com/redirect?target=https%3A%2F%2Fwww.google.com%3Fq%3Dswift%26hl%3Dzh-CN"`
     /// - ❌ `"https://api.example.com/redirect?target=https://www.google.com?q=swift&hl=zh-CN"`
+    /// - Important: 框架不会对传入的字符串做任何编码、转义、解析或修改操作，请严格遵循与后端约定的 URL 格式和编码规范
     var url: String { get }
     
     /// HTTP 请求头部字段字典
