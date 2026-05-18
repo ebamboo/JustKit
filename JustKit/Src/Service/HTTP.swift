@@ -5,10 +5,58 @@
 import Alamofire
 import Combine
 
+// MARK: - example
+
+/*
+
+enum TestAPI: HTTPRequest {
+    case login(account: String, password: String)
+    case userInfo(userId: Int)
+}
+
+extension TestAPI {
+
+    var method: HTTP.Method {
+        switch self {
+        case .login:   return .post
+        case .userInfo: return .get
+        }
+    }
+
+    var url: String {
+        switch self {
+        case .login:           return "https://api.example.com/login"
+        case .userInfo(let id): return "https://api.example.com/users/\(id)"
+        }
+    }
+
+    var headers: [String: String] { ["Token": "xxx"] }
+
+    var body: HTTP.Body {
+        switch self {
+        case .login(let account, let password):
+            return .json(["account": account, "password": password])
+        case .userInfo:
+            return .none
+        }
+    }
+    
+}
+
+HTTP.dataRequest(TestAPI.login(account: "test", password: "123")) { result in
+    
+}
+
+HTTP.dataRequest(TestAPI.userInfo(userId: 23)) { result in
+    
+}
+ 
+*/
+
 // MARK: - core
 
 /// HTTP 请求协议，定义请求的基本要素
-/// 遵循此协议的类型可以表示一个完整的 HTTP 请求
+/// 推荐定义一个枚举类型来遵循此协议，每个 case 表示一个具体的 API 接口
 protocol HTTPRequest {
     
     /// HTTP 请求方法（GET、POST、PUT、DELETE 等）
