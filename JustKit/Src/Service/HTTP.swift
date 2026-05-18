@@ -140,7 +140,7 @@ extension HTTP {
             requestModifier: requestModifier
         )
         task.validate()
-        task.response { dataResponse in
+        task.response(queue: .main) { dataResponse in
             let result: Result<HTTPResponse, HTTPError>
             if let error = dataResponse.error {
                 HTTPRequestDidFail.send(
@@ -218,7 +218,7 @@ extension HTTP {
         }
         task.validate()
         task.uploadProgress(closure: progress)
-        task.response { uploadResponse in
+        task.response(queue: .main) { uploadResponse in
             let result: Result<Data?, HTTPError>
             if let error = uploadResponse.error {
                 HTTPRequestDidFail.send(
@@ -278,7 +278,7 @@ extension HTTP {
         )
         task.validate()
         task.downloadProgress(closure: progress)
-        task.response { downloadResponse in
+        task.response(queue: .main) { downloadResponse in
             let result: Result<URL?, HTTPError>
             if let error = downloadResponse.error {
                 HTTPRequestDidFail.send(
