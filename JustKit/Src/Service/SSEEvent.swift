@@ -29,8 +29,11 @@ public extension SSEEvent {
         var dataLines: [String] = []
         var lastEventId: String? = nil
         var retryTime: Int? = nil
-        
-        let lines = rawMessage.split(separator: "\n", omittingEmptySubsequences: false)
+
+        let normalizedMessage = rawMessage
+            .replacingOccurrences(of: "\r\n", with: "\n")
+            .replacingOccurrences(of: "\r", with: "\n")
+        let lines = normalizedMessage.split(separator: "\n", omittingEmptySubsequences: false)
         for line in lines {
             // 存储从 line 获取的字段名和字段值
             let couple: (field: String, value: String)
