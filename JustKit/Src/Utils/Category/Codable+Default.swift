@@ -4,7 +4,7 @@
 
 import Foundation
 
-extension KeyedDecodingContainer {
+public extension KeyedDecodingContainer {
     
     func decode<T>(
         _ type: T.Type,
@@ -26,7 +26,7 @@ extension KeyedDecodingContainer {
     
 }
 
-extension Encodable {
+public extension Encodable {
     
     var jsonData: Data? {
         try? JSONEncoder().encode(self)
@@ -46,7 +46,7 @@ extension Encodable {
     
 }
 
-extension Decodable {
+public extension Decodable {
     
     static func decode(from jsonData: Data) -> Self?  {
         return try? JSONDecoder().decode(self, from: jsonData)
