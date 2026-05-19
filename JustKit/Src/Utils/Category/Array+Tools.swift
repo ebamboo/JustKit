@@ -4,7 +4,7 @@
 
 import Foundation
 
-extension Array {
+public extension Array {
     
     /// 把数组按照 chunkSize 个元素为一组进行分块
     func chunked(by chunkSize: Int) -> [[Element]] {
