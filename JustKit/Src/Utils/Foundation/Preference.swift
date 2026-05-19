@@ -22,9 +22,9 @@ extension UserDefaults {
 */
 
 @propertyWrapper
-struct Preference<Value> {
-    let name: String
-    var wrappedValue: Value? {
+public struct Preference<Value> {
+    public let name: String
+    public var wrappedValue: Value? {
         get {
             UserDefaults.standard.object(forKey: name) as? Value
         }
