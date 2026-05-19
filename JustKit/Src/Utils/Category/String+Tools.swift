@@ -43,11 +43,14 @@ public extension String {
     }
     
     /// URL方式编码字符串；
-    /// 大小写字母和数字不被编码；其他所有的字符都用百分号形式表示（URL表示）；
-    /// 适用场景：遍历参数字典，对value 进行编码，之后拼接至 URL;
-    /// 注意：不要在拼接 URL 之后再调用，这会把 大小写字母和数字 之外的所有字符编码；
+    /// 除指定字符外，其他所有的字符都用百分号形式表示
+    /// 适用场景：遍历 query 参数字典，对 value 进行编码，然后拼接至 URL;
     var urlEncoded: String? {
-        return addingPercentEncoding(withAllowedCharacters: .alphanumerics)
+        // RFC 3986 unreserved set
+        let unreserved = CharacterSet(
+            charactersIn: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~"
+        )
+        return addingPercentEncoding(withAllowedCharacters: unreserved)
     }
     
 }
