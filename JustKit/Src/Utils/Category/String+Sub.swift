@@ -35,14 +35,6 @@ public extension String {
         return String(self[...toIndex])
     }
     
-    /// 从 fromIndex 开始取到 toIndex，包括 fromIndex 和 toIndex
-    func sub(from: Int, to: Int) -> String? {
-        guard 0 <= from, from <= to, to < count else { return nil }
-        let fromIndex = index(startIndex, offsetBy: from)
-        let toIndex = index(startIndex, offsetBy: to)
-        return String(self[fromIndex...toIndex])
-    }
-    
     /// offset 表示 toIndex 相对于 fromIndex 偏移量
     /// "0123456".sub(from: 0, offset: 0) 返回 "0"
     /// "0123456".sub(from: 2, offset: 2) 返回 "234"
