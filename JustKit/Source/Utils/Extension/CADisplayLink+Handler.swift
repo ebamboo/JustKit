@@ -17,7 +17,7 @@ public extension CADisplayLink {
 private extension CADisplayLink {
     
     class DisplayLinkTarget {
-        var handler: (CADisplayLink) -> Void
+        let handler: (CADisplayLink) -> Void
         init(handler: @escaping (CADisplayLink) -> Void) {
             self.handler = handler
         }
