@@ -28,6 +28,11 @@ public extension NSObject {
         keyboardEventSubscription = subscription
     }
     
+    /// 取消订阅键盘相关事件
+    func unsubscribeFromKeyboardEvents() {
+        keyboardEventSubscription = nil
+    }
+    
     /// 键盘相关信息
     struct KeyboardInfo {
         let isLocal: Bool
