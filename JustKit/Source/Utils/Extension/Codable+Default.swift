@@ -4,8 +4,10 @@
 
 import Foundation
 
-// MARK: - 解码容错：为 KeyedDecodingContainer 提供带默认值的解码方法，字段缺失或类型不匹配时返回默认值而非抛出错误
-
+///
+/// 为 KeyedDecodingContainer 提供带默认值的解码方法
+/// 字段缺失或类型不匹配时返回默认值而非抛出错误
+///
 public extension KeyedDecodingContainer {
     
     /// 解码指定 key 的值，失败时返回 defaultValue
@@ -30,8 +32,9 @@ public extension KeyedDecodingContainer {
     
 }
 
-// MARK: - 编码便捷转换：将 Encodable 对象快速转为 Data / JSON 字符串 / 字典
-
+///
+/// 编码便捷转换：将 Encodable 对象快速转为 Data / JSON 字符串 / 字典
+///
 public extension Encodable {
     
     /// 编码为 JSON Data
@@ -55,8 +58,9 @@ public extension Encodable {
     
 }
 
-// MARK: - 解码便捷构造：从 Data 或 JSON 字符串直接解码为模型对象
-
+///
+/// 解码便捷构造：从 Data 或 JSON 字符串直接解码为模型对象
+///
 public extension Decodable {
     
     /// 从 JSON Data 解码，失败返回 nil
@@ -64,7 +68,7 @@ public extension Decodable {
         return try? JSONDecoder().decode(self, from: jsonData)
     }
     
-    /// 从 JSON 字符串解码，失败返回 nil
+    /// 从 JSON 字符串（UTF-8）解码，失败返回 nil
     static func decode(from jsonString: String) -> Self? {
         guard let jsonData = jsonString.data(using: .utf8) else { return nil }
         return try? JSONDecoder().decode(self, from: jsonData)
