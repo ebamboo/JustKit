@@ -6,31 +6,20 @@ import Foundation
 
 public extension Array {
     
-    /// 把数组按照 chunkSize 个元素为一组进行分块
+    /// 按固定大小分块，例如 [1,2,3,4,5].chunked(by: 2) -> [[1,2],[3,4],[5]]
+    /// - Parameter chunkSize: 每块的元素数量，必须大于 0
     func chunked(by chunkSize: Int) -> [[Element]] {
-        guard chunkSize > 0, !self.isEmpty else { return [] }
-        let stride = stride(from: 0, to: self.count, by: chunkSize)
-        let chunks = stride.map { startIndex in
-            let endIndex = Swift.min(startIndex + chunkSize, count)
-            let chunk = self[startIndex..<endIndex]
-            return Array(chunk)
+        guard chunkSize > 0, !isEmpty else { return [] }
+        return Swift.stride(from: 0, to: count, by: chunkSize).map {
+            Array(self[$0..<Swift.min($0 + chunkSize, count)])
         }
-        return chunks
     }
     
-    /// 去除重复元素，重复的元素保留第一个
-    /// 使用指定的 keyPath 属性进行比较
+    /// 稳定去重：按指定 keyPath 去除重复元素，仅保留首次出现的元素，结果保持原数组的相对顺序
+    /// - Parameter keyPath: 用于判断重复的属性路径，对应类型需遵循 Hashable
     func removingDuplicates<T: Hashable>(by keyPath: KeyPath<Element, T>) -> [Element] {
         var seen = Set<T>()
-        var result: [Element] = []
-        forEach { element in
-            let value = element[keyPath: keyPath]
-            if !seen.contains(value) {
-                seen.insert(value)
-                result.append(element)
-            }
-        }
-        return result
+        return filter { seen.insert($0[keyPath: keyPath]).inserted }
     }
     
 }
