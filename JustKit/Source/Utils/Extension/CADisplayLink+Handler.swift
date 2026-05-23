@@ -4,10 +4,23 @@
 
 import UIKit
 
+///
+/// # CADisplayLink 闭包初始化扩展
+///
+/// 将 target/selector 模式转化为闭包形式，使调用方可通过 `[weak self]` 主动打破循环引用。
+///
+/// ## 示例
+/// ```swift
+/// let link = CADisplayLink { [weak self] displayLink in
+///     self?.update(displayLink)
+/// }
+/// link.add(to: .main, forMode: .common)
+/// ```
+///
+
 public extension CADisplayLink {
     
-    /// 直接以闭包handler的形式初始化 CADisplayLink
-    /// 可以有效避免 “使用 Target 方法时引起的强引用进而造成循环引用和内存泄漏的问题”
+    /// 以闭包形式初始化 CADisplayLink，替代 target/selector 模式
     convenience init(handler: @escaping (CADisplayLink) -> Void) {
         self.init(target: DisplayLinkTarget(handler: handler), selector: #selector(DisplayLinkTarget.invoke(_:)))
     }
@@ -16,7 +29,8 @@ public extension CADisplayLink {
 
 private extension CADisplayLink {
     
-    class DisplayLinkTarget {
+    /// 中间代理对象，作为 CADisplayLink 的 target，将 selector 调用转发给闭包
+    class DisplayLinkTarget: NSObject {
         let handler: (CADisplayLink) -> Void
         init(handler: @escaping (CADisplayLink) -> Void) {
             self.handler = handler
