@@ -17,14 +17,10 @@ public extension UIView {
     /// 传入自定义的上下文菜单
     var customContextMenu: UIMenu? {
         get {
-            withUnsafePointer(to: &Self.context_menu_key) { key in
-                objc_getAssociatedObject(self, key) as? UIMenu
-            }
+            objc_getAssociatedObject(self, &Self.context_menu_key) as? UIMenu
         }
         set {
-            withUnsafePointer(to: &Self.context_menu_key) { key in
-                objc_setAssociatedObject(self, key, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-            }
+            objc_setAssociatedObject(self, &Self.context_menu_key, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
             interactions.removeAll { interaction in
                 interaction is ContextMenuInteraction
             }

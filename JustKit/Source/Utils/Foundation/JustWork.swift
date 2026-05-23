@@ -31,14 +31,10 @@ public extension NSObject {
     private static var work_times_info_key: Void?
     private var workTimesInfo: [String: Int] {
         get {
-            withUnsafePointer(to: &Self.work_times_info_key) { key in
-                objc_getAssociatedObject(self, key) as? [String: Int] ?? [:]
-            }
+            objc_getAssociatedObject(self, &Self.work_times_info_key) as? [String: Int] ?? [:]
         }
         set {
-            withUnsafePointer(to: &Self.work_times_info_key) { key in
-                objc_setAssociatedObject(self, key, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-            }
+            objc_setAssociatedObject(self, &Self.work_times_info_key, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
     

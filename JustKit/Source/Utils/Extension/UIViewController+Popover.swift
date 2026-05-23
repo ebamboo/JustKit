@@ -34,14 +34,10 @@ private extension UIViewController {
     static var popover_presentation_controller_delegate_key: Void?
     var popoverPresentationControllerDelegate: PopoverPresentationControllerDelegate? {
         get {
-            withUnsafePointer(to: &Self.popover_presentation_controller_delegate_key) { key in
-                objc_getAssociatedObject(self, key) as? PopoverPresentationControllerDelegate
-            }
+            objc_getAssociatedObject(self, &Self.popover_presentation_controller_delegate_key) as? PopoverPresentationControllerDelegate
         }
         set {
-            withUnsafePointer(to: &Self.popover_presentation_controller_delegate_key) { key in
-                objc_setAssociatedObject(self, key, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-            }
+            objc_setAssociatedObject(self, &Self.popover_presentation_controller_delegate_key, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
     

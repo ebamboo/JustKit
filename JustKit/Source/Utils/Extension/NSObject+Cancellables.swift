@@ -11,14 +11,10 @@ public extension NSObject {
     /// 使用示例：`.store(in: &objc_cancellables)`
     var objc_cancellables: Set<AnyCancellable> {
         get {
-            withUnsafePointer(to: &Self.objc_cancellables_key) { key in
-                objc_getAssociatedObject(self, key) as? Set<AnyCancellable> ?? []
-            }
+            objc_getAssociatedObject(self, &Self.objc_cancellables_key) as? Set<AnyCancellable> ?? []
         }
         set {
-            withUnsafePointer(to: &Self.objc_cancellables_key) { key in
-                objc_setAssociatedObject(self, key, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-            }
+            objc_setAssociatedObject(self, &Self.objc_cancellables_key, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
     

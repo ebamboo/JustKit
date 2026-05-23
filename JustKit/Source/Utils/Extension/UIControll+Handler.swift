@@ -47,14 +47,10 @@ private extension UIControl {
     static var action_handler_targets_key: Void?
     var actionHandlerTargets: [ActionHandlerTarget] {
         get {
-            withUnsafePointer(to: &Self.action_handler_targets_key) { key in
-                objc_getAssociatedObject(self, key) as? [ActionHandlerTarget] ?? []
-            }
+            objc_getAssociatedObject(self, &Self.action_handler_targets_key) as? [ActionHandlerTarget] ?? []
         }
         set {
-            withUnsafePointer(to: &Self.action_handler_targets_key) { key in
-                objc_setAssociatedObject(self, key, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-            }
+            objc_setAssociatedObject(self, &Self.action_handler_targets_key, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
     

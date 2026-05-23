@@ -57,14 +57,10 @@ private extension NSObject {
     static var keyboard_event_subscription_key: Void?
     var keyboardEventSubscription: KeyboardEventSubscription? {
         get {
-            withUnsafePointer(to: &Self.keyboard_event_subscription_key) { key in
-                objc_getAssociatedObject(self, key) as? KeyboardEventSubscription
-            }
+            objc_getAssociatedObject(self, &Self.keyboard_event_subscription_key) as? KeyboardEventSubscription
         }
         set {
-            withUnsafePointer(to: &Self.keyboard_event_subscription_key) { key in
-                objc_setAssociatedObject(self, key, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-            }
+            objc_setAssociatedObject(self, &Self.keyboard_event_subscription_key, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
     
