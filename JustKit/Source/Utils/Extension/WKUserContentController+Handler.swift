@@ -53,7 +53,7 @@ public class ScriptMessageHandlerAddition {
 
 private extension NSObject {
     
-    static var script_message_handler_additions_key = "script_message_handler_additions_key"
+    static var script_message_handler_additions_key: Void?
     var scriptMessageHandlerAdditions: [ScriptMessageHandlerAddition] {
         get {
             withUnsafePointer(to: &Self.script_message_handler_additions_key) { key in

@@ -44,7 +44,7 @@ private extension UIControl {
         }
     }
     
-    static var action_handler_targets_key = "action_handler_targets_key"
+    static var action_handler_targets_key: Void?
     var actionHandlerTargets: [ActionHandlerTarget] {
         get {
             withUnsafePointer(to: &Self.action_handler_targets_key) { key in

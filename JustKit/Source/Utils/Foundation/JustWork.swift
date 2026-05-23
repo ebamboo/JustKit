@@ -28,7 +28,7 @@ public extension NSObject {
         work()
     }
     
-    private static var work_times_info_key = "work_times_info_key"
+    private static var work_times_info_key: Void?
     private var workTimesInfo: [String: Int] {
         get {
             withUnsafePointer(to: &Self.work_times_info_key) { key in

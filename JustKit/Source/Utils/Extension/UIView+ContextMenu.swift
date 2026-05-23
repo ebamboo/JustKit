@@ -38,7 +38,7 @@ public extension UIView {
 
 private extension UIView {
     
-    static var context_menu_key = "context_menu_key"
+    static var context_menu_key: Void?
     
     class ContextMenuInteraction: UIContextMenuInteraction {
         let realDelegate: ContextMenuInteractionDelegate

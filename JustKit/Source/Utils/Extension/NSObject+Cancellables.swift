@@ -26,6 +26,6 @@ public extension NSObject {
 
 private extension NSObject {
     
-    static var objc_cancellables_key = "objc_cancellables_key"
+    static var objc_cancellables_key: Void?
     
 }

@@ -54,7 +54,7 @@ public extension NSObject {
 
 private extension NSObject {
     
-    static var keyboard_event_subscription_key = "keyboard_event_subscription_key"
+    static var keyboard_event_subscription_key: Void?
     var keyboardEventSubscription: KeyboardEventSubscription? {
         get {
             withUnsafePointer(to: &Self.keyboard_event_subscription_key) { key in

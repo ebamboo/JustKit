@@ -39,7 +39,7 @@ private extension UIBarButtonItem {
         }
     }
     
-    static var action_handler_target_key = "action_handler_target_key"
+    static var action_handler_target_key: Void?
     var actionHandlerTarget: ActionHandlerTarget? {
         get {
             withUnsafePointer(to: &Self.action_handler_target_key) { key in

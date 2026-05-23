@@ -17,7 +17,7 @@ public extension Timer {
 
 private extension NSObject {
     
-    static var wrapped_timers_key = "wrapped_timers_key"
+    static var wrapped_timers_key: Void?
     var wrappedTimers: [WrappedTimer] {
         get {
             withUnsafePointer(to: &Self.wrapped_timers_key) { key in
@@ -52,7 +52,7 @@ public extension CADisplayLink {
 
 private extension NSObject {
     
-    static var wrapped_displaylinks_key = "wrapped_displaylinks_key"
+    static var wrapped_displaylinks_key: Void?
     var wrappedDisplayLinks: [WrappedDisplayLink] {
         get {
             withUnsafePointer(to: &Self.wrapped_displaylinks_key) { key in
@@ -87,7 +87,7 @@ public extension NSObjectProtocol {
 
 private extension NSObject {
     
-    static var wrapped_notification_observers_key = "wrapped_notification_observers_key"
+    static var wrapped_notification_observers_key: Void?
     var wrappedNotificationObservers: [WrappedNotificationObserver] {
         get {
             withUnsafePointer(to: &Self.wrapped_notification_observers_key) { key in
@@ -126,7 +126,7 @@ public extension NSKeyValueObservation {
 
 private extension NSObject {
 
-    static var key_value_observations_key = "key_value_observations_key"
+    static var key_value_observations_key: Void?
     var keyValueObservations: [NSKeyValueObservation] {
         get {
             withUnsafePointer(to: &Self.key_value_observations_key) { key in

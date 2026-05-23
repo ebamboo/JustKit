@@ -31,7 +31,7 @@ public extension UIViewController {
 
 private extension UIViewController {
     
-    static var popover_presentation_controller_delegate_key = "popover_presentation_controller_delegate_key"
+    static var popover_presentation_controller_delegate_key: Void?
     var popoverPresentationControllerDelegate: PopoverPresentationControllerDelegate? {
         get {
             withUnsafePointer(to: &Self.popover_presentation_controller_delegate_key) { key in
