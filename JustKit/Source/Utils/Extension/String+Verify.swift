@@ -6,72 +6,66 @@ import Foundation
 
 public extension String {
     
+    /// 是否为国内手机号（1 开头，第二位 2-9，共 11 位）
     var isPhone: Bool {
         let mobilePhone = "^1[2-9][0-9]{9}$"
         let predicate = NSPredicate(format: "SELF MATCHES %@", mobilePhone)
         return predicate.evaluate(with: self)
     }
     
+    /// 是否为合法的 18 位身份证号（正则格式校验 + GB11643 校验码验证）
     var isID: Bool {
-        // 一、正则判断
+        // 一、正则判断：地区(6) + 出生年月日(8) + 顺序码(3) + 校验码(1)
         let ID = "^[1-9][0-9]{9}(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])[0-9]{3}[0-9X]$"
         let predicate = NSPredicate(format: "SELF MATCHES %@", ID)
-        if !predicate.evaluate(with: self) { return false }
+        guard predicate.evaluate(with: self) else { return false }
         
-        // 二、通过最后一位校验码验证
-        // 前 17 位加权因子
+        // 二、GB11643 校验码验证：前 17 位加权求和，模 11 映射校验码，与末位比对
         let factors = [7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2]
-        // 前 17 位加权和
         var weightedSum = 0
-        for i in 0...16 {
-            let num = (String(self[index(startIndex, offsetBy: i)]) as NSString).intValue
-            let factor = factors[i]
-            weightedSum += Int(num) * factor;
+        prefix(17).enumerated().forEach { (i, char) in
+            weightedSum += char.wholeNumberValue! * factors[i]
         }
-        // 根据余数计算验证码
-        let mod = weightedSum % 11
         let checkCodes = ["1", "0", "X", "9", "8", "7", "6", "5", "4", "3", "2"]
-        let checkCode = checkCodes[mod]
-        let lastCode = String(self[index(before: endIndex)])
+        let checkCode = checkCodes[weightedSum % 11]
+        let lastCode = String(last!)
         return checkCode == lastCode
     }
     
+    /// 是否包含中文字符（CJK 统一汉字基本区 U+4E00...U+9FA5）
     var hasChinese: Bool {
-        for i in 0..<count {
-            let char = self[index(startIndex, offsetBy: i)]
-            if "\u{4e00}" <= char, char <= "\u{9fa5}" {
-                return true
-            }
-        }
-        return false
+        contains { ("\u{4e00}"..."\u{9fa5}").contains($0) }
     }
     
+    /// 是否包含空格
     var hasSpace: Bool {
         return firstIndex(of: " ") != nil
     }
     
+    /// 检查字符串是否匹配正则规则
     ///
-    /// 通用地检查字符串是否符合正则式所表达的 "规则"
-    /// 使用 Rules(rawValue: "自定义正则式") 或者 Rules.custom("自定义正则式") 来检查自定义的正则式
+    /// 使用预定义规则或 `.custom("自定义正则式")` 来检查
     ///
-    /// "*" 表示 {0, } 表示，"+" 表示 {1, } 表示，"?" 表示 {0, 1}
+    /// "*" 表示 {0, }，"+" 表示 {1, }，"?" 表示 {0, 1}
     ///
-    struct Rules {
+    struct Rule {
         let rawValue: String
+        private init(_ rawValue: String) {
+            self.rawValue = rawValue
+        }
+        static func custom(_ pattern: String) -> Rule { Rule(pattern) }
         
-        static let chinese = Rules(rawValue: "^[\u{4e00}-\u{9fa5}]+$")
-        static let number = Rules(rawValue: "^[0-9]+$")
-        static let letter = Rules(rawValue: "^[a-zA-Z]+$")
-        static let lower = Rules(rawValue: "^[a-z]+$")
-        static let upper = Rules(rawValue: "^[A-Z]+$")
-        static let letterAndNumber = Rules(rawValue: "^[a-zA-Z0-9]+$")
-        static let lowerAndNumber = Rules(rawValue: "^[a-z0-9]+$")
-        static let upperAndNumber = Rules(rawValue: "^[A-Z0-9]+$")
-        
-        static func custom(_ rawValue: String) -> Rules { Rules(rawValue: rawValue) }
+        static let chinese = Rule("^[\u{4e00}-\u{9fa5}]+$")
+        static let number = Rule("^[0-9]+$")
+        static let letter = Rule("^[a-zA-Z]+$")
+        static let lower = Rule("^[a-z]+$")
+        static let upper = Rule("^[A-Z]+$")
+        static let letterAndNumber = Rule("^[a-zA-Z0-9]+$")
+        static let lowerAndNumber = Rule("^[a-z0-9]+$")
+        static let upperAndNumber = Rule("^[A-Z0-9]+$")
     }
-    func evaluate(_ rules: Rules) -> Bool {
-        return NSPredicate(format: "SELF matches %@", rules.rawValue).evaluate(with: self)
+    func matches(_ rule: Rule) -> Bool {
+        return NSPredicate(format: "SELF MATCHES %@", rule.rawValue).evaluate(with: self)
     }
     
 }
