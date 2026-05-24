@@ -6,7 +6,8 @@ import UIKit
 
 public extension UIColor {
     
-    /// 使用 6 位十六进制正整数初始化颜色，如 `UIColor(hex: 0xFE8C00)`
+    /// 使用 6 位十六进制正整数初始化颜色
+    /// 如 `UIColor(hex: 0xFE8C00)`
     convenience init(hex: Int, alpha: CGFloat = 1.0) {
         let r = CGFloat((hex >> 16) & 0xFF) / 255.0
         let g = CGFloat((hex >> 08) & 0xFF) / 255.0
@@ -15,7 +16,6 @@ public extension UIColor {
     }
     
     /// 使用 6 或 8 位十六进制字符串初始化颜色，开头可以包含 "#"
-    ///
     /// 6 位格式为 RRGGBB，8 位格式为 RRGGBBAA
     convenience init?(hex: String) {
         var hexString = hex.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
@@ -34,10 +34,9 @@ public extension UIColor {
     }
     
     /// 获取十六进制字符串（大写，不含 "#" 前缀）
-    ///
     /// - Parameter needAlpha: alpha 为 1.0 时是否包含 alpha 信息，默认包含；alpha 小于 1.0 时总是包含
     func hexString(needAlpha: Bool = true) -> String? {
-        guard let rgba = rgb else { return nil }
+        guard let rgba = rgba else { return nil }
         // 使用 round 避免浮点截断导致的 off-by-one
         let r = Int(round(rgba.r * 255))
         let g = Int(round(rgba.g * 255))
@@ -59,18 +58,14 @@ public extension UIColor {
     }
     
     /// 获取 RGBA 分量，均为 0~1 之间的小数
-    ///
     /// 非标准 RGB 颜色（如 pattern color）可能获取失败返回 nil
-    var rgb: (r: CGFloat, g: CGFloat, b: CGFloat, alpha: CGFloat)? {
+    var rgba: (r: CGFloat, g: CGFloat, b: CGFloat, alpha: CGFloat)? {
         var r: CGFloat = 0
         var g: CGFloat = 0
         var b: CGFloat = 0
         var alpha: CGFloat = 0
-        if getRed(&r, green: &g, blue: &b, alpha: &alpha) {
-            return (r, g, b, alpha)
-        } else {
-            return nil
-        }
+        guard getRed(&r, green: &g, blue: &b, alpha: &alpha) else { return nil }
+        return (r, g, b, alpha)
     }
     
     /// 随机颜色（alpha 固定为 1.0）
