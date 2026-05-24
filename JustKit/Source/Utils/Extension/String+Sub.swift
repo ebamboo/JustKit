@@ -40,6 +40,14 @@ public extension String {
         return String(self[...toIndex])
     }
     
+    /// 从开头到指定位置的子字符串（不包含该位置）
+    /// "0123456"[..<4] 返回 "0123"
+    subscript(range: PartialRangeUpTo<Int>) -> String? {
+        guard 0 < range.upperBound, range.upperBound <= count else { return nil }
+        let toIndex = index(startIndex, offsetBy: range.upperBound)
+        return String(self[..<toIndex])
+    }
+    
     /// 以指定位置为锚点，取 length 个字符；正数向右取，负数向左取，0 返回 nil
     /// - Parameters:
     ///   - position: 锚点位置（包含在结果中）

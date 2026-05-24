@@ -22,7 +22,10 @@ public extension CADisplayLink {
     
     /// 以闭包形式初始化 CADisplayLink，替代 target/selector 模式
     convenience init(handler: @escaping (CADisplayLink) -> Void) {
-        self.init(target: DisplayLinkTarget(handler: handler), selector: #selector(DisplayLinkTarget.invoke(_:)))
+        self.init(
+            target: DisplayLinkTarget(handler: handler),
+            selector: #selector(DisplayLinkTarget.invoke(_:))
+        )
     }
     
 }

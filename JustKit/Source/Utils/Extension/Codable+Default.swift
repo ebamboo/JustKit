@@ -33,7 +33,7 @@ public extension KeyedDecodingContainer {
 }
 
 ///
-/// 编码便捷转换：将 Encodable 对象快速转为 Data / JSON 字符串 / 字典
+/// 将 Encodable 对象快速转为 Data / JSON 字符串 / 字典
 ///
 public extension Encodable {
     
@@ -59,7 +59,7 @@ public extension Encodable {
 }
 
 ///
-/// 解码便捷构造：从 Data 或 JSON 字符串直接解码为模型对象
+/// 从 JSON Data / JSON String 直接解码为模型对象
 ///
 public extension Decodable {
     
