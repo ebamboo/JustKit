@@ -6,7 +6,7 @@ import UIKit
 
 public extension UIColor {
     
-    /// 接受一个6位十六机制正整数
+    /// 使用 6 位十六进制正整数初始化颜色，如 `UIColor(hex: 0xFE8C00)`
     convenience init(hex: Int, alpha: CGFloat = 1.0) {
         let r = CGFloat((hex >> 16) & 0xFF) / 255.0
         let g = CGFloat((hex >> 08) & 0xFF) / 255.0
@@ -14,7 +14,9 @@ public extension UIColor {
         self.init(red: r, green: g, blue: b, alpha: alpha)
     }
     
-    /// 接受6或8位长度的十六进制字符串，开头可以包含 "#"
+    /// 使用 6 或 8 位十六进制字符串初始化颜色，开头可以包含 "#"
+    ///
+    /// 6 位格式为 RRGGBB，8 位格式为 RRGGBBAA
     convenience init?(hex: String) {
         var hexString = hex.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
         if hexString.hasPrefix("#") {
@@ -31,24 +33,24 @@ public extension UIColor {
         self.init(red: r, green: g, blue: b, alpha: alpha)
     }
     
-    /// 获取十六进制字符串
-    /// 注意：1. 返回的字符串头部不添加添加 "#" 2. 其中字母均为大写字母
-    /// needAlpha 表示在 alpha 为 1.0时，是否需要把 alpha 包含在十六进制字符串中
-    /// alpha  小于 1.0 时，总会把 alpha 信息包含在字符串中
+    /// 获取十六进制字符串（大写，不含 "#" 前缀）
+    ///
+    /// - Parameter needAlpha: alpha 为 1.0 时是否包含 alpha 信息，默认包含；alpha 小于 1.0 时总是包含
     func hexString(needAlpha: Bool = true) -> String? {
-        guard let couple = rgb else { return nil }
-        let redInt = Int(couple.r * 255)
-        let greenInt = Int(couple.g * 255)
-        let blueInt = Int(couple.b * 255)
-        let alphaInt = Int(couple.alpha * 255)
-        if couple.alpha < 1.0 {
-            return String(format: "%02X%02X%02X%02X", redInt, greenInt, blueInt, alphaInt)
+        guard let rgba = rgb else { return nil }
+        // 使用 round 避免浮点截断导致的 off-by-one
+        let r = Int(round(rgba.r * 255))
+        let g = Int(round(rgba.g * 255))
+        let b = Int(round(rgba.b * 255))
+        let a = Int(round(rgba.alpha * 255))
+        if rgba.alpha < 1.0 {
+            return String(format: "%02X%02X%02X%02X", r, g, b, a)
         } else {
-            return String(format: "%02X%02X%02X\(needAlpha ? "FF" : "")", redInt, greenInt, blueInt)
+            return String(format: "%02X%02X%02X\(needAlpha ? "FF" : "")", r, g, b)
         }
     }
     
-    /// 使用 [0~255] 范围的 RGB 初始化颜色
+    /// 使用 0~255 范围的 RGB 值初始化颜色
     convenience init(r255: Int, g255: Int, b255: Int, alpha: CGFloat = 1.0) {
         let r = CGFloat(r255) / 255.0
         let g = CGFloat(g255) / 255.0
@@ -56,8 +58,9 @@ public extension UIColor {
         self.init(red: r, green: g, blue: b, alpha: alpha)
     }
     
-    /// 获取 rgb和alpha，均为 0-1 之间小数
-    /// 非标准 RGB 颜色或者无效的 UIColor 对象等情况可能获取失败
+    /// 获取 RGBA 分量，均为 0~1 之间的小数
+    ///
+    /// 非标准 RGB 颜色（如 pattern color）可能获取失败返回 nil
     var rgb: (r: CGFloat, g: CGFloat, b: CGFloat, alpha: CGFloat)? {
         var r: CGFloat = 0
         var g: CGFloat = 0
@@ -70,12 +73,9 @@ public extension UIColor {
         }
     }
     
-    /// 获取一个随机颜色
+    /// 随机颜色（alpha 固定为 1.0）
     static var random: UIColor {
-        let r = CGFloat(arc4random_uniform(256)) / 255.0
-        let g = CGFloat(arc4random_uniform(256)) / 255.0
-        let b = CGFloat(arc4random_uniform(256)) / 255.0
-        return UIColor(red: r, green: g, blue: b, alpha: 1.0)
+        UIColor(red: .random(in: 0...1), green: .random(in: 0...1), blue: .random(in: 0...1), alpha: 1.0)
     }
     
 }
