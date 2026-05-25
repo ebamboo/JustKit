@@ -11,19 +11,31 @@ import WebKit
 public extension WKUserContentController {
     
     /// 添加响应 ScriptMessage(name) 的 handler
-    func addScriptMessageHandler(for name: String, _ handler: @escaping (_ userContentController: WKUserContentController, _ message: WKScriptMessage) -> Void) -> ScriptMessageHandlerAddition {
-        add(ScriptMessageHandlerTarget(handler), name: name)
-        return ScriptMessageHandlerAddition(userContentController: self, name: name)
+    @discardableResult func addScriptMessageHandler(
+        for name: String,
+        _ handler: @escaping (_ userContentController: WKUserContentController, _ message: WKScriptMessage) -> Void
+    ) -> ScriptMessageObservation {
+        add(ScriptMessageHandlerProxy(handler), name: name)
+        return ScriptMessageObservation(userContentController: self, name: name)
     }
     
 }
 
 private extension WKUserContentController {
     
-    class ScriptMessageHandlerTarget: NSObject, WKScriptMessageHandler {
-        var handler: (_ userContentController: WKUserContentController, _ message: WKScriptMessage) -> Void
-        init(_ handler: @escaping (_ userContentController: WKUserContentController, _ message: WKScriptMessage) -> Void) { self.handler = handler }
-        func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) { handler(userContentController, message) }
+    class ScriptMessageHandlerProxy: NSObject, WKScriptMessageHandler {
+        let handler: (_ userContentController: WKUserContentController, _ message: WKScriptMessage) -> Void
+        init(
+            _ handler: @escaping (_ userContentController: WKUserContentController, _ message: WKScriptMessage) -> Void
+        ) {
+            self.handler = handler
+        }
+        func userContentController(
+            _ userContentController: WKUserContentController,
+            didReceive message: WKScriptMessage
+        ) {
+            handler(userContentController, message)
+        }
     }
     
 }
@@ -31,18 +43,18 @@ private extension WKUserContentController {
 // MARK: - ================================
 // MARK: -
 
-public class ScriptMessageHandlerAddition {
+public class ScriptMessageObservation {
     
-    weak private(set) var userContentController: WKUserContentController?
-    let name: String
+    public weak private(set) var userContentController: WKUserContentController?
+    public let name: String
     
-    init(userContentController: WKUserContentController, name: String) {
+    public init(userContentController: WKUserContentController, name: String) {
         self.userContentController = userContentController
         self.name = name
     }
     
-    func managed(by owner: NSObject) {
-        owner.scriptMessageHandlerAdditions.append(self)
+    public func managed(by owner: NSObject) {
+        owner.scriptMessageObservations.append(self)
     }
     
     deinit {
@@ -53,13 +65,13 @@ public class ScriptMessageHandlerAddition {
 
 private extension NSObject {
     
-    static var script_message_handler_additions_key: Void?
-    var scriptMessageHandlerAdditions: [ScriptMessageHandlerAddition] {
+    static var script_message_observations_key: Void?
+    var scriptMessageObservations: [ScriptMessageObservation] {
         get {
-            objc_getAssociatedObject(self, &Self.script_message_handler_additions_key) as? [ScriptMessageHandlerAddition] ?? []
+            objc_getAssociatedObject(self, &Self.script_message_observations_key) as? [ScriptMessageObservation] ?? []
         }
         set {
-            objc_setAssociatedObject(self, &Self.script_message_handler_additions_key, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            objc_setAssociatedObject(self, &Self.script_message_observations_key, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
     
