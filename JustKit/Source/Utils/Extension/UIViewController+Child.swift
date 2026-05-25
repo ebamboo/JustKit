@@ -4,59 +4,6 @@
 
 import UIKit
 
-///
-/// 便捷弹窗（Alert / ActionSheet）
-///
-/// presentAlert 以居中弹窗形式展示，适用于确认、提示等场景；
-/// presentSheet 以底部抽屉形式展示，适用于多选项操作；
-///
-/// 注意：仅支持 iPhone 模式；
-/// 若需适配 iPad，ActionSheet 会以 Popover 形式呈现，
-/// 需额外配置 popoverPresentationController 的 sourceView / sourceRect，否则会崩溃；
-///
-public extension UIViewController {
-    
-    func presentAlert(
-        title: String?,
-        message: String?,
-        actionsTitle: [String],
-        actionsHandler: @escaping (_ index: Int, _ action: UIAlertAction) -> Void
-    ) {
-        let vc = UIAlertController.init(title: title, message: message, preferredStyle: .alert)
-        for (index, actionTitle) in actionsTitle.enumerated() {
-            let btn = UIAlertAction(title: actionTitle, style: .default) { action in
-                actionsHandler(index, action)
-            }
-            vc.addAction(btn)
-        }
-        present(vc, animated: true, completion: nil)
-    }
-    
-    func presentSheet(
-        title: String?,
-        message: String?,
-        cancelTitle: String,
-        cancelHandler: @escaping (_ action: UIAlertAction) -> Void,
-        optionsTitle: [String],
-        optionsHandler: @escaping (_ index: Int, _ action: UIAlertAction) -> Void
-    ) {
-        let vc = UIAlertController(title: title, message: message, preferredStyle: .actionSheet)
-        let cancelBtn = UIAlertAction(title: cancelTitle, style: .cancel, handler: cancelHandler)
-        vc.addAction(cancelBtn)
-        for (index, optionTitle) in optionsTitle.enumerated() {
-            let optionBtn = UIAlertAction(title: optionTitle, style: .default) { action in
-                optionsHandler(index, action)
-            }
-            vc.addAction(optionBtn)
-        }
-        present(vc, animated: true, completion: nil)
-    }
-    
-}
-
-///
-/// 便捷子控制器管理
-///
 public extension UIViewController {
     
     func addChild(
