@@ -4,17 +4,15 @@
 
 import UIKit
 
-///
-/// 通过设置 customContextMenu 在用户长按或者使用 3D Touch时触发自定义的上下文菜单；
-///
-/// 注意：无法通过编程的方式触发上下文菜单，例如无法在点击视图时手动唤起上下文菜单；
-///
-/// 如果想要在点击视图时唤起上下文菜单，可以使用 UIButton 来实现；
-///
-
 public extension UIView {
     
-    /// 传入自定义的上下文菜单
+    /// 为任意视图提供声明式的上下文菜单配置能力。
+    ///
+    /// 设置该属性后，用户长按或使用 3D Touch 时将展示对应的上下文菜单。
+    /// 设置为 `nil` 可移除已添加的菜单交互。
+    ///
+    /// - Note: 上下文菜单仅支持系统手势触发，无法通过编程方式主动唤起。
+    ///   若需要点击触发菜单，请改用 `UIButton.menu` 配合 `showsMenuAsPrimaryAction`。
     var customContextMenu: UIMenu? {
         get {
             objc_getAssociatedObject(self, &Self.context_menu_key) as? UIMenu

@@ -6,7 +6,8 @@ import UIKit
 
 extension UIView {
     
-    /// 在 UIStack 中时，自定义的距离下一个元素的间距
+    /// 在 UIStackView 中时，自定义当前视图与下一个排列元素之间的间距
+    /// 仅当父视图为 UIStackView 时生效；支持 Interface Builder 设置
     @IBInspectable var afterSpacing: CGFloat {
         get {
             guard let stack = superview as? UIStackView else { return 0 }
