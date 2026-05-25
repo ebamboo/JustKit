@@ -43,11 +43,7 @@ public extension String {
     }
     
     /// 检查字符串是否匹配正则规则
-    ///
     /// 使用预定义规则或 `.custom("自定义正则式")` 来检查
-    ///
-    /// "*" 表示 {0, }，"+" 表示 {1, }，"?" 表示 {0, 1}
-    ///
     struct Rule {
         let rawValue: String
         private init(_ rawValue: String) {
