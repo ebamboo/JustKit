@@ -40,7 +40,7 @@ private extension UIBarButtonItem {
     
     /// 闭包包装对象，桥接闭包与 target-action 机制
     class ActionHandlerTarget {
-        var handler: (UIBarButtonItem) -> Void
+        let handler: (UIBarButtonItem) -> Void
         init(handler: @escaping (UIBarButtonItem) -> Void) {
             self.handler = handler
         }

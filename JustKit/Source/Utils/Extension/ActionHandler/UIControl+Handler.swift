@@ -45,7 +45,7 @@ private extension UIControl {
     /// 闭包包装对象，桥接闭包与 target-action 机制
     class ActionHandlerTarget {
         var events: Event
-        var handler: (UIControl) -> Void
+        let handler: (UIControl) -> Void
         init(events: Event, handler: @escaping (UIControl) -> Void) {
             self.events = events
             self.handler = handler

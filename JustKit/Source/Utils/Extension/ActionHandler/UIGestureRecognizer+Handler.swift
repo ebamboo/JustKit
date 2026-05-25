@@ -40,7 +40,7 @@ private extension UIGestureRecognizer {
     
     /// 闭包包装对象，桥接闭包与 target-action 机制
     class ActionHandlerTarget {
-        var handler: (UIGestureRecognizer) -> Void
+        let handler: (UIGestureRecognizer) -> Void
         init(handler: @escaping (UIGestureRecognizer) -> Void) {
             self.handler = handler
         }
