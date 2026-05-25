@@ -4,29 +4,41 @@
 
 import UIKit
 
-/// 为 UIBarButtonItem 提供基于闭包的事件处理，替代传统的 target-action 模式
+/// 为 `UIBarButtonItem` 提供基于闭包的事件处理，替代传统的 target-action 模式。
 ///
-/// UIBarButtonItem 只有一个 action，因此使用单个 target 包装对象（非数组）；
-/// 调用 `setActionHandler` 会替换已有的 handler。
+/// `UIBarButtonItem` 仅支持单个 action，因此同一时刻只保留一个 handler；
+/// 调用 ``setActionHandler(_:)`` 会替换已有的 handler。
 ///
-/// - Note: handler 闭包会接收 UIBarButtonItem 作为参数，注意避免在闭包中强引用该 item 导致循环引用
+/// - Warning: 闭包参数为触发事件的 item 自身，注意避免强引用导致循环引用。
 public extension UIBarButtonItem {
     
-    /// 使用标题和闭包初始化
+    /// 使用标题和闭包创建 bar button item。
+    ///
+    /// - Parameters:
+    ///   - title: 按钮标题。
+    ///   - style: 按钮样式。
+    ///   - handler: 点击时执行的闭包。
     convenience init(title: String?, style: UIBarButtonItem.Style, action handler: @escaping (UIBarButtonItem) -> Void) {
         let newTarget = ActionHandlerTarget(handler: handler)
         self.init(title: title, style: style, target: newTarget, action: #selector(ActionHandlerTarget.invoke(_:)))
         actionHandlerTarget = newTarget
     }
     
-    /// 使用图片和闭包初始化
+    /// 使用图片和闭包创建 bar button item。
+    ///
+    /// - Parameters:
+    ///   - image: 按钮图片。
+    ///   - style: 按钮样式。
+    ///   - handler: 点击时执行的闭包。
     convenience init(image: UIImage?, style: UIBarButtonItem.Style, action handler: @escaping (UIBarButtonItem) -> Void) {
         let newTarget = ActionHandlerTarget(handler: handler)
         self.init(image: image, style: style, target: newTarget, action: #selector(ActionHandlerTarget.invoke(_:)))
         actionHandlerTarget = newTarget
     }
     
-    /// 替换当前的闭包处理，旧 target 通过关联对象替换自动释放
+    /// 替换当前的闭包处理。
+    ///
+    /// - Parameter handler: 新的点击处理闭包，替换已有 handler。
     func setActionHandler(_ handler: @escaping (UIBarButtonItem) -> Void) {
         let newTarget = ActionHandlerTarget(handler: handler)
         target = newTarget
@@ -38,7 +50,7 @@ public extension UIBarButtonItem {
 
 private extension UIBarButtonItem {
     
-    /// 闭包包装对象，桥接闭包与 target-action 机制
+    /// 桥接闭包与 target-action 机制的包装对象。
     class ActionHandlerTarget {
         let handler: (UIBarButtonItem) -> Void
         init(handler: @escaping (UIBarButtonItem) -> Void) {
