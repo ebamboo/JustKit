@@ -4,8 +4,7 @@
 
 import WebKit
 
-// MARK: - ================================
-// MARK: -
+// MARK: - WKUserContentController Convenience
 
 public extension WKUserContentController {
     
@@ -18,11 +17,7 @@ public extension WKUserContentController {
         return ScriptMessageObservation(userContentController: self, name: name)
     }
     
-}
-
-private extension WKUserContentController {
-    
-    class ScriptMessageHandlerProxy: NSObject, WKScriptMessageHandler {
+    private class ScriptMessageHandlerProxy: NSObject, WKScriptMessageHandler {
         let handler: (_ message: WKScriptMessage) -> Void
         init(_ handler: @escaping (_ message: WKScriptMessage) -> Void) {
             self.handler = handler
@@ -37,8 +32,7 @@ private extension WKUserContentController {
     
 }
 
-// MARK: - ================================
-// MARK: -
+// MARK: - ScriptMessageObservation Manage
 
 public class ScriptMessageObservation {
     
