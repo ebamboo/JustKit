@@ -79,12 +79,14 @@ public extension UIViewController {
 /// 便捷弹出 Popover 页面
 ///
 /// 以 Popover 样式 present 指定的视图控制器，在 iPhone 上强制保持 Popover 形式，不会自适应为全屏。
-/// 配合 `ArrowlessPopoverBackgroundView` 可隐藏箭头并自定义间距。
+/// 通过 `arrowStyle` 参数控制是否显示箭头以及弹窗与锚点之间的间距。
 ///
 /// 注意事项：
 /// - 被弹出的 VC 需提前设置 `preferredContentSize`，否则尺寸可能异常
 /// - `onDismiss` 仅在用户点击外部区域关闭时触发；VC 内部主动调用 `dismiss` 不会触发，
 ///   主动关闭的后续逻辑应在 `dismiss(animated:completion:)` 的 completion 中处理
+/// - `.hidden(spacing:)` 的间距通过全局静态属性实现，每次调用会覆盖上一次的值；
+///   同时存在多个无箭头 Popover 时，所有实例共享最后一次设置的间距
 ///
 /// 示例：
 /// ```swift
@@ -92,17 +94,26 @@ public extension UIViewController {
 /// presentPopover(menuVC, sourceView: sender)
 ///
 /// // 2. 无箭头（使用默认间距 8pt）
-/// presentPopover(menuVC, sourceView: sender, backgroundClass: ArrowlessPopoverBackgroundView.self)
+/// presentPopover(menuVC, sourceView: sender, arrowStyle: .hidden())
 ///
-/// // 3. 无箭头 + 自定义间距（spacing 为全局静态属性，需在 present 前设置）
-/// ArrowlessPopoverBackgroundView.spacing = 12
-/// presentPopover(menuVC, sourceView: sender, arrowDirections: .up, backgroundClass: ArrowlessPopoverBackgroundView.self)
+/// // 3. 无箭头 + 自定义间距
+/// presentPopover(menuVC, sourceView: sender, arrowDirections: .up, arrowStyle: .hidden(spacing: 12))
 ///
 /// // 4. 监听外部点击关闭
 /// presentPopover(menuVC, sourceView: sender, onDismiss: { [weak self] in self?.refreshUI() })
 /// ```
 ///
 public extension UIViewController {
+    
+    /// Popover 箭头样式
+    ///
+    /// - `system`：系统默认样式，显示箭头
+    /// - `hidden(spacing:)`：隐藏箭头，spacing 为锚点视图与弹窗之间的间距（默认 8pt）；
+    ///   间距为全局共享值，多个无箭头 Popover 同时存在时以最后一次设置为准
+    enum PopoverArrowStyle {
+        case system
+        case hidden(spacing: CGFloat = 8)
+    }
     
     /// 以 Popover 形式弹出视图控制器
     ///
@@ -111,14 +122,14 @@ public extension UIViewController {
     ///   - sourceView: 箭头指向的锚点视图
     ///   - sourceRect: 锚点区域；不传时使用 sourceView.bounds（随屏幕旋转自动适配）；传入固定值则不会随旋转更新
     ///   - arrowDirections: 允许的箭头方向，影响弹窗相对于锚点的定位方向
-    ///   - backgroundClass: 自定义背景视图类；传 `ArrowlessPopoverBackgroundView.self` 可隐藏箭头
+    ///   - arrowStyle: 箭头样式；`.system` 为系统默认带箭头，`.hidden(spacing:)` 为无箭头并指定间距
     ///   - onDismiss: 用户点击外部区域关闭弹窗时的回调（主动 dismiss 不触发）
     func presentPopover(
         _ viewController: UIViewController,
         sourceView: UIView,
         sourceRect: CGRect? = nil,
         arrowDirections: UIPopoverArrowDirection = .any,
-        backgroundClass: (any UIPopoverBackgroundViewMethods.Type)? = nil,
+        arrowStyle: PopoverArrowStyle = .system,
         onDismiss: (() -> Void)? = nil
     ) {
         let delegate = PopoverDelegate(onDismiss: onDismiss)
@@ -129,62 +140,20 @@ public extension UIViewController {
             viewController.popoverPresentationController?.sourceRect = sourceRect
         }
         viewController.popoverPresentationController?.permittedArrowDirections = arrowDirections
-        viewController.popoverPresentationController?.popoverBackgroundViewClass = backgroundClass
+        switch arrowStyle {
+        case .system:
+            break
+        case .hidden(let spacing):
+            ArrowlessBackgroundView.spacing = spacing
+            viewController.popoverPresentationController?.popoverBackgroundViewClass = ArrowlessBackgroundView.self
+        }
         viewController.popoverPresentationController?.delegate = delegate
         present(viewController, animated: true)
     }
     
 }
 
-// MARK: - Popover Public Support
-
-///
-/// 无箭头的 Popover 背景视图
-///
-/// 隐藏系统默认的箭头、阴影和背景样式，弹窗内容的外观完全由内容控制器自行决定。
-///
-/// 注意事项：
-/// - `spacing` 是全局静态属性，修改后影响所有后续弹出的 Popover；需在每次 `presentPopover` 前设置所需值
-/// - 仅配合 `presentPopover` 使用，通过 `backgroundClass` 参数传入
-///
-public class ArrowlessPopoverBackgroundView: UIPopoverBackgroundView {
-    
-    /// 锚点视图与弹窗之间的间距（默认 8pt）
-    ///
-    /// 全局静态属性，需在调用 `presentPopover` 前设置；修改后影响所有后续弹出的 Popover
-    public static var spacing: CGFloat = 8
-    
-    public override static func arrowHeight() -> CGFloat { spacing }
-    public override static func arrowBase() -> CGFloat { 0 }
-    public override static func contentViewInsets() -> UIEdgeInsets { .zero }
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        layer.shadowColor = UIColor.clear.cgColor
-    }
-    
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        layer.shadowColor = UIColor.clear.cgColor
-    }
-    
-    // 以下属性仅为满足 UIPopoverBackgroundView 的重写要求提供存储，系统会在布局时设置实际值
-    
-    private var _arrowOffset: CGFloat = 0
-    public override var arrowOffset: CGFloat {
-        get { _arrowOffset }
-        set { _arrowOffset = newValue; setNeedsLayout() }
-    }
-    
-    private var _arrowDirection: UIPopoverArrowDirection = .up
-    public override var arrowDirection: UIPopoverArrowDirection {
-        get { _arrowDirection }
-        set { _arrowDirection = newValue; setNeedsLayout() }
-    }
-    
-}
-
-// MARK: - Popover Private Support
+// MARK: - Popover Support
 
 private extension UIViewController {
     
@@ -216,6 +185,45 @@ private extension UIViewController {
         func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
             onDismiss?()
             presentationController.presentedViewController.popoverDelegate = nil
+        }
+        
+    }
+    
+    /// 无箭头的 Popover 背景视图
+    ///
+    /// 隐藏系统默认的箭头、阴影和背景样式，弹窗内容的外观完全由内容控制器自行决定。
+    /// 由 `presentPopover` 根据 `arrowStyle` 参数在内部配置，外部无需感知。
+    class ArrowlessBackgroundView: UIPopoverBackgroundView {
+        
+        /// 锚点视图与弹窗之间的间距，由 presentPopover 在 present 前设置
+        static var spacing: CGFloat = 8
+        
+        override static func arrowHeight() -> CGFloat { spacing }
+        override static func arrowBase() -> CGFloat { 0 }
+        override static func contentViewInsets() -> UIEdgeInsets { .zero }
+        
+        override init(frame: CGRect) {
+            super.init(frame: frame)
+            layer.shadowColor = UIColor.clear.cgColor
+        }
+        
+        required init?(coder: NSCoder) {
+            super.init(coder: coder)
+            layer.shadowColor = UIColor.clear.cgColor
+        }
+        
+        // 以下属性仅为满足 UIPopoverBackgroundView 的重写要求提供存储，系统会在布局时设置实际值
+        
+        private var _arrowOffset: CGFloat = 0
+        override var arrowOffset: CGFloat {
+            get { _arrowOffset }
+            set { _arrowOffset = newValue; setNeedsLayout() }
+        }
+        
+        private var _arrowDirection: UIPopoverArrowDirection = .up
+        override var arrowDirection: UIPopoverArrowDirection {
+            get { _arrowDirection }
+            set { _arrowDirection = newValue; setNeedsLayout() }
         }
         
     }
