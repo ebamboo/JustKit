@@ -16,15 +16,17 @@ class PopoverToolsTestViewController: UIViewController {
     
     @IBAction func testAction1(_ sender: UIButton) {
         let vc = MyTestViewController()
-        showPopoverMenu(vc, sourceView: sender)
+        presentPopover(vc, sourceView: sender)
     }
     
     @IBAction func testAction2(_ sender: UIButton) {
         let vc = MyTestViewController()
-        showPopoverMenu(vc,
-                        sourceView: sender,
-                        permittedArrowDirections: .any,
-                        popoverBackgroundViewClass: NoneArrowPopoverBackgroundView<NoneArrowPopoverBackgroundViewDefaultSpacing>.self)
+        presentPopover(
+            vc,
+            sourceView: sender,
+            arrowDirections: .any,
+            backgroundClass: ArrowlessPopoverBackgroundView.self
+        )
     }
     
 }
