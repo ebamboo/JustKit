@@ -4,7 +4,59 @@
 
 import UIKit
 
-// MARK: - Popover
+// MARK: - alert and actionSheet
+
+///
+/// 便捷弹窗（Alert / ActionSheet）
+///
+/// presentAlert 以居中弹窗形式展示，适用于确认、提示等场景；
+/// presentSheet 以底部抽屉形式展示，适用于多选项操作；
+///
+/// 注意：仅支持 iPhone 模式；
+/// 若需适配 iPad，ActionSheet 会以 Popover 形式呈现，
+/// 需额外配置 popoverPresentationController 的 sourceView / sourceRect，否则会崩溃；
+///
+public extension UIViewController {
+    
+    func presentAlert(
+        title: String?,
+        message: String?,
+        actionsTitle: [String],
+        actionsHandler: @escaping (_ index: Int, _ action: UIAlertAction) -> Void
+    ) {
+        let vc = UIAlertController.init(title: title, message: message, preferredStyle: .alert)
+        for (index, actionTitle) in actionsTitle.enumerated() {
+            let btn = UIAlertAction(title: actionTitle, style: .default) { action in
+                actionsHandler(index, action)
+            }
+            vc.addAction(btn)
+        }
+        present(vc, animated: true, completion: nil)
+    }
+    
+    func presentSheet(
+        title: String?,
+        message: String?,
+        cancelTitle: String,
+        cancelHandler: @escaping (_ action: UIAlertAction) -> Void,
+        optionsTitle: [String],
+        optionsHandler: @escaping (_ index: Int, _ action: UIAlertAction) -> Void
+    ) {
+        let vc = UIAlertController(title: title, message: message, preferredStyle: .actionSheet)
+        let cancelBtn = UIAlertAction(title: cancelTitle, style: .cancel, handler: cancelHandler)
+        vc.addAction(cancelBtn)
+        for (index, optionTitle) in optionsTitle.enumerated() {
+            let optionBtn = UIAlertAction(title: optionTitle, style: .default) { action in
+                optionsHandler(index, action)
+            }
+            vc.addAction(optionBtn)
+        }
+        present(vc, animated: true, completion: nil)
+    }
+    
+}
+
+// MARK: - popover
 
 ///
 /// 便捷弹出 Popover 页面
@@ -81,6 +133,8 @@ public extension UIViewController {
     
 }
 
+// MARK: - popover public support
+
 ///
 /// 无箭头的 Popover 背景视图
 ///
@@ -131,7 +185,7 @@ public class ArrowlessPopoverBackgroundView: UIPopoverBackgroundView {
     
 }
 
-// MARK: - Private Support
+// MARK: - popover private support
 
 private extension UIViewController {
     
