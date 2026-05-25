@@ -25,7 +25,7 @@ class PopoverToolsTestViewController: UIViewController {
             vc,
             sourceView: sender,
             arrowDirections: .any,
-            backgroundClass: ArrowlessPopoverBackgroundView.self
+            arrowStyle: .hidden()
         )
     }
     
