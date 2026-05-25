@@ -4,11 +4,13 @@
 
 import UIKit
 
+///
 /// 为 `UIControl` 提供基于闭包的事件处理，替代传统的 target-action 模式。
 ///
 /// 支持为同一控件添加多个 handler，每个 handler 可监听不同的事件类型。
 ///
 /// - Warning: 闭包参数为触发事件的控件自身，注意避免强引用导致循环引用。
+///
 public extension UIControl {
     
     /// 添加响应指定事件的闭包处理。
