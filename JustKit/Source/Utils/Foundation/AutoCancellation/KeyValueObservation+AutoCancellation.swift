@@ -12,12 +12,26 @@ public extension NSKeyValueObservation {
     ///
     /// owner 释放时观察自动取消。
     ///
+    /// - Important: 必须在主线程调用。
+    ///
     /// - Note: 闭包**强捕获** self（NSKeyValueObservation）。
     ///   与 Timer、CADisplayLink、通知观察者不同（它们由 RunLoop 或 NotificationCenter 外部持有），
     ///   NSKeyValueObservation 没有外部持有者，
     ///   若使用 `[weak self]` 则观察对象会在 `store(on:)` 返回后立即释放，观察随之失效。
     ///   强捕获使持有链为：owner → token → closure → NSKeyValueObservation，
     ///   owner 释放时链路断开，observation 释放并自动取消观察。
+    ///
+    /// 若不使用 `store(on:)` 自动管理，可手动持有 `NSKeyValueObservation`，
+    /// 释放即自动取消观察，也可主动调用 `invalidate()` 提前取消：
+    /// ```swift
+    /// // 手动管理
+    /// self.observation = scrollView.observe(\.contentOffset) { [weak self] scrollView, _ in
+    ///     self?.handleScroll(scrollView)
+    /// }
+    /// // 需要停止时（二选一）
+    /// self.observation?.invalidate()  // 主动取消
+    /// self.observation = nil          // 释放即取消
+    /// ```
     ///
     /// ## 示例
     /// ```swift
