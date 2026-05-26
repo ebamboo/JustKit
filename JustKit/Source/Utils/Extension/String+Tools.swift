@@ -30,21 +30,9 @@ public extension String {
         }
     }
     
-    /// 把字符串中汉字转换为拼音（小写字母）
-    /// 注意：返回结果已去除了其中的 " " 字符串
-    /// 举例：
-    /// "你好".pinyin 结果为 "nihao"
-    /// "1a《混合".pinyin 结果为 "1a《hunhe"
-    /// "".pinyin 结果为 ""
-    var pinyin: String? {
-        guard let temp = self.applyingTransform(.mandarinToLatin, reverse: false) else { return nil }
-        guard let temp = temp.applyingTransform(.stripDiacritics, reverse: false) else { return nil }
-        return temp.replacingOccurrences(of: " ", with: "")
-    }
-    
-    /// URL方式编码字符串；
+    /// URL方式编码字符串
     /// 除指定字符外，其他所有的字符都用百分号形式表示
-    /// 适用场景：遍历 query 参数字典，对 value 进行编码，然后拼接至 URL;
+    /// 适用场景：遍历 query 参数字典，对 value 进行编码，然后拼接至 URL
     var urlEncoded: String? {
         // RFC 3986 unreserved set
         let unreserved = CharacterSet(

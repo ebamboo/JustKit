@@ -44,7 +44,9 @@ public extension String {
     /// "12345".matches(.number)                // true
     /// "Hello".matches(.letter)                // true
     /// "abc123ABC".matches(.letterAndNumber)       // true
-    /// "test@mail.com".matches(.custom("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) // true
+    /// // 自定义电子邮箱规则
+    /// let emailRule = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+    /// "test@mail.com".matches(.custom(rule)) // true
     /// ```
     func matches(_ rule: Rule) -> Bool {
         return NSPredicate(format: "SELF MATCHES %@", rule.rawValue).evaluate(with: self)
