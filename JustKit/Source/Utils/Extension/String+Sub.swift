@@ -6,7 +6,15 @@ import Foundation
 
 public extension String {
     
-    /// 闭区间下标，获取指定范围的子字符串
+    /// 获取指定位置的单个字符
+    /// "0123456"[3] 返回 "3"
+    subscript(index: Int) -> String? {
+        guard 0 <= index, index < count else { return nil }
+        let i = self.index(startIndex, offsetBy: index)
+        return String(self[i])
+    }
+    
+    /// 获取闭区间范围的子字符串（包含两端）
     /// "0123456"[2...5] 返回 "2345"
     subscript(range: ClosedRange<Int>) -> String? {
         guard 0 <= range.lowerBound, range.upperBound < count else { return nil }
@@ -15,16 +23,16 @@ public extension String {
         return String(self[fromIndex...toIndex])
     }
     
-    /// 左闭右开区间下标，获取指定范围的子字符串（不包含 upperBound）
+    /// 获取半开区间范围的子字符串（不包含上界）
     /// "0123456"[2..<5] 返回 "234"
     subscript(range: Range<Int>) -> String? {
-        guard 0 <= range.lowerBound, range.upperBound <= count else { return nil }
+        guard 0 <= range.lowerBound, range.upperBound <= count, !range.isEmpty else { return nil }
         let fromIndex = index(startIndex, offsetBy: range.lowerBound)
         let toIndex = index(fromIndex, offsetBy: range.upperBound - range.lowerBound)
         return String(self[fromIndex..<toIndex])
     }
     
-    /// 从指定位置到末尾的子字符串（包含该位置）
+    /// 获取从指定位置到末尾的子字符串（包含该位置）
     /// "0123456"[2...] 返回 "23456"
     subscript(range: PartialRangeFrom<Int>) -> String? {
         guard 0 <= range.lowerBound, range.lowerBound < count else { return nil }
@@ -32,7 +40,7 @@ public extension String {
         return String(self[fromIndex...])
     }
     
-    /// 从开头到指定位置的子字符串（包含该位置）
+    /// 获取从开头到指定位置的子字符串（包含该位置）
     /// "0123456"[...4] 返回 "01234"
     subscript(range: PartialRangeThrough<Int>) -> String? {
         guard 0 <= range.upperBound, range.upperBound < count else { return nil }
@@ -40,7 +48,7 @@ public extension String {
         return String(self[...toIndex])
     }
     
-    /// 从开头到指定位置的子字符串（不包含该位置）
+    /// 获取从开头到指定位置的子字符串（不包含该位置）
     /// "0123456"[..<4] 返回 "0123"
     subscript(range: PartialRangeUpTo<Int>) -> String? {
         guard 0 < range.upperBound, range.upperBound <= count else { return nil }
@@ -63,14 +71,6 @@ public extension String {
         let fromIndex = index(startIndex, offsetBy: lower)
         let toIndex = index(fromIndex, offsetBy: upper - lower)
         return String(self[fromIndex...toIndex])
-    }
-    
-    /// 获取指定位置的单个字符
-    /// "0123456"[3] 返回 "3"
-    subscript(index: Int) -> String? {
-        guard 0 <= index, index < count else { return nil }
-        let i = self.index(startIndex, offsetBy: index)
-        return String(self[i])
     }
     
 }
