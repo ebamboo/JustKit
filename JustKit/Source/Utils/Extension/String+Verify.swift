@@ -32,36 +32,45 @@ public extension String {
         return checkCode == lastCode
     }
     
-    /// 是否包含中文字符（CJK 统一汉字基本区 U+4E00...U+9FA5）
+    /// 是否包含中文字符（CJK 统一汉字基本区 U+4E00...U+9FFF）
     var hasChinese: Bool {
-        contains { ("\u{4e00}"..."\u{9fa5}").contains($0) }
+        contains { ("\u{4e00}"..."\u{9fff}").contains($0) }
     }
     
-    /// 是否包含空格
-    var hasSpace: Bool {
-        return firstIndex(of: " ") != nil
-    }
-    
-    /// 检查字符串是否匹配正则规则
-    /// 使用预定义规则或 `.custom("自定义正则式")` 来检查
-    struct Rule {
-        let rawValue: String
-        private init(_ rawValue: String) {
-            self.rawValue = rawValue
-        }
-        static func custom(_ pattern: String) -> Rule { Rule(pattern) }
-        
-        static let chinese = Rule("^[\u{4e00}-\u{9fa5}]+$")
-        static let number = Rule("^[0-9]+$")
-        static let letter = Rule("^[a-zA-Z]+$")
-        static let lower = Rule("^[a-z]+$")
-        static let upper = Rule("^[A-Z]+$")
-        static let letterAndNumber = Rule("^[a-zA-Z0-9]+$")
-        static let lowerAndNumber = Rule("^[a-z0-9]+$")
-        static let upperAndNumber = Rule("^[A-Z0-9]+$")
-    }
+    /// 是否匹配任意正则式
     func matches(_ rule: Rule) -> Bool {
         return NSPredicate(format: "SELF MATCHES %@", rule.rawValue).evaluate(with: self)
+    }
+    
+}
+
+public extension String {
+ 
+    /// 正则匹配规则
+    ///
+    /// 使用预定义规则或通过 `.custom("正则表达式")` 自定义规则
+    /// - 示例：`"你好".matches(.chinese)` / `"abc".matches(.custom("^[a-z]+$"))`
+    ///
+    /// 常用正则语法速查：
+    /// - `^` / `$`：匹配开头 / 结尾
+    /// - `[]`：字符集，如 `[a-z]` 匹配小写字母
+    /// - `{n}`：精确重复 n 次；`{n,m}`：重复 n 到 m 次
+    /// - `+`：1 次或多次；`*`：0 次或多次；`?`：0 次或 1 次
+    /// - `\d`：数字（NSPredicate 中需写 `[0-9]`）
+    /// - `|`：或，如 `(a|b)` 匹配 a 或 b
+    struct Rule {
+        public let rawValue: String
+        public init(_ rawValue: String) { self.rawValue = rawValue }
+        public static func custom(_ pattern: String) -> Rule { Rule(pattern) }
+        
+        public static let chinese = Rule("^[\u{4e00}-\u{9fff}]+$")
+        public static let number = Rule("^[0-9]+$")
+        public static let letter = Rule("^[a-zA-Z]+$")
+        public static let lower = Rule("^[a-z]+$")
+        public static let upper = Rule("^[A-Z]+$")
+        public static let letterAndNumber = Rule("^[a-zA-Z0-9]+$")
+        public static let lowerAndNumber = Rule("^[a-z0-9]+$")
+        public static let upperAndNumber = Rule("^[A-Z0-9]+$")
     }
     
 }
