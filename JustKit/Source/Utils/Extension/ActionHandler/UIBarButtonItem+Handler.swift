@@ -8,9 +8,6 @@ import UIKit
 /// 为 `UIBarButtonItem` 提供基于闭包的事件处理，替代传统的 target-action 模式。
 ///
 /// `UIBarButtonItem` 仅支持单个 action，因此同一时刻只保留一个 handler；
-/// 调用 ``setActionHandler(_:)`` 会替换已有的 handler。
-///
-/// - Warning: 闭包参数为触发事件的 item 自身，注意避免强引用导致循环引用。
 ///
 public extension UIBarButtonItem {
     
@@ -52,7 +49,7 @@ public extension UIBarButtonItem {
 
 private extension UIBarButtonItem {
     
-    /// 桥接闭包与 target-action 机制的包装对象。
+    /// UIBarButtonItem 的 target 对象，将 action 转发给闭包
     class ActionHandlerTarget {
         let handler: (UIBarButtonItem) -> Void
         init(handler: @escaping (UIBarButtonItem) -> Void) {

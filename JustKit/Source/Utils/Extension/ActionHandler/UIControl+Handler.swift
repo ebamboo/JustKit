@@ -9,8 +9,6 @@ import UIKit
 ///
 /// 支持为同一控件添加多个 handler，每个 handler 可监听不同的事件类型。
 ///
-/// - Warning: 闭包参数为触发事件的控件自身，注意避免强引用导致循环引用。
-///
 public extension UIControl {
     
     /// 添加响应指定事件的闭包处理。
@@ -47,7 +45,7 @@ public extension UIControl {
 
 private extension UIControl {
     
-    /// 桥接闭包与 target-action 机制的包装对象。
+    /// UIControl 的 target 对象，将 action 转发给闭包
     class ActionHandlerTarget {
         var events: Event
         let handler: (UIControl) -> Void

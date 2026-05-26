@@ -7,9 +7,7 @@ import UIKit
 ///
 /// 为 `UIGestureRecognizer` 提供基于闭包的事件处理，替代传统的 target-action 模式。
 ///
-/// 支持在初始化时直接传入闭包，也支持后续通过 ``addActionHandler(_:)`` 追加多个 handler。
-///
-/// - Warning: 闭包参数为触发事件的手势识别器自身，注意避免强引用导致循环引用。
+/// 支持在初始化时直接传入闭包，也支持后续通过 `addActionHandler(_:)` 追加多个 handler。
 ///
 public extension UIGestureRecognizer {
     
@@ -43,7 +41,7 @@ public extension UIGestureRecognizer {
 
 private extension UIGestureRecognizer {
     
-    /// 桥接闭包与 target-action 机制的包装对象。
+    /// UIGestureRecognizer 的 target 对象，将 action 转发给闭包
     class ActionHandlerTarget {
         let handler: (UIGestureRecognizer) -> Void
         init(handler: @escaping (UIGestureRecognizer) -> Void) {
