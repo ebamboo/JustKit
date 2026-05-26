@@ -37,7 +37,7 @@ public extension String {
         contains { ("\u{4e00}"..."\u{9fff}").contains($0) }
     }
     
-    /// 是否匹配任意正则式
+    /// 是否匹配指定正则规则（支持预定义规则和自定义正则）
     func matches(_ rule: Rule) -> Bool {
         return NSPredicate(format: "SELF MATCHES %@", rule.rawValue).evaluate(with: self)
     }
@@ -48,16 +48,11 @@ public extension String {
  
     /// 正则匹配规则
     ///
-    /// 使用预定义规则或通过 `.custom("正则表达式")` 自定义规则
-    /// - 示例：`"你好".matches(.chinese)` / `"abc".matches(.custom("^[a-z]+$"))`
-    ///
-    /// 常用正则语法速查：
-    /// - `^` / `$`：匹配开头 / 结尾
-    /// - `[]`：字符集，如 `[a-z]` 匹配小写字母
-    /// - `{n}`：精确重复 n 次；`{n,m}`：重复 n 到 m 次
-    /// - `+`：1 次或多次；`*`：0 次或多次；`?`：0 次或 1 次
-    /// - `\d`：数字（NSPredicate 中需写 `[0-9]`）
-    /// - `|`：或，如 `(a|b)` 匹配 a 或 b
+    /// 常用正则语法：
+    /// - `^` / `$`：开头 / 结尾
+    /// - `[]`：字符集
+    /// - `{n,m}`：重复次数
+    /// - `+`：1次或多次；`*`：0次或多次；`?`：0次或1次
     struct Rule {
         public let rawValue: String
         public init(_ rawValue: String) { self.rawValue = rawValue }
