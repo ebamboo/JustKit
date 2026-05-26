@@ -63,7 +63,7 @@ public extension UIColor {
         return (r, g, b, alpha)
     }
     
-    /// 十六进制字符串（大写，无前缀），alpha < 1.0 时始终包含 alpha 分量
+    /// 十六进制字符串（大写，无前缀），alpha 小于 1.0 时始终包含 alpha 分量
     func hexString(includeAlpha: Bool = true) -> String? {
         guard let rgba = rgba else { return nil }
         let r = Int(round(rgba.r * 255))
