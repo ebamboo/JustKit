@@ -38,6 +38,14 @@ public extension String {
     }
     
     /// 是否匹配指定正则规则（支持预定义规则和自定义正则）
+    ///
+    /// ```
+    /// "你好世界".matches(.chinese)              // true
+    /// "12345".matches(.number)                // true
+    /// "Hello".matches(.letter)                // true
+    /// "abc123ABC".matches(.letterAndNumber)       // true
+    /// "test@mail.com".matches(.custom("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) // true
+    /// ```
     func matches(_ rule: Rule) -> Bool {
         return NSPredicate(format: "SELF MATCHES %@", rule.rawValue).evaluate(with: self)
     }
