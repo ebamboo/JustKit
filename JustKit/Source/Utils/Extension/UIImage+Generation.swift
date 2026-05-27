@@ -21,31 +21,6 @@ public extension UIImage {
         self.init(cgImage: cgImage)
     }
     
-    /// 颜色转为 UIImage
-    convenience init?(color: CGColor, size: CGSize = CGSize(width: 1.0, height: 1.0)) {
-        UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
-        defer { UIGraphicsEndImageContext() }
-        guard let context = UIGraphicsGetCurrentContext() else { return nil }
-        context.setFillColor(color)
-        context.fill(CGRect(origin: .zero, size: size))
-        guard let cgImage  = UIGraphicsGetImageFromCurrentImageContext()?.cgImage else { return nil }
-        self.init(cgImage: cgImage)
-    }
-    
-    /// UIView 转为 UIImage
-    convenience init?(view: UIView) {
-        UIGraphicsBeginImageContextWithOptions(view.bounds.size, false, 0.0)
-        defer { UIGraphicsEndImageContext() }
-        guard let context = UIGraphicsGetCurrentContext() else { return nil }
-        view.layer.render(in: context)
-        guard let cgImage  = UIGraphicsGetImageFromCurrentImageContext()?.cgImage else { return nil }
-        self.init(cgImage: cgImage)
-    }
-    
-}
-
-private extension UIImage {
-    
     /// 把不清晰的 ciImage 转为清晰的 cgImage
     static func transferToCGImage(from ciImage: CIImage, side: CGFloat = 300) -> CGImage? {
         // 1.
@@ -68,7 +43,6 @@ private extension UIImage {
     }
     
 }
-
 
 public extension UIImage {
     
@@ -99,13 +73,31 @@ public extension UIImage {
         return asset.image(with: .current)
     }
     
+    // opaque 系统默认值 false
+    // scale 系统默认值 UIScreen.main.scale
     static func image(
         with color: UIColor,
-        size: CGSize = CGSize(width: 1, height: 1),
-        scale: CGFloat = 1
+        size: CGSize = .init(width: 1, height: 1)
     ) -> UIImage {
-        
-        UIImage(named: "")!
+        let safeSize = size.width > 0 && size.height > 0
+            ? size
+            : .init(width: 1, height: 1)
+        let renderer = UIGraphicsImageRenderer(size: safeSize)
+        return renderer.image { context in
+            color.setFill()
+            context.fill(.init(origin: .zero, size: safeSize))
+        }
+    }
+    
+    // opaque 系统默认值 false
+    // scale 系统默认值 UIScreen.main.scale
+    static func qrCode(
+        from text: String,
+        size: CGSize,
+        foregroundColor: UIColor = .black,
+        backgroundColor: UIColor = .white,
+    ) -> UIImage? {
+        return nil
     }
     
 }
