@@ -9,7 +9,7 @@ class UtilsHomeViewController: UIViewController {
     let titles = [
         "Keychain", "ModelAnimator", "渐变视图测试",
         "自定义虚线视图DashView", "自定义UIView每个圆角大小RoundView", "仿UISwitch控件CommonSwitch",
-        "UIImage+Transform 测试", "自定义 Stepper", "自定义渐变圆角边框/渐变文字",
+        "UIImage+Rotation 测试", "自定义 Stepper", "自定义渐变圆角边框/渐变文字",
         "标签样式CollectionViewTagLayout", "Popover弹窗工具测试", "普通视图支持上下文菜单",
         "SwiftUI风格封装UICollectionView新布局"
     ]
