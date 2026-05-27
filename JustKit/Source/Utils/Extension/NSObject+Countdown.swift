@@ -8,20 +8,18 @@ public extension NSObject {
 
     /// 开启倒计时
     ///
-    /// 从 duration 秒开始，每 interval 秒触发一次 onTick，归零后触发 onFinish。
-    /// 回调均在主线程执行。
-    ///
-    /// 生命周期自动管理：
-    /// - 重复调用自动取消上一次倒计时
-    /// - 宿主对象释放时自动取消
-    /// - 可通过 `cancelCountdown()` 主动取消
-    /// - App 进入后台再回前台，剩余时间基于绝对时间自动修正
-    ///
     /// - Parameters:
-    ///   - duration: 倒计时总时长（秒），默认 60
+    ///   - duration: 总时长（秒），默认 60
     ///   - interval: 触发间隔（秒），默认 1
-    ///   - onTick: 每次触发回调，remaining 为剩余秒数
-    ///   - onFinish: 倒计时结束回调
+    ///   - onTick: 每次触发回调，remaining 为剩余秒数（首次调用立即触发）
+    ///   - onFinish: 倒计时归零回调
+    ///
+    /// - Note:
+    ///   - onTick / onFinish 均在主线程执行
+    ///   - App 进入后台再回前台，剩余时间基于绝对时间自动修正
+    ///   - 调用者释放时，自动取消倒计时
+    ///   - 重复调用时自动取消上一次倒计时
+    ///   - 可通过 `cancelCountdown()` 主动取消倒计时
     func startCountdown(
         duration: Int = 60,
         interval: Int = 1,
@@ -40,13 +38,14 @@ public extension NSObject {
         objc_setAssociatedObject(self, &Self.countdown_context_key, nil, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
     }
     
+    /// 用于访问关联对象的 key
+    private static var countdown_context_key: Void?
+    
 }
 
 private extension NSObject {
     
-    static var countdown_context_key: Void?
-    
-    /// 通过关联对象绑定到宿主，借助 deinit 自动管理 timer 生命周期
+    /// 倒计时上下对象，管理 timer 生命周期
     class CountdownContext {
         
         var timer: DispatchSourceTimer?
@@ -78,7 +77,7 @@ private extension NSObject {
         }
         
         func cancel() {
-            // cancel 后 GCD 释放对 source 的内部持有
+            // cancel 后，GCD 释放对 timer source 的内部持有
             timer?.cancel()
             timer = nil
         }
