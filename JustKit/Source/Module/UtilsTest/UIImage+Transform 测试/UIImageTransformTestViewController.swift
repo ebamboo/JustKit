@@ -21,25 +21,37 @@ class UIImageTransformTestViewController: UIViewController {
         testImageView02.image = testImage
     }
 
-    static var i = 1
+    static var i = 0
+    /// 测试四个方向旋转（0°、90°、180°、270°）
     @IBAction func testAction01(_ sender: Any) {
-        switch Self.i % 4 {
-        case 0:
-            testImageView01.image = testImage.transfering(.upRotated)
-        case 1:
-            testImageView01.image = testImage.transfering(.rightRotated)
-        case 2:
-            testImageView01.image = testImage.transfering(.downRotated)
-        case 3:
-            testImageView01.image = testImage.transfering(.leftRotated)
-        default:
-            break
-        }
+        let angle = CGFloat.pi / 2 * CGFloat(Self.i % 4)
+        testImageView01.image = testImage.rotated(by: angle)
         Self.i += 1
     }
     
+    static var j = 0
+    /// 测试多种变换组合
     @IBAction func testAction02(_ sender: Any) {
-        testImageView02.image = testImage.transfering(.rotated(radian: Double.pi/9))
+        switch Self.j % 5 {
+        case 0:
+            // 任意角度旋转（20°）
+            testImageView02.image = testImage.rotated(by: .pi / 9)
+        case 1:
+            // 水平镜像（左右翻转）
+            testImageView02.image = testImage.rotated(by: 0, mirrored: true)
+        case 2:
+            // 上下翻转 = 水平镜像 + 旋转 180°
+            testImageView02.image = testImage.rotated(by: .pi, mirrored: true)
+        case 3:
+            // 镜像 + 90° 旋转
+            testImageView02.image = testImage.rotated(by: .pi / 2, mirrored: true)
+        case 4:
+            // 任意角度旋转（-45°，逆时针）
+            testImageView02.image = testImage.rotated(by: -.pi / 4)
+        default:
+            break
+        }
+        Self.j += 1
     }
     
     @IBAction func restartAction(_ sender: Any) {
