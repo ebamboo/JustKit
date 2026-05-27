@@ -7,7 +7,16 @@ import UIKit
 public extension NSObject {
     
     /// 订阅键盘相关事件
-    /// - NOTE:  仅订阅了 keyboardWillShowNotification 和 keyboardWillHideNotification
+    ///
+    /// - Parameters:
+    ///   - block: 键盘事件回调，isDocked 为 true 表示键盘弹出，false 表示收起
+    ///
+    /// - Note:
+    ///   - 仅订阅 keyboardWillShowNotification 和 keyboardWillHideNotification
+    ///   - 回调在主线程执行
+    ///   - 调用者释放时，自动取消订阅
+    ///   - 重复调用时自动取消上一次订阅
+    ///   - 可通过 `unsubscribeFromKeyboardEvents()` 主动取消订阅
     func subscribeToKeyboardEvents(with block: @escaping (_ isDocked: Bool, _ info: KeyboardInfo?) -> Void) {
         let subscription = KeyboardEventSubscription()
         subscription.eventBlock = block
@@ -28,7 +37,7 @@ public extension NSObject {
         keyboardEventSubscription = subscription
     }
     
-    /// 取消订阅键盘相关事件
+    /// 主动取消订阅键盘相关事件
     func unsubscribeFromKeyboardEvents() {
         keyboardEventSubscription = nil
     }
