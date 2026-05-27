@@ -68,3 +68,44 @@ private extension UIImage {
     }
     
 }
+
+
+public extension UIImage {
+    
+    /// 创建一张能随 UITraitCollection 变化自动切换外观的动态图片
+    ///
+    /// 内部通过 UIImageAsset 注册不同 trait 对应的图片变体，
+    /// 当系统外观（如 Light/Dark Mode）发生切换时，UIKit 会自动选择匹配的变体进行显示。
+    ///
+    /// - Parameters:
+    ///   - traits: 需要适配的 trait 集合，默认为 Light 和 Dark 两种外观模式
+    ///   - provider: 根据给定 trait 返回对应图片的闭包
+    /// - Returns: 与 UIImageAsset 关联的动态图片
+    static func dynamic(
+        for traits: [UITraitCollection] = [
+            UITraitCollection(userInterfaceStyle: .light),
+            UITraitCollection(userInterfaceStyle: .dark)
+        ],
+        provider: (UITraitCollection) -> UIImage
+    ) -> UIImage {
+        guard !traits.isEmpty else { fatalError("traits 不可为空") }
+        let asset = UIImageAsset()
+        for trait in traits {
+            let image = provider(trait)
+            asset.register(image, with: trait)
+        }
+        // 返回的 UIImage 通过 imageAsset 属性强引用 UIImageAsset，
+        // 因此局部变量 asset 不会被释放，图片能持续响应 trait 变化并自动切换变体。
+        return asset.image(with: .current)
+    }
+    
+    static func image(
+        with color: UIColor,
+        size: CGSize = CGSize(width: 1, height: 1),
+        scale: CGFloat = 1
+    ) -> UIImage {
+        
+        UIImage(named: "")!
+    }
+    
+}
