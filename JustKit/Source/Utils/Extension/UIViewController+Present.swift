@@ -4,18 +4,7 @@
 
 import UIKit
 
-// MARK: - Alert & ActionSheet
-
-//
-// 便捷弹窗（Alert / ActionSheet）
-//
-// - presentAlert：居中弹窗，适用于确认、提示等场景
-// - presentSheet：底部抽屉，适用于多选项操作
-//
-// 所有按钮统一使用 .default 样式，不支持 .destructive；
-// 如需自定义样式请直接使用 UIAlertController；
-// presentSheet 仅适用于 iPhone；iPad 上需额外配置 sourceView / sourceRect，否则会崩溃。
-//
+// MARK: - Alert & ActionSheet & Popover
 
 public extension UIViewController {
     
@@ -73,33 +62,6 @@ public extension UIViewController {
         }
         present(vc, animated: true, completion: nil)
     }
-    
-}
-
-// MARK: - Popover
-
-//
-// 便捷弹出 Popover 页面
-//
-// 以 Popover 样式 present 指定的视图控制器，在 iPhone 上强制保持 Popover 形式，不会自适应为全屏。
-// 通过 arrowStyle 参数控制是否显示箭头以及弹窗与锚点之间的间距。
-//
-// 使用示例：
-//
-//   // 系统默认样式（带箭头，系统自动选择弹出方向）
-//   presentPopover(menuVC, sourceView: sender)
-//
-//   // 无箭头（使用默认间距 8pt）
-//   presentPopover(menuVC, sourceView: sender, arrowStyle: .hidden())
-//
-//   // 无箭头 + 自定义间距
-//   presentPopover(menuVC, sourceView: sender, arrowDirections: .up, arrowStyle: .hidden(spacing: 12))
-//
-//   // 监听外部点击关闭
-//   presentPopover(menuVC, sourceView: sender, onDismiss: { [weak self] in self?.refreshUI() })
-//
-
-public extension UIViewController {
     
     /// Popover 箭头样式
     enum PopoverArrowStyle {
@@ -160,8 +122,6 @@ public extension UIViewController {
 private extension UIViewController {
     
     static var popover_delegate_key: Void?
-    
-    /// 关联对象持有 delegate，各弹窗独立持有，dismiss 后自动释放
     var popoverDelegate: PopoverDelegate? {
         get {
             objc_getAssociatedObject(self, &Self.popover_delegate_key) as? PopoverDelegate
@@ -170,8 +130,6 @@ private extension UIViewController {
             objc_setAssociatedObject(self, &Self.popover_delegate_key, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
-    
-    /// 强制 iPhone 保持 Popover 样式，并转发外部点击关闭事件
     class PopoverDelegate: NSObject, UIPopoverPresentationControllerDelegate {
         
         var onDismiss: (() -> Void)?
@@ -191,9 +149,10 @@ private extension UIViewController {
         
     }
     
-    /// 无箭头 Popover 背景视图，隐藏系统箭头与阴影，外观完全由内容控制器决定
+    /// 无箭头 Popover 背景视图，隐藏系统箭头与阴影
     class ArrowlessBackgroundView: UIPopoverBackgroundView {
         
+        // 用以控制锚点视图与弹窗之间的间距
         static var spacing: CGFloat = 8
         
         override static func arrowHeight() -> CGFloat { spacing }
