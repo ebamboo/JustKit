@@ -38,12 +38,12 @@ public extension NSObject {
         objc_setAssociatedObject(self, &Self.countdown_context_key, nil, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
     }
     
-    /// 用于访问关联对象的 key
-    private static var countdown_context_key: Void?
-    
 }
 
 private extension NSObject {
+    
+    /// 用于访问关联对象的 key
+    private static var countdown_context_key: Void?
     
     /// 倒计时上下对象，管理 timer 生命周期
     class CountdownContext {
