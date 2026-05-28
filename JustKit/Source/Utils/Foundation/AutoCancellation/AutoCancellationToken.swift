@@ -7,8 +7,6 @@ import UIKit
 ///
 /// 自动取消令牌
 ///
-/// 在自身 `deinit` 时执行清理闭包，将订阅/观察的生命周期绑定到 owner 对象上。
-///
 /// ## 机制
 /// 各类型通过 `store(on:)` 创建令牌并存入 owner 的 `autoCancellationTokens` 中，
 /// 形成持有链：**owner → tokens → closure → 清理逻辑**。
@@ -21,15 +19,7 @@ import UIKit
 /// - 通知观察者（`NotificationCenter.addObserver(forName:...)`）— owner 释放时调用 `removeObserver(_:)`
 /// - `ScriptMessageSubscription` — owner 释放时释放订阅对象，`deinit` 自动移除 handler
 ///
-/// ## 用法
-/// ```swift
-/// // 通过 store(on:) 绑定到 owner 生命周期
-/// Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
-///     self?.updateCountdown()
-/// }.store(on: self)
-/// ```
-///
-class AutoCancellationToken {
+public class AutoCancellationToken {
     
     private let cleanup: () -> Void
     
@@ -43,7 +33,7 @@ class AutoCancellationToken {
     
 }
 
-extension NSObject {
+public extension NSObject {
     
     private static var auto_cancellation_tokens_key: Void?
     
