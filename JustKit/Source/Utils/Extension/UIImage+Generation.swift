@@ -3,46 +3,7 @@
 //
 
 import UIKit
-
-public extension UIImage {
-    
-    /// 字符串转为二维码图片
-    convenience init?(string: String, side: CGFloat = 300) {
-        // 二维码滤镜名称固定写法 "CIQRCodeGenerator"
-        guard let filter = CIFilter(name: "CIQRCodeGenerator") else { return nil }
-        filter.setDefaults()
-        // 设置输入数据
-        filter.setValue(string.data(using: .utf8), forKey: "inputMessage")
-        // 设置二维码的纠错水平，越高纠错水平越高，可以污损的范围越大
-        filter.setValue("H", forKey: "inputCorrectionLevel")
-        
-        guard let ciImage = filter.outputImage else { return nil }
-        guard let cgImage = UIImage.transferToCGImage(from: ciImage, side: side) else { return nil }
-        self.init(cgImage: cgImage)
-    }
-    
-    /// 把不清晰的 ciImage 转为清晰的 cgImage
-    static func transferToCGImage(from ciImage: CIImage, side: CGFloat = 300) -> CGImage? {
-        // 1.
-        let extent = ciImage.extent
-        guard let cgImage = CIContext(options: nil).createCGImage(ciImage, from: extent) else { return nil }
-        
-        // 2.
-        let scale = min(side/extent.size.width, side/extent.size.height) * UIScreen.main.scale
-        let context_width = Int(extent.size.width * scale)
-        let context_height = Int(extent.size.height * scale)
-        
-        // 3.
-        guard let context = CGContext(data: nil, width: context_width, height: context_height, bitsPerComponent: 8, bytesPerRow: 0, space: CGColorSpaceCreateDeviceGray(), bitmapInfo: 0) else { return nil }
-        context.interpolationQuality = .none
-        context.scaleBy(x: scale, y: scale)
-        context.draw(cgImage, in: extent)
-        
-        // 4.
-        return context.makeImage()
-    }
-    
-}
+import CoreImage.CIFilterBuiltins
 
 public extension UIImage {
     
@@ -75,7 +36,7 @@ public extension UIImage {
     
     // opaque 系统默认值 false
     // scale 系统默认值 UIScreen.main.scale
-    static func image(
+    static func filled(
         with color: UIColor,
         size: CGSize = .init(width: 1, height: 1)
     ) -> UIImage {
@@ -83,21 +44,87 @@ public extension UIImage {
             ? size
             : .init(width: 1, height: 1)
         let renderer = UIGraphicsImageRenderer(size: safeSize)
-        return renderer.image { context in
+        return renderer.image { ctx in
             color.setFill()
-            context.fill(.init(origin: .zero, size: safeSize))
+            ctx.fill(.init(origin: .zero, size: safeSize))
         }
     }
     
-    // opaque 系统默认值 false
-    // scale 系统默认值 UIScreen.main.scale
+    /// 二维码纠错等级
+    ///
+    /// 纠错等级越高，二维码可被遮挡或污损的面积越大，
+    /// 但可编码的有效数据量会相应减少（更多空间用于存储纠错码字）。
+    enum QRCorrectionLevel: String {
+        /// 低纠错：约 7% 的码字可恢复
+        case low = "L"
+        /// 中等纠错：约 15% 的码字可恢复
+        case medium = "M"
+        /// 较高纠错：约 25% 的码字可恢复
+        case quartile = "Q"
+        /// 最高纠错：约 30% 的码字可恢复，适合需要在二维码中心叠加 Logo 的场景
+        case high = "H"
+    }
+    
+    /// 根据文本内容生成自定义颜色的二维码图片
+    ///
+    /// - Parameters:
+    ///   - text: 要编码的文本内容（使用 UTF-8 编码）
+    ///   - size: 输出图片的目标尺寸（二维码等比缩放后居中绘制，宽高不等时长边方向两侧为透明区域）
+    ///   - correctionLevel: 纠错等级，默认 `.medium`
+    ///   - foregroundColor: 码块颜色，默认黑色
+    ///   - backgroundColor: 背景颜色，默认白色
+    /// - Returns: 生成的二维码 UIImage；文本为空、size 无效或滤镜失败时返回 nil
     static func qrCode(
         from text: String,
         size: CGSize,
+        correctionLevel: QRCorrectionLevel = .medium,
         foregroundColor: UIColor = .black,
-        backgroundColor: UIColor = .white,
+        backgroundColor: UIColor = .white
     ) -> UIImage? {
-        return nil
+        guard !text.isEmpty else { return nil }
+        guard size.width > 0, size.height > 0 else { return nil }
+        
+        // 1. 通过 CIQRCodeGenerator 生成原始二维码 CIImage，
+        // 此时图像非常小（通常仅 20~30 像素），且为黑白单通道。
+        guard let qrCIImage = {
+            let qrFilter = CIFilter.qrCodeGenerator()
+            qrFilter.message = Data(text.utf8)
+            qrFilter.correctionLevel = correctionLevel.rawValue
+            return qrFilter.outputImage
+        }() else { return nil }
+        
+        // 2. 通过 CIFalseColor 将黑白像素重新映射为指定的前景色和背景色。
+        guard let coloredCIImage = {
+            let colorFilter = CIFilter.falseColor()
+            colorFilter.inputImage = qrCIImage
+            colorFilter.color0 = CIColor(color: foregroundColor) // 对应亮度为 0 的像素，即原始黑色码块
+            colorFilter.color1 = CIColor(color: backgroundColor) // 对应亮度为 1 的像素，即原始白色背景
+            return colorFilter.outputImage
+        }() else { return nil }
+        
+        // 3. 使用 CIContext 将着色后的 CIImage 渲染为 CGImage。
+        guard let cgImage = CIContext().createCGImage(coloredCIImage, from: coloredCIImage.extent) else { return nil }
+        
+        // 4. 根据原始 extent 与目标 size 计算等比缩放比例，得到居中绘制区域。
+        let drawRect = {
+            let originalExtent = coloredCIImage.extent.integral
+            let scale = min(size.width / originalExtent.width, size.height / originalExtent.height)
+            let scaledWidth = originalExtent.width * scale
+            let scaledHeight = originalExtent.height * scale
+            return CGRect(
+                x: (size.width - scaledWidth) * 0.5,
+                y: (size.height - scaledHeight) * 0.5,
+                width: scaledWidth,
+                height: scaledHeight
+            )
+        }()
+        
+        // 5. 通过 UIGraphicsImageRenderer 将 CGImage 绘制到目标尺寸的画布中并导出 UIImage
+        let renderer = UIGraphicsImageRenderer(size: size)
+        return renderer.image { ctx in
+            ctx.cgContext.interpolationQuality = .none // 最近邻插值，避免缩放模糊，保持码块边缘锐利
+            ctx.cgContext.draw(cgImage, in: drawRect)
+        }
     }
     
 }
