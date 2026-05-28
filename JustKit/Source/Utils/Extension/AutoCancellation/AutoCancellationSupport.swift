@@ -2,7 +2,7 @@
 //  Created by 姚旭 on 2022/8/7.
 //
 
-import UIKit
+import Foundation
 
 ///
 /// 自动取消令牌
