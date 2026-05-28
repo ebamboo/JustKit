@@ -43,8 +43,8 @@ public extension CADisplayLink {
     ///   ```
     convenience init(handler: @escaping (CADisplayLink) -> Void) {
         self.init(
-            target: DisplayLinkTarget(handler: handler),
-            selector: #selector(DisplayLinkTarget.invoke(_:))
+            target: ClosureProxy(handler: handler),
+            selector: #selector(ClosureProxy.invoke(_:))
         )
     }
     
@@ -53,7 +53,7 @@ public extension CADisplayLink {
 private extension CADisplayLink {
     
     /// CADisplayLink 的 target 对象，将 action 转发给闭包
-    class DisplayLinkTarget: NSObject {
+    class ClosureProxy: NSObject {
         let handler: (CADisplayLink) -> Void
         init(handler: @escaping (CADisplayLink) -> Void) {
             self.handler = handler

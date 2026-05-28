@@ -15,26 +15,26 @@ public extension UIGestureRecognizer {
     ///
     /// - Parameter handler: 手势触发时执行的闭包。
     convenience init(action handler: @escaping (UIGestureRecognizer) -> Void) {
-        let target = ActionHandlerTarget(handler: handler)
-        self.init(target: target, action: #selector(ActionHandlerTarget.invoke(_:)))
-        actionHandlerTargets.append(target)
+        let target = ClosureProxy(handler: handler)
+        self.init(target: target, action: #selector(ClosureProxy.invoke(_:)))
+        closureProxies.append(target)
     }
     
     /// 追加一个闭包处理。
     ///
     /// - Parameter handler: 手势触发时执行的闭包。
     func addActionHandler(_ handler: @escaping (UIGestureRecognizer) -> Void) {
-        let target = ActionHandlerTarget(handler: handler)
-        addTarget(target, action: #selector(ActionHandlerTarget.invoke(_:)))
-        actionHandlerTargets.append(target)
+        let target = ClosureProxy(handler: handler)
+        addTarget(target, action: #selector(ClosureProxy.invoke(_:)))
+        closureProxies.append(target)
     }
     
     /// 移除所有通过闭包添加的处理。
     func removeAllActionHandlers() {
-        actionHandlerTargets.forEach { target in
-            removeTarget(target, action: #selector(ActionHandlerTarget.invoke(_:)))
+        closureProxies.forEach { target in
+            removeTarget(target, action: #selector(ClosureProxy.invoke(_:)))
         }
-        actionHandlerTargets.removeAll()
+        closureProxies.removeAll()
     }
     
 }
@@ -42,7 +42,7 @@ public extension UIGestureRecognizer {
 private extension UIGestureRecognizer {
     
     /// UIGestureRecognizer 的 target 对象，将 action 转发给闭包
-    class ActionHandlerTarget {
+    class ClosureProxy {
         let handler: (UIGestureRecognizer) -> Void
         init(handler: @escaping (UIGestureRecognizer) -> Void) {
             self.handler = handler
@@ -52,13 +52,13 @@ private extension UIGestureRecognizer {
         }
     }
     
-    static var action_handler_targets_key: Void?
-    var actionHandlerTargets: [ActionHandlerTarget] {
+    static var closure_proxies_key: Void?
+    var closureProxies: [ClosureProxy] {
         get {
-            objc_getAssociatedObject(self, &Self.action_handler_targets_key) as? [ActionHandlerTarget] ?? []
+            objc_getAssociatedObject(self, &Self.closure_proxies_key) as? [ClosureProxy] ?? []
         }
         set {
-            objc_setAssociatedObject(self, &Self.action_handler_targets_key, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            objc_setAssociatedObject(self, &Self.closure_proxies_key, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
     

@@ -45,7 +45,7 @@ public extension WKUserContentController {
         for name: String,
         _ handler: @escaping (_ message: WKScriptMessage) -> Void
     ) -> ScriptMessageSubscription {
-        add(ScriptMessageHandlerProxy(handler), name: name)
+        add(ClosureProxy(handler), name: name)
         return ScriptMessageSubscription(userContentController: self, name: name)
     }
     
@@ -73,7 +73,7 @@ public class ScriptMessageSubscription {
 private extension WKUserContentController {
     
     /// 遵守 WKScriptMessageHandler 协议的代理对象，将协议回调转发给闭包
-    class ScriptMessageHandlerProxy: NSObject, WKScriptMessageHandler {
+    class ClosureProxy: NSObject, WKScriptMessageHandler {
         let handler: (_ message: WKScriptMessage) -> Void
         init(_ handler: @escaping (_ message: WKScriptMessage) -> Void) {
             self.handler = handler

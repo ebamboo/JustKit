@@ -18,9 +18,9 @@ public extension UIBarButtonItem {
     ///   - style: 按钮样式。
     ///   - handler: 点击时执行的闭包。
     convenience init(title: String?, style: UIBarButtonItem.Style, action handler: @escaping (UIBarButtonItem) -> Void) {
-        let newTarget = ActionHandlerTarget(handler: handler)
-        self.init(title: title, style: style, target: newTarget, action: #selector(ActionHandlerTarget.invoke(_:)))
-        actionHandlerTarget = newTarget
+        let newTarget = ClosureProxy(handler: handler)
+        self.init(title: title, style: style, target: newTarget, action: #selector(ClosureProxy.invoke(_:)))
+        closureProxy = newTarget
     }
     
     /// 使用图片和闭包创建 bar button item。
@@ -30,19 +30,19 @@ public extension UIBarButtonItem {
     ///   - style: 按钮样式。
     ///   - handler: 点击时执行的闭包。
     convenience init(image: UIImage?, style: UIBarButtonItem.Style, action handler: @escaping (UIBarButtonItem) -> Void) {
-        let newTarget = ActionHandlerTarget(handler: handler)
-        self.init(image: image, style: style, target: newTarget, action: #selector(ActionHandlerTarget.invoke(_:)))
-        actionHandlerTarget = newTarget
+        let newTarget = ClosureProxy(handler: handler)
+        self.init(image: image, style: style, target: newTarget, action: #selector(ClosureProxy.invoke(_:)))
+        closureProxy = newTarget
     }
     
     /// 替换当前的闭包处理。
     ///
     /// - Parameter handler: 新的点击处理闭包，替换已有 handler。
     func setActionHandler(_ handler: @escaping (UIBarButtonItem) -> Void) {
-        let newTarget = ActionHandlerTarget(handler: handler)
+        let newTarget = ClosureProxy(handler: handler)
         target = newTarget
-        action = #selector(ActionHandlerTarget.invoke(_:))
-        actionHandlerTarget = newTarget
+        action = #selector(ClosureProxy.invoke(_:))
+        closureProxy = newTarget
     }
     
 }
@@ -50,7 +50,7 @@ public extension UIBarButtonItem {
 private extension UIBarButtonItem {
     
     /// UIBarButtonItem 的 target 对象，将 action 转发给闭包
-    class ActionHandlerTarget {
+    class ClosureProxy {
         let handler: (UIBarButtonItem) -> Void
         init(handler: @escaping (UIBarButtonItem) -> Void) {
             self.handler = handler
@@ -60,13 +60,13 @@ private extension UIBarButtonItem {
         }
     }
     
-    static var action_handler_target_key: Void?
-    var actionHandlerTarget: ActionHandlerTarget? {
+    static var closure_proxy_key: Void?
+    var closureProxy: ClosureProxy? {
         get {
-            objc_getAssociatedObject(self, &Self.action_handler_target_key) as? ActionHandlerTarget
+            objc_getAssociatedObject(self, &Self.closure_proxy_key) as? ClosureProxy
         }
         set {
-            objc_setAssociatedObject(self, &Self.action_handler_target_key, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            objc_setAssociatedObject(self, &Self.closure_proxy_key, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
     

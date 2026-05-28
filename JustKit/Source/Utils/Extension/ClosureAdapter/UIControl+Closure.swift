@@ -17,9 +17,9 @@ public extension UIControl {
     ///   - events: 要监听的事件类型。
     ///   - handler: 事件触发时执行的闭包。
     func addActionHandler(for events: Event, _ handler: @escaping (UIControl) -> Void) {
-        let target = ActionHandlerTarget(events: events, handler: handler)
-        addTarget(target, action: #selector(ActionHandlerTarget.invoke(_:)), for: target.events)
-        actionHandlerTargets.append(target)
+        let target = ClosureProxy(events: events, handler: handler)
+        addTarget(target, action: #selector(ClosureProxy.invoke(_:)), for: target.events)
+        closureProxies.append(target)
     }
     
     /// 移除指定事件的所有闭包处理。
@@ -28,13 +28,13 @@ public extension UIControl {
     ///
     /// - Parameter events: 要移除的事件类型，默认为 `.allEvents`。
     func removeAllActionHandlers(for events: Event = .allEvents) {
-        actionHandlerTargets.removeAll { target in
+        closureProxies.removeAll { target in
             let remainingEvents = target.events.subtracting(events)
             if remainingEvents.isEmpty {
-                removeTarget(target, action: #selector(ActionHandlerTarget.invoke(_:)), for: target.events)
+                removeTarget(target, action: #selector(ClosureProxy.invoke(_:)), for: target.events)
                 return true
             } else {
-                removeTarget(target, action: #selector(ActionHandlerTarget.invoke(_:)), for: events)
+                removeTarget(target, action: #selector(ClosureProxy.invoke(_:)), for: events)
                 target.events = remainingEvents
                 return false
             }
@@ -46,7 +46,7 @@ public extension UIControl {
 private extension UIControl {
     
     /// UIControl 的 target 对象，将 action 转发给闭包
-    class ActionHandlerTarget {
+    class ClosureProxy {
         var events: Event
         let handler: (UIControl) -> Void
         init(events: Event, handler: @escaping (UIControl) -> Void) {
@@ -58,13 +58,13 @@ private extension UIControl {
         }
     }
     
-    static var action_handler_targets_key: Void?
-    var actionHandlerTargets: [ActionHandlerTarget] {
+    static var closure_proxies_key: Void?
+    var closureProxies: [ClosureProxy] {
         get {
-            objc_getAssociatedObject(self, &Self.action_handler_targets_key) as? [ActionHandlerTarget] ?? []
+            objc_getAssociatedObject(self, &Self.closure_proxies_key) as? [ClosureProxy] ?? []
         }
         set {
-            objc_setAssociatedObject(self, &Self.action_handler_targets_key, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            objc_setAssociatedObject(self, &Self.closure_proxies_key, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
     
