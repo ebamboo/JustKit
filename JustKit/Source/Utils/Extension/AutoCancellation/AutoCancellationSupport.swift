@@ -19,7 +19,7 @@ import UIKit
 /// - 通知观察者（`NotificationCenter.addObserver(forName:...)`）— owner 释放时调用 `removeObserver(_:)`
 /// - `ScriptMessageSubscription` — owner 释放时释放订阅对象，`deinit` 自动移除 handler
 ///
-public class AutoCancellationToken {
+class AutoCancellationToken {
     
     private let cleanup: () -> Void
     
@@ -33,7 +33,7 @@ public class AutoCancellationToken {
     
 }
 
-public extension NSObject {
+extension NSObject {
     
     private static var auto_cancellation_tokens_key: Void?
     
