@@ -27,29 +27,37 @@ public extension NSObject {
         onFinish: @escaping () -> Void
     ) {
         let context = CountdownContext()
-        // 替换关联对象 → 旧 context 释放 → deinit 自动 cancel 旧 timer
-        objc_setAssociatedObject(self, &Self.countdown_context_key, context, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        // 替换关联对象 → 旧 context 释放 → deinit 自动取消旧 timer
+        countdownContext = context
         context.start(duration: duration, interval: interval, onTick: onTick, onFinish: onFinish)
     }
     
     /// 主动取消倒计时
     func cancelCountdown() {
-        // 置 nil → context 释放 → deinit 自动 cancel timer
-        objc_setAssociatedObject(self, &Self.countdown_context_key, nil, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        // 置 nil → context 释放 → deinit 自动取消 timer
+        countdownContext = nil
     }
     
 }
 
 private extension NSObject {
     
-    /// 用于访问关联对象的 key
-    private static var countdown_context_key: Void?
+    /// 用于访问关联的 倒计时上下文对象 的 key
+    static var countdown_context_key: Void?
     
-    /// 倒计时上下对象，管理 timer 生命周期
+    /// 关联的 倒计时上下文对象
+    var countdownContext: CountdownContext? {
+        get {
+            objc_getAssociatedObject(self, &Self.countdown_context_key) as? CountdownContext
+        }
+        set {
+            objc_setAssociatedObject(self, &Self.countdown_context_key, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
+    }
+    
+    /// 倒计时上下文对象，管理 timer 生命周期
     class CountdownContext {
-        
         var timer: DispatchSourceTimer?
-        
         func start(
             duration: Int,
             interval: Int,
@@ -61,7 +69,6 @@ private extension NSObject {
             // 记录结束时间点，用绝对时间计算剩余秒数，避免后台挂起导致计时不准
             let endDate = Date().addingTimeInterval(TimeInterval(duration))
             let step = interval
-            
             timer = DispatchSource.makeTimerSource(queue: .main)
             timer?.schedule(deadline: .now(), repeating: .seconds(step))
             timer?.setEventHandler { [weak self] in
@@ -75,17 +82,8 @@ private extension NSObject {
             }
             timer?.resume()
         }
-        
-        func cancel() {
-            // cancel 后，GCD 释放对 timer source 的内部持有
-            timer?.cancel()
-            timer = nil
-        }
-        
-        deinit {
-            cancel()
-        }
-        
+        func cancel() { timer?.cancel(); timer = nil }
+        deinit { /* 释放时自动取消 timer */ cancel() }
     }
     
 }
