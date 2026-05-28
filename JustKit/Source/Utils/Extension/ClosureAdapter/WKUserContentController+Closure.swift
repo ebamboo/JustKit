@@ -65,7 +65,16 @@ public class ScriptMessageSubscription {
         self.name = name
     }
     deinit {
-        userContentController?.removeScriptMessageHandler(forName: name)
+        // WKUserContentController 的 API 必须在主线程调用
+        guard let controller = userContentController else { return }
+        let name = self.name
+        if Thread.isMainThread {
+            controller.removeScriptMessageHandler(forName: name)
+        } else {
+            DispatchQueue.main.async {
+                controller.removeScriptMessageHandler(forName: name)
+            }
+        }
     }
     
 }
