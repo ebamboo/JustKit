@@ -4,8 +4,6 @@
 
 import UIKit
 
-// MARK: - 自动取消
-
 public extension NSKeyValueObservation {
     
     /// 将 KVO 观察的生命周期存储到 owner
@@ -14,12 +12,12 @@ public extension NSKeyValueObservation {
     ///
     /// - Important: 必须在主线程调用。
     ///
-    /// - Note: 闭包**强捕获** self（NSKeyValueObservation）。
-    ///   与 Timer、CADisplayLink、通知观察者不同（它们由 RunLoop 或 NotificationCenter 外部持有），
-    ///   NSKeyValueObservation 没有外部持有者，
-    ///   若使用 `[weak self]` 则观察对象会在 `store(on:)` 返回后立即释放，观察随之失效。
-    ///   强捕获使持有链为：owner → token → closure → NSKeyValueObservation，
-    ///   owner 释放时链路断开，observation 释放并自动取消观察。
+    /// ```swift
+    /// // 自动管理 — 通过 store(on:) 绑定到 owner 生命周期
+    /// scrollView.observe(\.contentOffset) { [weak self] scrollView, _ in
+    ///     self?.handleScroll(scrollView)
+    /// }.store(on: self)
+    /// ```
     ///
     /// 若不使用 `store(on:)` 自动管理，可手动持有 `NSKeyValueObservation`，
     /// 释放即自动取消观察，也可主动调用 `invalidate()` 提前取消：
@@ -32,15 +30,8 @@ public extension NSKeyValueObservation {
     /// self.observation?.invalidate()  // 主动取消
     /// self.observation = nil          // 释放即取消
     /// ```
-    ///
-    /// ## 示例
-    /// ```swift
-    /// scrollView.observe(\.contentOffset) { [weak self] scrollView, _ in
-    ///     self?.handleScroll(scrollView)
-    /// }.store(on: self)
-    /// ```
     func store(on owner: NSObject) {
-        // 强捕获 self：闭包持有 observation，确保观察在 owner 存活期间有效
+        // 强捕获 self：NSKeyValueObservation 无外部持有者，闭包必须强引用以维持观察在 owner 存活期间有效
         let token = AutoCancellationToken { _ = self }
         owner.autoCancellationTokens.append(token)
     }
