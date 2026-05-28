@@ -6,7 +6,7 @@ import UIKit
 
 public extension NSObject {
     
-    /// 订阅键盘相关事件
+    /// 订阅键盘事件
     ///
     /// - Parameters:
     ///   - block: 键盘事件回调，isDocked 为 true 表示键盘弹出，false 表示收起
@@ -34,15 +34,17 @@ public extension NSObject {
         ) { [weak self] notification in
             self?.keyboardEventSubscription?.eventBlock?(false, .init(notification))
         }
+        // 替换关联对象 → 旧 subscription 释放 → deinit 自动移除旧通知观察者
         keyboardEventSubscription = subscription
     }
     
-    /// 主动取消订阅键盘相关事件
+    /// 主动取消订阅键盘事件
     func unsubscribeFromKeyboardEvents() {
+        // 置 nil → subscription 释放 → deinit 自动移除通知观察者
         keyboardEventSubscription = nil
     }
     
-    /// 键盘相关信息
+    /// 键盘事件信息
     struct KeyboardInfo {
         let isLocal: Bool
         let frameBegin: CGRect
@@ -68,7 +70,10 @@ public extension NSObject {
 
 private extension NSObject {
     
+    /// 用于访问关联的 键盘事件订阅对象 的 key
     static var keyboard_event_subscription_key: Void?
+    
+    /// 关联的 键盘事件订阅对象
     var keyboardEventSubscription: KeyboardEventSubscription? {
         get {
             objc_getAssociatedObject(self, &Self.keyboard_event_subscription_key) as? KeyboardEventSubscription
@@ -78,11 +83,13 @@ private extension NSObject {
         }
     }
     
+    /// 键盘事件订阅对象，管理 通知观察者 生命周期
     class KeyboardEventSubscription {
         var eventBlock: ((Bool, KeyboardInfo?) -> Void)?
         weak var observerForShow: NSObjectProtocol?
         weak var observerForHide: NSObjectProtocol?
         deinit {
+            // 释放时自动移除通知观察者
             if let observerForShow {
                 NotificationCenter.default.removeObserver(observerForShow)
             }
