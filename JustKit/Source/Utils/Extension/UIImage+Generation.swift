@@ -7,7 +7,7 @@ import CoreImage.CIFilterBuiltins
 
 public extension UIImage {
     
-    /// 创建一张能随 UITraitCollection 变化自动切换外观的动态图片
+    /// 创建 能随 UITraitCollection 变化而自动切换外观的 图片
     ///
     /// 内部通过 UIImageAsset 注册不同 trait 对应的图片变体，
     /// 当系统外观（如 Light/Dark Mode）发生切换时，UIKit 会自动选择匹配的变体进行显示。
@@ -34,8 +34,15 @@ public extension UIImage {
         return asset.image(with: .current)
     }
     
-    // opaque 系统默认值 false
-    // scale 系统默认值 UIScreen.main.scale
+    /// 创建指定颜色和尺寸的纯色图片
+    ///
+    /// 内部使用 UIGraphicsImageRenderer 绘制，
+    /// 输出图片的 opaque 为 false、scale 跟随屏幕分辨率
+    ///
+    /// - Parameters:
+    ///   - color: 填充颜色
+    ///   - size: 图片尺寸，默认 1×1 pt
+    /// - Returns: 纯色填充的 UIImage
     static func filled(
         with color: UIColor,
         size: CGSize = .init(width: 1, height: 1)
