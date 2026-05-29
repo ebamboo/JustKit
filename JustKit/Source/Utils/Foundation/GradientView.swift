@@ -15,14 +15,14 @@ import UIKit
 /// v.layer.endPoint = CGPoint(x: 1, y: 0.5)
 /// ```
 ///
-/// - Note: 渐变层覆盖在背景之上。
-class GradientView: UIView {
+/// - Note: 渐变层覆盖在背景（backgroundColor）之上。
+public class GradientView: UIView {
     
-    override var layer: CAGradientLayer {
+    public override var layer: CAGradientLayer {
         super.layer as! CAGradientLayer
     }
     
-    override class var layerClass: AnyClass {
+    public override class var layerClass: AnyClass {
         CAGradientLayer.self
     }
     
