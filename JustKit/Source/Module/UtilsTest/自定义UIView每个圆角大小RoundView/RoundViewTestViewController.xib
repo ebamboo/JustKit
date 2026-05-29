@@ -19,7 +19,7 @@
             <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
-                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="syV-Dl-TXH" customClass="RoundView" customModule="DevelopmentKit" customModuleProvider="target">
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="syV-Dl-TXH" customClass="UnevenCornerView" customModule="DevelopmentKit" customModuleProvider="target">
                     <rect key="frame" x="100" y="196" width="214" height="532"/>
                     <color key="backgroundColor" systemColor="systemRedColor"/>
                     <userDefinedRuntimeAttributes>
