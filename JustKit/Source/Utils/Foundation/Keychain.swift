@@ -32,14 +32,14 @@ import Foundation
 public enum Keychain {
     
     enum KeychainError: Error {
-        case unexpectedData
-        case unhandledError(status: OSStatus)
-    }
+         case invalidDataFormat
+         case operationFailed(status: OSStatus)
+     }
     
     /// 删除数据
     /// 若 account 为 nil，删除 kSecAttrService 为 service 的 items
     /// 若 account 存在，删除  kSecAttrService 为 service 且 kSecAttrAccount 为 account 的 items
-    public static func deleteData(for account: String? = nil, service: String, group: String? = nil) throws {
+    public static func deleteItems(for account: String? = nil, service: String, group: String? = nil) throws {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service
@@ -53,7 +53,7 @@ public enum Keychain {
         let status = SecItemDelete(query as CFDictionary)
         
         guard status == errSecItemNotFound || status == errSecSuccess else {
-            throw KeychainError.unhandledError(status: status)
+            throw KeychainError.operationFailed(status: status)
         }
     }
     
@@ -74,8 +74,8 @@ public enum Keychain {
         let status = SecItemCopyMatching(query as CFDictionary, &items)
         
         if status == errSecItemNotFound { return [] }
-        guard status == errSecSuccess else { throw KeychainError.unhandledError(status: status) }
-        guard let itemList = items as? [[String: Any]] else { throw KeychainError.unexpectedData }
+        guard status == errSecSuccess else { throw KeychainError.operationFailed(status: status) }
+        guard let itemList = items as? [[String: Any]] else { throw KeychainError.invalidDataFormat }
         return itemList.compactMap { $0[kSecAttrAccount as String] as? String }
     }
     
@@ -98,16 +98,16 @@ public enum Keychain {
         let status = SecItemCopyMatching(query as CFDictionary, &item)
         
         if status == errSecItemNotFound { return Data() }
-        guard status == errSecSuccess else { throw KeychainError.unhandledError(status: status) }
+        guard status == errSecSuccess else { throw KeychainError.operationFailed(status: status) }
         guard let existingItem = item as? [String : Any], let data = existingItem[kSecValueData as String] as? Data else {
-            throw KeychainError.unexpectedData
+            throw KeychainError.invalidDataFormat
         }
         return data
     }
     
     /// 保存数据
     public static func saveData(_ data: Data, for account: String, service: String, group: String? = nil) throws {
-        try deleteData(for: account, service: service, group: group)
+        try deleteItems(for: account, service: service, group: group)
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -119,7 +119,7 @@ public enum Keychain {
         }
         let status = SecItemAdd(query as CFDictionary, nil)
         
-        guard status == errSecSuccess else { throw KeychainError.unhandledError(status: status) }
+        guard status == errSecSuccess else { throw KeychainError.operationFailed(status: status) }
     }
     
 }
