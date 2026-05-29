@@ -8,7 +8,7 @@ class DashTestViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "自定义虚线视图DashView"
+        title = "自定义虚线视图DashLine"
     }
 
 }

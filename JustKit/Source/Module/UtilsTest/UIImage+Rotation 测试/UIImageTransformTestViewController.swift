@@ -15,7 +15,7 @@ class UIImageTransformTestViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        title = "UIImage+Transform 测试"
+        title = "UIImage+Rotation 测试"
         originImageView.image = testImage
         testImageView01.image = testImage
         testImageView02.image = testImage

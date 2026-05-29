@@ -4,24 +4,28 @@
 
 import UIKit
 
-///
 /// 支持为四个角分别设置不同圆角半径的 `UIView` 子类，可在 Interface Builder 中直接配置。
 ///
 /// - Note: 使用 `layer.mask` 裁剪，设置了 `layer.shadow` 的阴影将不可见。
 ///   如需同时使用阴影，需要额外嵌套一个容器视图来承载阴影。
-///
 public class UnevenCornerView: UIView {
-    
+
+    // MARK: - 配置属性
+
     @IBInspectable public var topLeftRadius: CGFloat = 0.0
     @IBInspectable public var topRightRadius: CGFloat = 0.0
     @IBInspectable public var bottomRightRadius: CGFloat = 0.0
     @IBInspectable public var bottomLeftRadius: CGFloat = 0.0
-    
+
+    // MARK: - Override
+
     public override func layoutSubviews() {
         super.layoutSubviews()
         maskLayer.path = maskPath.cgPath
         layer.mask = maskLayer
     }
+    
+    // MARK: - Private
     
     private lazy var maskLayer = CAShapeLayer()
     

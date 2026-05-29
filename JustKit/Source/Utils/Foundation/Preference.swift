@@ -4,7 +4,6 @@
 
 import Foundation
 
-///
 /// 基于 `UserDefaults.standard` 的属性包装器，将属性的读写映射为对指定 key 的取存。
 ///
 /// ```swift
@@ -20,7 +19,6 @@ import Foundation
 ///     static var userToken: String?
 /// }
 /// ```
-///
 @propertyWrapper
 public struct Preference<Value> {
     public let key: String

@@ -10,6 +10,15 @@ class GradeTestViewController: UIViewController {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
+        
+        
+        
+        let label = GradientLabel()
+        label.text = "nafsdfdsfsdfsfsdf"
+        label.frame = .init(x: 100, y: 100, width: 100, height: 44)
+        view.addSubview(label)
+        
+        
     }
 
 
