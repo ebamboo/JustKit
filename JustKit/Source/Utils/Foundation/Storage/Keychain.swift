@@ -86,7 +86,6 @@ public enum Keychain {
             kSecAttrService as String: service,
             kSecAttrAccount as String: account,
             kSecMatchLimit as String: kSecMatchLimitOne, // 主键为 service+account 因此最多存在一个（如果 Keychain 中已存在则无法再次添加）
-            kSecReturnAttributes as String: true, // 必须明确设置为 true，否则返回的 item 不为 [String : Any]
             kSecReturnData as String: true
         ]
         if let group = group {
@@ -97,7 +96,7 @@ public enum Keychain {
         
         if status == errSecItemNotFound { return nil }
         guard status == errSecSuccess else { throw KeychainError.operationFailed(status: status) }
-        guard let existingItem = item as? [String : Any], let data = existingItem[kSecValueData as String] as? Data else {
+        guard let data = item as? Data else {
             throw KeychainError.invalidDataFormat
         }
         return data
