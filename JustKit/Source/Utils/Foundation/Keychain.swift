@@ -80,9 +80,7 @@ public enum Keychain {
     }
     
     /// 读取数据
-    /// 若返回的数据为空，可能 errSecItemNotFound 或者 data 为空
-    /// 空的含义：调用 isEmpty 返回 true
-    public static func readData(for account: String, service: String, group: String? = nil) throws -> Data {
+    public static func readData(for account: String, service: String, group: String? = nil) throws -> Data? {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -97,7 +95,7 @@ public enum Keychain {
         var item: CFTypeRef?
         let status = SecItemCopyMatching(query as CFDictionary, &item)
         
-        if status == errSecItemNotFound { return Data() }
+        if status == errSecItemNotFound { return nil }
         guard status == errSecSuccess else { throw KeychainError.operationFailed(status: status) }
         guard let existingItem = item as? [String : Any], let data = existingItem[kSecValueData as String] as? Data else {
             throw KeychainError.invalidDataFormat
