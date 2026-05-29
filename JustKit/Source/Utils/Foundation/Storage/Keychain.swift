@@ -4,7 +4,6 @@
 
 import Foundation
 
-///
 /// 使用钥匙串管理账号和密码数据
 /// 密码数据不仅仅指一个简单的字符串，还可以是一些其他敏感数据
 ///
@@ -28,7 +27,6 @@ import Foundation
 /// 调用 SecItemCopyMatching 或者 SecItemDelete 时，
 /// 不设置 kSecAttrAccount 则操作对象为所有 kSecAttrService 为 service 的 items
 /// 设置 kSecAttrAccount 为 "" 则操作对象为所有 kSecAttrService 为 service 且 kSecAttrAccount 为 "" 的 items
-///
 public enum Keychain {
     
     public enum KeychainError: Error, LocalizedError {
@@ -76,39 +74,6 @@ public enum Keychain {
         }
     }
     
-    /// 删除  kSecAttrService 为 service 且 kSecAttrAccount 为 account 的 item
-    public static func deleteItem(for account: String, service: String, group: String? = nil) throws {
-        var query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: service,
-            kSecAttrAccount as String: account
-        ]
-        if let group = group {
-            query[kSecAttrAccessGroup as String] = group
-        }
-        let status = SecItemDelete(query as CFDictionary)
-        
-        guard status == errSecItemNotFound || status == errSecSuccess else {
-            throw KeychainError.operationFailed(status: status)
-        }
-    }
-    
-    /// 删除 kSecAttrService 为 service 的所有 items
-    public static func deleteAllItems(for service: String, group: String? = nil) throws {
-        var query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: service
-        ]
-        if let group = group {
-            query[kSecAttrAccessGroup as String] = group
-        }
-        let status = SecItemDelete(query as CFDictionary)
-        
-        guard status == errSecItemNotFound || status == errSecSuccess else {
-            throw KeychainError.operationFailed(status: status)
-        }
-    }
-    
     /// 读取所有账号
     /// 若返回的列表为空，可能 errSecItemNotFound 或者  结果为空
     public static func accounts(for service: String, group: String? = nil) throws -> [String] {
@@ -135,6 +100,28 @@ public enum Keychain {
         }
     }
     
+    /// 读取数据
+    public static func data(for account: String, service: String, group: String? = nil) throws -> Data? {
+        var query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: account,
+            kSecMatchLimit as String: kSecMatchLimitOne, // 主键为 service+account 因此最多存在一个（如果 Keychain 中已存在则无法再次添加）
+            kSecReturnData as String: true
+        ]
+        if let group = group {
+            query[kSecAttrAccessGroup as String] = group
+        }
+        var item: CFTypeRef?
+        let status = SecItemCopyMatching(query as CFDictionary, &item)
+        
+        if status == errSecItemNotFound { return nil }
+        guard status == errSecSuccess else { throw KeychainError.operationFailed(status: status) }
+        guard let data = item as? Data else {
+            throw KeychainError.invalidDataFormat
+        }
+        return data
+    }
     
     /// 保存数据
     ///
@@ -214,29 +201,37 @@ public enum Keychain {
         }
     }
     
-
-    
-    /// 读取数据
-    public static func data(for account: String, service: String, group: String? = nil) throws -> Data? {
+    /// 删除  kSecAttrService 为 service 且 kSecAttrAccount 为 account 的 item
+    public static func deleteItem(for account: String, service: String, group: String? = nil) throws {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
-            kSecAttrAccount as String: account,
-            kSecMatchLimit as String: kSecMatchLimitOne, // 主键为 service+account 因此最多存在一个（如果 Keychain 中已存在则无法再次添加）
-            kSecReturnData as String: true
+            kSecAttrAccount as String: account
         ]
         if let group = group {
             query[kSecAttrAccessGroup as String] = group
         }
-        var item: CFTypeRef?
-        let status = SecItemCopyMatching(query as CFDictionary, &item)
+        let status = SecItemDelete(query as CFDictionary)
         
-        if status == errSecItemNotFound { return nil }
-        guard status == errSecSuccess else { throw KeychainError.operationFailed(status: status) }
-        guard let data = item as? Data else {
-            throw KeychainError.invalidDataFormat
+        guard status == errSecItemNotFound || status == errSecSuccess else {
+            throw KeychainError.operationFailed(status: status)
         }
-        return data
+    }
+    
+    /// 删除 kSecAttrService 为 service 的所有 items
+    public static func deleteAllItems(for service: String, group: String? = nil) throws {
+        var query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service
+        ]
+        if let group = group {
+            query[kSecAttrAccessGroup as String] = group
+        }
+        let status = SecItemDelete(query as CFDictionary)
+        
+        guard status == errSecItemNotFound || status == errSecSuccess else {
+            throw KeychainError.operationFailed(status: status)
+        }
     }
     
 }
