@@ -20,27 +20,13 @@ import Foundation
 /// - `ScriptMessageSubscription` — owner 释放时释放订阅对象，`deinit` 自动移除 handler
 ///
 class AutoCancellable {
-    
     private let cleanup: () -> Void
-    
-    init(cleanup: @escaping () -> Void) {
-        self.cleanup = cleanup
-    }
-    
-    deinit {
-        cleanup()
-    }
-    
+    init(cleanup: @escaping () -> Void) { self.cleanup = cleanup }
+    deinit { cleanup() }
 }
 
 extension NSObject {
-    
     private static var auto_cancellables_key: Void?
-    
-    /// owner 持有的所有自动取消句柄
-    ///
-    /// 各类型的 `store(on:)` 方法将 cancellable 追加到此数组中。
-    /// owner 释放时数组随之释放，所有 cancellable 的 `deinit` 依次触发清理逻辑。
     var autoCancellables: [AutoCancellable] {
         get {
             objc_getAssociatedObject(self, &Self.auto_cancellables_key) as? [AutoCancellable] ?? []
@@ -49,5 +35,4 @@ extension NSObject {
             objc_setAssociatedObject(self, &Self.auto_cancellables_key, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
-    
 }
