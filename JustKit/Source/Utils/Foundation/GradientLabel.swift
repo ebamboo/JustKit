@@ -4,12 +4,10 @@
 
 import UIKit
 
-///
 /// 渐变色文字的 `UILabel` 子类，支持多行，可在 Interface Builder 中配置渐变方向。
 ///
 /// - Note: `backgroundColor` 和 `textColor` 由内部固定，外部设置无效。
 ///   需要背景色时，请在外层包裹容器视图。
-///
 public class GradientLabel: UILabel {
 
     /// 渐变色数组，支持动态颜色（如暗黑模式自适应颜色）
@@ -35,6 +33,12 @@ public class GradientLabel: UILabel {
     public override var textColor: UIColor! {
         get { .black }
         set { super.textColor = .black }
+    }
+    
+    public override var contentMode: UIView.ContentMode {
+        // redraw 保证 bounds 变化时必定触发 `drawText(in:)`
+        get { .redraw }
+        set { super.contentMode = .redraw }
     }
     
     public override func drawText(in rect: CGRect) {
