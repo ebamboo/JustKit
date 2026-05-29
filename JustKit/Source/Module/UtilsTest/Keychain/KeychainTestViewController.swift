@@ -57,7 +57,7 @@ class KeychainTestViewController: UIViewController {
     }
     
     @IBAction func searchForAllAccountsAction(_ sender: Any) {
-        if let list = try? Keychain.readAccounts(service: service) {
+        if let list = try? Keychain.accounts(for: service) {
             accountList = list.map { account in
                 AccountModel(account: account)
             }
@@ -91,7 +91,7 @@ class KeychainTestViewController: UIViewController {
     }
     
     func searchForAccount(_ account: String) {
-        if let data = try? Keychain.readData(for: account, service: service) {
+        if let data = try? Keychain.data(for: account, service: service) {
             let password = String(data: data, encoding: .utf8) ?? ""
             accountList.forEach { model in
                 if model.account == account {

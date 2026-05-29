@@ -60,7 +60,7 @@ public enum Keychain {
     /// 读取所有账号
     /// 若返回的列表为空，可能 errSecItemNotFound 或者 itemList.compactMap 结果为空
     /// 空的含义：调用 isEmpty 返回 true
-    public static func readAccounts(service: String, group: String? = nil) throws -> [String] {
+    public static func accounts(for service: String, group: String? = nil) throws -> [String] {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -80,7 +80,7 @@ public enum Keychain {
     }
     
     /// 读取数据
-    public static func readData(for account: String, service: String, group: String? = nil) throws -> Data? {
+    public static func data(for account: String, service: String, group: String? = nil) throws -> Data? {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
