@@ -110,8 +110,7 @@ public enum Keychain {
     }
     
     /// 读取所有账号
-    /// 若返回的列表为空，可能 errSecItemNotFound 或者 itemList.compactMap 结果为空
-    /// 空的含义：调用 isEmpty 返回 true
+    /// 若返回的列表为空，可能 errSecItemNotFound 或者  结果为空
     public static func accounts(for service: String, group: String? = nil) throws -> [String] {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
@@ -136,6 +135,87 @@ public enum Keychain {
         }
     }
     
+    
+    /// 保存数据
+    ///
+    /// - Parameters:
+    ///   - data: 要保存的数据
+    ///   - account: 用户唯一标识
+    ///   - service: 服务唯一标识
+    ///   - group: 钥匙串共享组
+    ///   - accessible: 数据可访问性策略
+    ///
+    /// 保存逻辑：
+    ///
+    /// 1. 若 item 已存在，则执行 update
+    /// 2. 若 item 不存在，则执行 add
+    ///
+    /// 注意：
+    ///
+    /// kSecAttrAccessible 属于 item 元数据，
+    /// update 时也会同步更新 accessibility。
+    /// The app must provide the contents of the keychain item (kSecValueData) when changing this attribute in iOS 4 and earlier.
+    ///
+    public static func saveData(
+        _ data: Data,
+        for account: String,
+        service: String,
+        group: String? = nil,
+        accessible: Accessibility = .afterFirstUnlock
+    ) throws {
+        
+        // 查询条件（主键）
+        var query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: account
+        ]
+        
+        if let group = group {
+            query[kSecAttrAccessGroup as String] = group
+        }
+        
+        // update 的属性
+        let attributes: [String: Any] = [
+            kSecValueData as String: data,
+            kSecAttrAccessible as String: accessible.value
+        ]
+        
+        // 先尝试更新
+        let updateStatus = SecItemUpdate(
+            query as CFDictionary,
+            attributes as CFDictionary
+        )
+        
+        switch updateStatus {
+            
+        case errSecSuccess:
+            return
+            
+        case errSecItemNotFound:
+            
+            // 不存在则新增
+            var newItem = query
+            
+            newItem[kSecValueData as String] = data
+            newItem[kSecAttrAccessible as String] = accessible.value
+            
+            let addStatus = SecItemAdd(
+                newItem as CFDictionary,
+                nil
+            )
+            
+            guard addStatus == errSecSuccess else {
+                throw KeychainError.operationFailed(status: addStatus)
+            }
+            
+        default:
+            throw KeychainError.operationFailed(status: updateStatus)
+        }
+    }
+    
+
+    
     /// 读取数据
     public static func data(for account: String, service: String, group: String? = nil) throws -> Data? {
         var query: [String: Any] = [
@@ -157,23 +237,6 @@ public enum Keychain {
             throw KeychainError.invalidDataFormat
         }
         return data
-    }
-    
-    /// 保存数据
-    public static func saveData(_ data: Data, for account: String, service: String, group: String? = nil) throws {
-        try deleteItem(for: account, service: service, group: group)
-        var query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: service,
-            kSecAttrAccount as String: account,
-            kSecValueData as String: data
-        ]
-        if let group = group {
-            query[kSecAttrAccessGroup as String] = group
-        }
-        let status = SecItemAdd(query as CFDictionary, nil)
-        
-        guard status == errSecSuccess else { throw KeychainError.operationFailed(status: status) }
     }
     
 }
