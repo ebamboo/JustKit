@@ -49,7 +49,7 @@ class KeychainTestViewController: UIViewController {
     @IBAction func saveAction(_ sender: Any) {
         let account = accountField.text ?? ""
         let password = passwordField.text ?? ""
-        if let _ = try? Keychain.saveData(password.data(using: .utf8)!, for: account, service: service) {
+        if let _ = try? Keychain.setData(password.data(using: .utf8)!, for: account, service: service) {
             print("save ========== success")
         } else {
             print("save ========== failure")

@@ -53,7 +53,7 @@ public enum Keychain {
         case whenUnlockedThisDeviceOnly
         case afterFirstUnlockThisDeviceOnly
         
-        var value: CFString {
+        public var value: CFString {
             switch self {
                 
             case .whenUnlocked:
@@ -90,9 +90,11 @@ public enum Keychain {
         
         if status == errSecItemNotFound { return [] }
         guard status == errSecSuccess else { throw KeychainError.operationFailed(status: status) }
+        guard let itemList = items as? [[String: Any]] else {
+            throw KeychainError.invalidDataFormat
+        }
         // 如果 Keychain 中存在无kSecAttrAccount的项（比如旧版本遗留数据、其他工具存储的项），调用 accounts 方法会直接抛出错误，导致无法获取任何有效账号。
         // 但方法的设计目标是「获取所有有效账号」，无账号的项本就应该被过滤，而非让整个调用失败。
-        guard let itemList = items as? [[String: Any]] else { return [] }
         return itemList.compactMap { $0[kSecAttrAccount as String] as? String }
     }
     
@@ -138,7 +140,7 @@ public enum Keychain {
     /// kSecAttrAccessible 属于 item 元数据，
     /// update 时也可以同步更新 accessibility。
     ///
-    public static func saveData(
+    public static func setData(
         _ data: Data,
         for account: String,
         service: String,
