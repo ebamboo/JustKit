@@ -76,7 +76,12 @@ public enum Keychain {
         if status == errSecItemNotFound { return [] }
         guard status == errSecSuccess else { throw KeychainError.operationFailed(status: status) }
         guard let itemList = items as? [[String: Any]] else { throw KeychainError.invalidDataFormat }
-        return itemList.compactMap { $0[kSecAttrAccount as String] as? String }
+        return try itemList.map {
+            guard let account = $0[kSecAttrAccount as String] as? String else {
+                throw KeychainError.invalidDataFormat
+            }
+            return account
+        }
     }
     
     /// 读取数据
