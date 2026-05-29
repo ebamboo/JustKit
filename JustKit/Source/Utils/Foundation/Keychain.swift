@@ -29,7 +29,7 @@ import Foundation
 /// 不设置 kSecAttrAccount 则操作对象为所有 kSecAttrService 为 service 的 items
 /// 设置 kSecAttrAccount 为 "" 则操作对象为所有 kSecAttrService 为 service 且 kSecAttrAccount 为 "" 的 items
 ///
-public struct Keychain {
+public enum Keychain {
     
     enum KeychainError: Error {
         case unexpectedData
@@ -39,7 +39,7 @@ public struct Keychain {
     /// 删除数据
     /// 若 account 为 nil，删除 kSecAttrService 为 service 的 items
     /// 若 account 存在，删除  kSecAttrService 为 service 且 kSecAttrAccount 为 account 的 items
-    static func clearData(for account: String? = nil, service: String, group: String? = nil) throws {
+    public static func deleteData(for account: String? = nil, service: String, group: String? = nil) throws {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service
@@ -60,7 +60,7 @@ public struct Keychain {
     /// 读取所有账号
     /// 若返回的列表为空，可能 errSecItemNotFound 或者 itemList.compactMap 结果为空
     /// 空的含义：调用 isEmpty 返回 true
-    static func readAccounts(service: String, group: String? = nil) throws -> [String] {
+    public static func readAccounts(service: String, group: String? = nil) throws -> [String] {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -82,7 +82,7 @@ public struct Keychain {
     /// 读取数据
     /// 若返回的数据为空，可能 errSecItemNotFound 或者 data 为空
     /// 空的含义：调用 isEmpty 返回 true
-    static func readData(for account: String, service: String, group: String? = nil) throws -> Data {
+    public static func readData(for account: String, service: String, group: String? = nil) throws -> Data {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -106,8 +106,8 @@ public struct Keychain {
     }
     
     /// 保存数据
-    static func saveData(_ data: Data, for account: String, service: String, group: String? = nil) throws {
-        try clearData(for: account, service: service, group: group)
+    public static func saveData(_ data: Data, for account: String, service: String, group: String? = nil) throws {
+        try deleteData(for: account, service: service, group: group)
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
