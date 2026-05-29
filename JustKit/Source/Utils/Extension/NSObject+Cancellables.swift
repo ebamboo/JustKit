@@ -22,15 +22,23 @@ public extension NSObject {
     ///     }
     ///     .store(in: &objc_cancellables)
     ///
-    /// // 2. 同时管理多个订阅
-    /// NotificationCenter.default
-    ///     .publisher(for: UIApplication.didBecomeActiveNotification)
-    ///     .sink { [weak self] _ in
-    ///         self?.refreshData()
+    /// // 2. 通过 KVO 监听 UITextView 文字变化（仅代码赋值触发，用户输入不触发）
+    /// textView.publisher(for: \.text)
+    ///     .sink { [weak self] text in
+    ///         self?.handleTextChange(text)
     ///     }
     ///     .store(in: &objc_cancellables)
     ///
-    /// // 3. 需要重置所有订阅时，直接赋空集合
+    /// // 3. 通过 Notification 监听 UITextView 输入变化（仅用户输入触发，代码赋值不触发）
+    /// NotificationCenter.default
+    ///     .publisher(for: UITextView.textDidChangeNotification, object: textView)
+    ///     .compactMap { ($0.object as? UITextView)?.text }
+    ///     .sink { [weak self] text in
+    ///         self?.handleUserInput(text)
+    ///     }
+    ///     .store(in: &objc_cancellables)
+    ///
+    /// // 4. 需要重置所有订阅时，直接赋空集合
     /// objc_cancellables = []
     /// ```
     var objc_cancellables: Set<AnyCancellable> {
