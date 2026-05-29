@@ -32,7 +32,7 @@ public enum Keychain {
     public enum KeychainError: Error, LocalizedError {
         case invalidDataFormat
         case operationFailed(status: OSStatus)
-        var errorDescription: String {
+        public var errorDescription: String? {
             switch self {
             case .invalidDataFormat:
                 return "Invalid keychain data format"
@@ -75,7 +75,6 @@ public enum Keychain {
     }
     
     /// 读取所有账号
-    /// 若返回的列表为空，可能 errSecItemNotFound 或者  结果为空
     public static func accounts(for service: String, group: String? = nil) throws -> [String] {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
@@ -91,13 +90,10 @@ public enum Keychain {
         
         if status == errSecItemNotFound { return [] }
         guard status == errSecSuccess else { throw KeychainError.operationFailed(status: status) }
-        guard let itemList = items as? [[String: Any]] else { throw KeychainError.invalidDataFormat }
-        return try itemList.map {
-            guard let account = $0[kSecAttrAccount as String] as? String else {
-                throw KeychainError.invalidDataFormat
-            }
-            return account
-        }
+        // 如果 Keychain 中存在无kSecAttrAccount的项（比如旧版本遗留数据、其他工具存储的项），调用 accounts 方法会直接抛出错误，导致无法获取任何有效账号。
+        // 但方法的设计目标是「获取所有有效账号」，无账号的项本就应该被过滤，而非让整个调用失败。
+        guard let itemList = items as? [[String: Any]] else { return [] }
+        return itemList.compactMap { $0[kSecAttrAccount as String] as? String }
     }
     
     /// 读取数据
@@ -140,15 +136,14 @@ public enum Keychain {
     /// 注意：
     ///
     /// kSecAttrAccessible 属于 item 元数据，
-    /// update 时也会同步更新 accessibility。
-    /// The app must provide the contents of the keychain item (kSecValueData) when changing this attribute in iOS 4 and earlier.
+    /// update 时也可以同步更新 accessibility。
     ///
     public static func saveData(
         _ data: Data,
         for account: String,
         service: String,
         group: String? = nil,
-        accessible: Accessibility = .afterFirstUnlock
+        accessible: Accessibility? = nil // 当为 nil 时，更新操作不更新 kSecAttrAccessible，添加操作默认设置为 whenUnlocked
     ) throws {
         
         // 查询条件（主键）
@@ -163,10 +158,10 @@ public enum Keychain {
         }
         
         // update 的属性
-        let attributes: [String: Any] = [
-            kSecValueData as String: data,
-            kSecAttrAccessible as String: accessible.value
-        ]
+        var attributes: [String: Any] = [kSecValueData as String: data]
+        if let accessible = accessible {
+            attributes[kSecAttrAccessible as String] = accessible.value
+        }
         
         // 先尝试更新
         let updateStatus = SecItemUpdate(
@@ -185,7 +180,7 @@ public enum Keychain {
             var newItem = query
             
             newItem[kSecValueData as String] = data
-            newItem[kSecAttrAccessible as String] = accessible.value
+            newItem[kSecAttrAccessible as String] = (accessible ?? .whenUnlocked).value
             
             let addStatus = SecItemAdd(
                 newItem as CFDictionary,
