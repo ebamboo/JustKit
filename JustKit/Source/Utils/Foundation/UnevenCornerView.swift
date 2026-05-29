@@ -5,25 +5,25 @@
 import UIKit
 
 ///
-/// 完全自定义 UIView 每个圆角的是否圆角以及该圆角的大小
+/// 支持为四个角分别设置不同圆角半径的 `UIView` 子类，可在 Interface Builder 中直接配置。
 ///
-public class RoundView: UIView {
-
+/// - Note: 使用 `layer.mask` 裁剪，设置了 `layer.shadow` 的阴影将不可见。
+///   如需同时使用阴影，需要额外嵌套一个容器视图来承载阴影。
+///
+public class UnevenCornerView: UIView {
+    
     @IBInspectable public var topLeftRadius: CGFloat = 0.0
     @IBInspectable public var topRightRadius: CGFloat = 0.0
     @IBInspectable public var bottomRightRadius: CGFloat = 0.0
     @IBInspectable public var bottomLeftRadius: CGFloat = 0.0
-
-}
-
-public extension RoundView {
     
-    override func layoutSubviews() {
+    public override func layoutSubviews() {
         super.layoutSubviews()
-        let maskLayer = CAShapeLayer()
         maskLayer.path = maskPath.cgPath
         layer.mask = maskLayer
     }
+    
+    private lazy var maskLayer = CAShapeLayer()
     
     private var maskPath: UIBezierPath {
         let rect = bounds
@@ -33,7 +33,6 @@ public extension RoundView {
             path.addArc(withCenter: CGPoint(x: topLeftRadius, y: topLeftRadius), radius: topLeftRadius, startAngle: -Double.pi, endAngle: -Double.pi/2, clockwise: true)
         } else {
             path.move(to: CGPoint(x: 0, y: 0))
-            path.addLine(to: CGPoint(x: rect.width/2, y: 0))
         }
         
         if topRightRadius > 0.0 {
