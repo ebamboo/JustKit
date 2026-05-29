@@ -5,31 +5,31 @@
 import Foundation
 
 ///
-/// 这是一个属性包装器，用于管理通过 UserDefaults 存储的偏好设置
-/// 使用方法如示例：
+/// 基于 `UserDefaults.standard` 的属性包装器，将属性的读写映射为对指定 key 的取存。
 ///
-
-/*
-extension UserDefaults {
-
-    @Preference(name: "firstLaunch")
-    static var firstLaunch: Bool?
-
-    @Preference(name: "defaultModel")
-    static var defaultModel: String?
-
-}
-*/
-
+/// ```swift
+/// enum AppPreference {
+///     /// 是否首次启动
+///     @Preference(key: "isFirstLaunch")
+///     static var isFirstLaunch: Bool?
+///     /// 上次运行的版本号
+///     @Preference(key: "lastVersionCode")
+///     static var lastVersionCode: String?
+///     /// 登录凭证
+///     @Preference(key: "userToken")
+///     static var userToken: String?
+/// }
+/// ```
+///
 @propertyWrapper
 public struct Preference<Value> {
-    public let name: String
+    public let key: String
     public var wrappedValue: Value? {
         get {
-            UserDefaults.standard.object(forKey: name) as? Value
+            UserDefaults.standard.object(forKey: key) as? Value
         }
         set {
-            UserDefaults.standard.set(newValue, forKey: name)
+            UserDefaults.standard.set(newValue, forKey: key)
         }
     }
 }
