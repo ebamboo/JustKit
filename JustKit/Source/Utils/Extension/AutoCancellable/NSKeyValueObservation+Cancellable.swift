@@ -32,8 +32,8 @@ public extension NSKeyValueObservation {
     /// ```
     func store(on owner: NSObject) {
         // 强捕获 self：NSKeyValueObservation 无外部持有者，闭包必须强引用以维持观察在 owner 存活期间有效
-        let token = AutoCancellationToken { _ = self }
-        owner.autoCancellationTokens.append(token)
+        let cancellable = AutoCancellable { _ = self }
+        owner.autoCancellables.append(cancellable)
     }
     
 }

@@ -34,10 +34,10 @@ public extension CADisplayLink {
     /// ```
     func store(on owner: NSObject) {
         // 弱捕获 self：RunLoop 外部持有 CADisplayLink，即使闭包不强持有，DisplayLink 仍存活直到被 invalidate
-        let token = AutoCancellationToken { [weak self] in
+        let cancellable = AutoCancellable { [weak self] in
             self?.invalidate()
         }
-        owner.autoCancellationTokens.append(token)
+        owner.autoCancellables.append(cancellable)
     }
     
 }

@@ -36,12 +36,12 @@ public extension NSObjectProtocol {
     /// ```
     func store(on owner: NSObject) {
         // 弱捕获 self：NotificationCenter 外部持有 observer，即使闭包不强持有，observer 仍存活直到被 remove
-        let token = AutoCancellationToken { [weak self] in
+        let cancellable = AutoCancellable { [weak self] in
             if let self {
                 NotificationCenter.default.removeObserver(self)
             }
         }
-        owner.autoCancellationTokens.append(token)
+        owner.autoCancellables.append(cancellable)
     }
     
 }
