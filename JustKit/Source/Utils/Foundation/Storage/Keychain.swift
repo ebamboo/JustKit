@@ -31,7 +31,7 @@ import Foundation
 ///
 public enum Keychain {
     
-    enum KeychainError: Error, LocalizedError {
+    public enum KeychainError: Error, LocalizedError {
         case invalidDataFormat
         case operationFailed(status: OSStatus)
         var errorDescription: String {
@@ -43,6 +43,35 @@ public enum Keychain {
                     return msg as String
                 }
                 return "Keychain operation failed: \(status)"
+            }
+        }
+    }
+    
+    public enum Accessibility {
+        
+        case whenUnlocked
+        case afterFirstUnlock
+        case whenPasscodeSetThisDeviceOnly
+        case whenUnlockedThisDeviceOnly
+        case afterFirstUnlockThisDeviceOnly
+        
+        var value: CFString {
+            switch self {
+                
+            case .whenUnlocked:
+                return kSecAttrAccessibleWhenUnlocked
+                
+            case .afterFirstUnlock:
+                return kSecAttrAccessibleAfterFirstUnlock
+                
+            case .whenPasscodeSetThisDeviceOnly:
+                return kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly
+                
+            case .whenUnlockedThisDeviceOnly:
+                return kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+                
+            case .afterFirstUnlockThisDeviceOnly:
+                return kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
             }
         }
     }
