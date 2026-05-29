@@ -31,22 +31,45 @@ import Foundation
 ///
 public enum Keychain {
     
-    enum KeychainError: Error {
-         case invalidDataFormat
-         case operationFailed(status: OSStatus)
-     }
+    enum KeychainError: Error, LocalizedError {
+        case invalidDataFormat
+        case operationFailed(status: OSStatus)
+        var errorDescription: String {
+            switch self {
+            case .invalidDataFormat:
+                return "Invalid keychain data format"
+            case .operationFailed(let status):
+                if let msg = SecCopyErrorMessageString(status, nil) {
+                    return msg as String
+                }
+                return "Keychain operation failed: \(status)"
+            }
+        }
+    }
     
-    /// 删除数据
-    /// 若 account 为 nil，删除 kSecAttrService 为 service 的 items
-    /// 若 account 存在，删除  kSecAttrService 为 service 且 kSecAttrAccount 为 account 的 items
-    public static func deleteItems(for account: String? = nil, service: String, group: String? = nil) throws {
+    /// 删除  kSecAttrService 为 service 且 kSecAttrAccount 为 account 的 item
+    public static func deleteItem(for account: String, service: String, group: String? = nil) throws {
+        var query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: account
+        ]
+        if let group = group {
+            query[kSecAttrAccessGroup as String] = group
+        }
+        let status = SecItemDelete(query as CFDictionary)
+        
+        guard status == errSecItemNotFound || status == errSecSuccess else {
+            throw KeychainError.operationFailed(status: status)
+        }
+    }
+    
+    /// 删除 kSecAttrService 为 service 的所有 items
+    public static func deleteAllItems(for service: String, group: String? = nil) throws {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service
         ]
-        if let account = account {
-            query[kSecAttrAccount as String] = account
-        }
         if let group = group {
             query[kSecAttrAccessGroup as String] = group
         }
@@ -109,7 +132,7 @@ public enum Keychain {
     
     /// 保存数据
     public static func saveData(_ data: Data, for account: String, service: String, group: String? = nil) throws {
-        try deleteItems(for: account, service: service, group: group)
+        try deleteItem(for: account, service: service, group: group)
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,

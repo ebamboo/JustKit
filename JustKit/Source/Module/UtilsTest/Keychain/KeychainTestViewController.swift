@@ -69,7 +69,7 @@ class KeychainTestViewController: UIViewController {
     }
     
     @IBAction func deleteAllAccountsAction(_ sender: Any) {
-        if let _ = try? Keychain.deleteItems(for: nil, service: service) {
+        if let _ = try? Keychain.deleteAllItems(for: service) {
             accountList = []
             tableView.reloadData()
             print("clear all accounts ========== success")
@@ -79,7 +79,7 @@ class KeychainTestViewController: UIViewController {
     }
     
     func deleteAccount(_ account: String) {
-        if let _ = try? Keychain.deleteItems(for: account, service: service) {
+        if let _ = try? Keychain.deleteItem(for: account, service: service) {
             accountList = accountList.filter { model in
                 model.account != account
             }
