@@ -99,7 +99,8 @@ public enum Keychain {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
-            kSecMatchLimit as String: kSecMatchLimitAll, // 必须明确设置为 kSecMatchLimitAll，否则返回的 items 不为 [[String: Any]]
+            // 设置为 `kSecMatchLimitAll` 返回列表
+            kSecMatchLimit as String: kSecMatchLimitAll,
             kSecReturnAttributes as String: true
         ]
         if let group = group {
@@ -109,11 +110,11 @@ public enum Keychain {
         let status = SecItemCopyMatching(query as CFDictionary, &items)
         if status == errSecItemNotFound { return [] }
         if status != errSecSuccess { throw KeychainError.operationFailed(status: status) }
-        guard let itemList = items as? [[String: Any]] else {
+        guard let list = items as? [[String: Any]] else {
             throw KeychainError.invalidDataFormat
         }
         // 过滤无 account 的异常条目
-        return itemList.compactMap { $0[kSecAttrAccount as String] as? String }
+        return list.compactMap { $0[kSecAttrAccount as String] as? String }
     }
     
     /// 读取指定账号的密码数据。
@@ -129,7 +130,7 @@ public enum Keychain {
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: account,
-            // 主键为 service+account 因此最多存在一个
+            // 因主键为 service+account 查询结果最多返回一个条目
             kSecMatchLimit as String: kSecMatchLimitOne,
             kSecReturnData as String: true
         ]
