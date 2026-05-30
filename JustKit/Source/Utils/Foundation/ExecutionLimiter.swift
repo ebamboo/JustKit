@@ -8,6 +8,10 @@ import Foundation
 ///
 /// 同一 `label` 的任务最多执行 `limit` 次。
 /// 首次调用时指定的 `limit` 会被记录，后续调用即使传入不同的 `limit` 也将忽略。
+///
+/// - Note:
+///   对于 NSObject 实例级别的“一次性执行”需求，优先使用 `lazy` 属性实现。
+///   若需要限制对象生命周期内的执行次数，则应由对象自行维护计数状态。
 public enum ExecutionLimiter {
     
     private static var storage: [String: Int] = [:]
