@@ -81,6 +81,18 @@ public enum Keychain {
                 kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
             }
         }
+        /// 判断当前访问策略是否为设备专属。
+        public var isThisDeviceOnly: Bool {
+            switch self {
+            case .whenPasscodeSetThisDeviceOnly,
+                 .whenUnlockedThisDeviceOnly,
+                 .afterFirstUnlockThisDeviceOnly:
+                return true
+            case .whenUnlocked,
+                 .afterFirstUnlock:
+                return false
+            }
+        }
     }
     
     /// 获取指定服务下的所有账号标识。
