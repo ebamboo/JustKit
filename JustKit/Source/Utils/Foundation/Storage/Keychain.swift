@@ -67,7 +67,7 @@ public enum Keychain {
         /// 数据仅保存在当前设备，不参与备份和迁移。
         case afterFirstUnlockThisDeviceOnly
         /// 对应 `kSecAttrAccessible` 属性值。
-        public var cfValue: CFString {
+        public var secValue: CFString {
             switch self {
             case .whenUnlocked:
                 kSecAttrAccessibleWhenUnlocked
@@ -220,7 +220,7 @@ public enum Keychain {
         }
         var attributes: [String: Any] = [kSecValueData as String: data]
         if let accessible = accessible {
-            attributes[kSecAttrAccessible as String] = accessible.cfValue
+            attributes[kSecAttrAccessible as String] = accessible.secValue
         }
         let updateStatus = SecItemUpdate(
             query as CFDictionary,
@@ -232,7 +232,7 @@ public enum Keychain {
         case errSecItemNotFound: // 条目不存在则新增条目
             var newItem = query
             newItem[kSecValueData as String] = data
-            newItem[kSecAttrAccessible as String] = (accessible ?? .whenUnlocked).cfValue
+            newItem[kSecAttrAccessible as String] = (accessible ?? .whenUnlocked).secValue
             let addStatus = SecItemAdd(
                 newItem as CFDictionary,
                 nil
