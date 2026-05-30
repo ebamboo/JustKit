@@ -1,9 +1,41 @@
 //
 //  Created by 姚旭 on 2021/4/18.
 //
+//  Apple 关于 Keychain 的官方文档
+//  https://developer.apple.com/documentation/security/keychain_services
+//
 
 import Foundation
 
+/// Keychain Services Wrapper for Generic Passwords
+///
+/// 本工具提供了一组类型安全的静态方法，用于存取 `kSecClassGenericPassword` 类型的敏感数据，如密码、令牌、密钥等。
+///
+/// ## 概述
+///
+/// Keychain 中 Generic Password（kSecClassGenericPassword）类型数据主要通过以下属性进行标识：
+///
+/// - kSecAttrService：业务域标识，用于隔离不同业务模块的数据。
+/// - kSecAttrAccount：账号标识，用于区分同一服务下的不同用户。
+/// - kSecAttrAccessGroup：Keychain Sharing 分组标识。
+///
+/// 对于 Generic Password 项，Apple 将 kSecAttrService 与 kSecAttrAccount 视为主要查询键（Primary Keys）。
+///
+/// 当多个应用通过 Keychain Sharing 共享数据时，访问组（Access Group）、服务标识（Service）与账号标识（Account）必须保持一致。
+///
+/// 因此，service 应作为业务级命名空间使用，不建议直接使用 Bundle Identifier 作为默认值，以避免后续服务拆分、组件共享或数据迁移时受到限制。
+///
+/// ## 查询限制
+///
+/// You can’t combine the kSecReturnData and kSecMatchLimitAll options when copying password items, because copying each password item could require additional authentication.
+///
+/// 受此限制，批量查询账号时仅返回属性信息，不包含密码数据。如需读取所有密码，应先获取账号列表，再逐条读取。
+///
+/// - Note: `account` 参数的缺省行为。
+///   - `SecItemAdd`：不指定 `account` 或指定为空串 `""`，Keychain 中该条目的 `kSecAttrAccount` 均存储为 `""`。
+///   - `SecItemCopyMatching` / `SecItemDelete`：
+///     不指定 `account` 时，操作范围为指定 `service` 下的**所有**条目；
+///     指定为 `""` 时，仅操作 `account` 为 `""` 的条目。
 public enum Keychain {
     
     public enum KeychainError: Error, LocalizedError {
