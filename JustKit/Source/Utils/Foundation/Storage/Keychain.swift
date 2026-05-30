@@ -26,12 +26,10 @@ import Foundation
 /// 因此，`service` 应作为业务级命名空间使用，不建议直接使用 Bundle Identifier 作为默认值，以避免后续服务拆分、组件共享或数据迁移时受到限制。
 public enum Keychain {
     
-    /// Keychain 条目的摘要信息。
+    /// Keychain 条目元数据。
     public struct Item {
         public let account: String
         public let synchronizable: Bool
-        /// - Note: `nil` 表示 `Accessibility` 不支持的情况或者从钥匙串获取该属性失败。
-        public let accessible: Accessibility?
     }
     
     /// Keychain 操作相关错误。
@@ -74,23 +72,6 @@ public enum Keychain {
         /// 首次解锁后即可访问。
         /// 数据仅保存在当前设备，不参与备份和迁移。
         case afterFirstUnlockThisDeviceOnly
-        /// 从 `kSecAttrAccessible` 查询结果构造。
-        public init?(secValue: CFString) {
-            switch secValue {
-            case kSecAttrAccessibleWhenUnlocked:
-                self = .whenUnlocked
-            case kSecAttrAccessibleAfterFirstUnlock:
-                self = .afterFirstUnlock
-            case kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly:
-                self = .whenPasscodeSetThisDeviceOnly
-            case kSecAttrAccessibleWhenUnlockedThisDeviceOnly:
-                self = .whenUnlockedThisDeviceOnly
-            case kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly:
-                self = .afterFirstUnlockThisDeviceOnly
-            default:
-                return nil
-            }
-        }
         /// 对应 `kSecAttrAccessible` 属性值。
         public var secValue: CFString {
             switch self {
@@ -135,7 +116,7 @@ public enum Keychain {
         }
     }
     
-    /// 获取指定服务下的所有条目摘要信息。
+    /// 获取指定服务下的所有条目元信息。
     ///
     /// - Parameters:
     ///   - service: 服务标识符。
@@ -146,7 +127,7 @@ public enum Keychain {
     ///
     /// - Note:
     ///   Apple 不允许同时使用 `kSecMatchLimitAll` 与 `kSecReturnData`。
-    ///   因此该方法仅返回条目摘要信息，不返回对应密码数据。
+    ///   因此该方法仅返回条目元信息，不返回对应密码数据。
     ///   如需读取密码数据，请使用 ``data(for:service:group:scope:)``。
     public static func items(for service: String, group: String? = nil, scope: SynchronizableScope? = .local) throws -> [Item] {
         var query: [String: Any] = [
@@ -177,14 +158,7 @@ public enum Keychain {
                 }
                 // 解析失败视为本地条目
                 let synchronizable = info[kSecAttrSynchronizable as String] as? Bool ?? false
-                // 解析失败视为正常条目，`kSecAttrAccessible` 值缺失
-                let accessible: Accessibility?
-                if let rawValue = info[kSecAttrAccessible as String] as? String {
-                    accessible = Accessibility(secValue: rawValue as CFString)
-                } else {
-                    accessible = nil
-                }
-                return Item(account: account, synchronizable: synchronizable, accessible: accessible)
+                return Item(account: account, synchronizable: synchronizable)
             }
         default:
             throw KeychainError.operationFailed(status: status)
