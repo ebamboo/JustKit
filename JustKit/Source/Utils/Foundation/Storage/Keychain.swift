@@ -217,7 +217,7 @@ public enum Keychain {
     /// - Throws: ``KeychainError``。
     ///
     /// - Important: `synchronizable = true` 与带 `ThisDeviceOnly` 后缀的 ``Accessibility`` 互斥。
-    ///   新增条目时若检测到此冲突，将抛出 `errSecParam` 错误。
+    ///   若检测到此冲突，将抛出 `errSecParam` 错误。
     /// - Note: `kSecAttrAccessible` 属于条目元数据，可在更新时同步变更，无需删除后重建（有些版本要求必须同步修改 `kSecValueData`）。
     /// - Note: `SecItemAdd` 时若未指定 `account` 或指定为空串 `""`，Keychain 中该条目的 `kSecAttrAccount` 均存储为 `""`。
     public static func setData(
