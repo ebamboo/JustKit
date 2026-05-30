@@ -108,13 +108,18 @@ public enum Keychain {
         }
         var items: CFTypeRef?
         let status = SecItemCopyMatching(query as CFDictionary, &items)
-        if status == errSecItemNotFound { return [] }
-        if status != errSecSuccess { throw KeychainError.operationFailed(status: status) }
-        guard let list = items as? [[String: Any]] else {
-            throw KeychainError.invalidDataFormat
+        switch status {
+        case errSecItemNotFound:
+            return []
+        case errSecSuccess:
+            guard let list = items as? [[String: Any]] else {
+                throw KeychainError.invalidDataFormat
+            }
+            // 过滤无 account 的异常条目
+            return list.compactMap { $0[kSecAttrAccount as String] as? String }
+        default:
+            throw KeychainError.operationFailed(status: status)
         }
-        // 过滤无 account 的异常条目
-        return list.compactMap { $0[kSecAttrAccount as String] as? String }
     }
     
     /// 读取指定账号的密码数据。
@@ -139,12 +144,17 @@ public enum Keychain {
         }
         var item: CFTypeRef?
         let status = SecItemCopyMatching(query as CFDictionary, &item)
-        if status == errSecItemNotFound { return nil }
-        if status != errSecSuccess { throw KeychainError.operationFailed(status: status) }
-        guard let data = item as? Data else {
-            throw KeychainError.invalidDataFormat
+        switch status {
+        case errSecItemNotFound:
+            return nil
+        case errSecSuccess:
+            guard let data = item as? Data else {
+                throw KeychainError.invalidDataFormat
+            }
+            return data
+        default:
+            throw KeychainError.operationFailed(status: status)
         }
-        return data
     }
     
     /// 保存或更新指定账号的密码数据。
