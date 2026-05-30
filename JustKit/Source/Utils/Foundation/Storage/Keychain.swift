@@ -27,11 +27,10 @@ import Foundation
 public enum Keychain {
     
     /// Keychain 条目的摘要信息。
-    public struct ItemInfo {
-        public let group: String?
-        public let service: String
+    public struct Item {
         public let account: String
         public let synchronizable: Bool
+        /// - Note: `nil` 表示 `Accessibility` 不支持的情况或者从钥匙串获取该属性失败。
         public let accessible: Accessibility?
     }
     
@@ -149,7 +148,7 @@ public enum Keychain {
     ///   Apple 不允许同时使用 `kSecMatchLimitAll` 与 `kSecReturnData`。
     ///   因此该方法仅返回条目摘要信息，不返回对应密码数据。
     ///   如需读取密码数据，请使用 ``data(for:service:group:scope:)``。
-    public static func items(for service: String, group: String? = nil, scope: SynchronizableScope? = .local) throws -> [ItemInfo] {
+    public static func items(for service: String, group: String? = nil, scope: SynchronizableScope? = .local) throws -> [Item] {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -172,16 +171,20 @@ public enum Keychain {
             }
             // 过滤异常条目
             return list.compactMap { info in
-                guard let account = info[kSecAttrAccount as String] as? String else { return nil }
-                //                    $0[kSecAttrAccount as String] as? String
+                // 解析失败视为异常条目
+                guard let account = info[kSecAttrAccount as String] as? String else {
+                    return nil
+                }
+                // 解析失败视为本地条目
+                let synchronizable = info[kSecAttrSynchronizable as String] as? Bool ?? false
+                // 解析失败视为正常条目，`kSecAttrAccessible` 值缺失
                 let accessible: Accessibility?
                 if let rawValue = info[kSecAttrAccessible as String] as? String {
                     accessible = Accessibility(secValue: rawValue as CFString)
                 } else {
-                    // 异常条目，忽略
-                    return nil
+                    accessible = nil
                 }
-                return ItemInfo(group: group, service: service, account: account, synchronizable: true, accessible: accessible)
+                return Item(account: account, synchronizable: synchronizable, accessible: accessible)
             }
         default:
             throw KeychainError.operationFailed(status: status)
