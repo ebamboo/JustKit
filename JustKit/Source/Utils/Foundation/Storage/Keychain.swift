@@ -95,7 +95,7 @@ public enum Keychain {
         }
     }
     
-    /// 条目查询范围
+    /// 条目查询范围。
     public enum SynchronizableScope {
         /// 仅匹配本地条目（默认）。
         case local
@@ -218,6 +218,10 @@ public enum Keychain {
         accessible: Accessibility? = nil,
         synchronizable: Bool = false
     ) throws {
+        // 同步条目不兼容 ThisDeviceOnly 级别的访问策略
+        if synchronizable, let accessible, accessible.isThisDeviceOnly {
+            throw KeychainError.operationFailed(status: errSecParam)
+        }
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -239,14 +243,9 @@ public enum Keychain {
         case errSecSuccess:
             return
         case errSecItemNotFound: // 条目不存在则新增条目
-            let accessible = accessible ?? .whenUnlocked
-            // 同步条目不兼容 ThisDeviceOnly 级别的访问策略
-            if synchronizable, accessible.isThisDeviceOnly {
-                throw KeychainError.operationFailed(status: errSecParam)
-            }
             var newItem = query
             newItem[kSecValueData as String] = data
-            newItem[kSecAttrAccessible as String] = accessible.secValue
+            newItem[kSecAttrAccessible as String] = (accessible ?? .whenUnlocked).secValue
             let addStatus = SecItemAdd(
                 newItem as CFDictionary,
                 nil
