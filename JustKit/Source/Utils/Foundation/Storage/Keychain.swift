@@ -27,15 +27,9 @@ import Foundation
 ///
 /// ## 查询限制
 ///
-/// You can’t combine the kSecReturnData and kSecMatchLimitAll options when copying password items, because copying each password item could require additional authentication.
+/// > You can’t combine the kSecReturnData and kSecMatchLimitAll options when copying password items, because copying each password item could require additional authentication.
 ///
 /// 受此限制，批量查询账号时仅返回属性信息，不包含密码数据。如需读取所有密码，应先获取账号列表，再逐条读取。
-///
-/// - Note: `account` 参数的缺省行为。
-///   - `SecItemAdd`：不指定 `account` 或指定为空串 `""`，Keychain 中该条目的 `kSecAttrAccount` 均存储为 `""`。
-///   - `SecItemCopyMatching` / `SecItemDelete`：
-///     不指定 `account` 时，操作范围为指定 `service` 下的**所有**条目；
-///     指定为 `""` 时，仅操作 `account` 为 `""` 的条目。
 public enum Keychain {
     
     public enum KeychainError: Error, LocalizedError {
