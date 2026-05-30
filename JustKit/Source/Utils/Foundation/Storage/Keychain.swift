@@ -26,6 +26,15 @@ import Foundation
 /// 因此，`service` 应作为业务级命名空间使用，不建议直接使用 Bundle Identifier 作为默认值，以避免后续服务拆分、组件共享或数据迁移时受到限制。
 public enum Keychain {
     
+    ///
+    public struct ItemInfo {
+        public let group: String?
+        public let service: String
+        public let account: String
+        public let synchronizable: Bool
+        public let accessible: Accessibility?
+    }
+    
     /// Keychain 操作相关错误。
     public enum KeychainError: Error, LocalizedError {
         /// 返回的数据无法转换为预期类型。
@@ -101,14 +110,11 @@ public enum Keychain {
         case local
         /// 仅匹配同步条目。
         case synchronizable
-        /// 同时匹配本地和同步条目。
-        case any
         /// 对应 `kSecAttrSynchronizable` 属性值。
-        public var secValue: Any {
+        public var secValue: CFBoolean {
             switch self {
-            case .local: false
-            case .synchronizable: true
-            case .any: kSecAttrSynchronizableAny
+            case .local: kCFBooleanFalse
+            case .synchronizable: kCFBooleanTrue
             }
         }
     }
@@ -118,7 +124,7 @@ public enum Keychain {
     /// - Parameters:
     ///   - service: 服务标识符。
     ///   - group: 访问组标识符，`nil` 表示不限定。
-    ///   - scope: 查询范围，控制匹配本地条目、同步条目或全部。默认仅匹配本地条目。
+    ///   - scope: 查询范围，控制匹配本地条目或同步条目。`nil` 表示不限制，同时匹配本地和同步条目。默认仅匹配本地条目。
     /// - Returns: 所有有效的 account。无匹配条目时返回空数组。返回顺序未定义。
     /// - Throws: ``KeychainError``。
     /// 
@@ -126,11 +132,12 @@ public enum Keychain {
     ///   Apple 不允许同时使用 `kSecMatchLimitAll` 与 `kSecReturnData`。
     ///   因此该方法仅返回账号列表，不返回对应密码数据。
     ///   如需读取密码数据，请使用 ``data(for:service:group:scope:)``。
-    public static func accounts(for service: String, group: String? = nil, scope: SynchronizableScope = .local) throws -> [String] {
+    /// - Note: 当 `scope` 为 `nil` 时，同一账号若同时存在本地和同步条目，返回结果中可能出现重复的账号名。
+    public static func accounts(for service: String, group: String? = nil, scope: SynchronizableScope? = .local) throws -> [String] {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
-            kSecAttrSynchronizable as String: scope.secValue,
+            kSecAttrSynchronizable as String: scope?.secValue ?? kSecAttrSynchronizableAny,
             // 设置为 `kSecMatchLimitAll` 返回列表
             kSecMatchLimit as String: kSecMatchLimitAll,
             kSecReturnAttributes as String: true
@@ -160,7 +167,7 @@ public enum Keychain {
     ///   - account: 账号标识符。
     ///   - service: 服务标识符。
     ///   - group: 访问组标识符，`nil` 表示不限定。
-    ///   - scope: 查询范围，控制匹配本地条目、同步条目或全部。默认仅匹配本地条目。
+    ///   - scope: 查询范围，控制匹配本地条目或同步条目。默认仅匹配本地条目。
     /// - Returns: 条目关联的二进制数据；条目不存在时返回 `nil`。
     /// - Throws: ``KeychainError``。
     public static func data(for account: String, service: String, group: String? = nil, scope: SynchronizableScope = .local) throws -> Data? {
@@ -267,18 +274,18 @@ public enum Keychain {
     ///   - account: 账号标识符。
     ///   - service: 服务标识符。
     ///   - group: 访问组标识符，`nil` 表示不限定。
-    ///   - scope: 查询范围，控制匹配本地条目、同步条目或全部。默认仅匹配本地条目。
+    ///   - scope: 查询范围，控制匹配本地条目或同步条目。`nil` 表示不限制，同时匹配本地和同步条目。默认仅匹配本地条目。
     /// - Throws: ``KeychainError``。
     ///
     /// - Note: 本方法显式指定了 `account`，仅匹配该账号对应的条目。
     ///   若不指定 `account`，`SecItemDelete` 将删除 `service` 下的所有条目——
     ///   这正是 ``deleteAllItems(for:group:scope:)`` 的行为。
-    public static func deleteItem(for account: String, service: String, group: String? = nil, scope: SynchronizableScope = .local) throws {
+    public static func deleteItem(for account: String, service: String, group: String? = nil, scope: SynchronizableScope? = .local) throws {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: account,
-            kSecAttrSynchronizable as String: scope.secValue
+            kSecAttrSynchronizable as String: scope?.secValue ?? kSecAttrSynchronizableAny
         ]
         if let group = group {
             query[kSecAttrAccessGroup as String] = group
@@ -297,15 +304,15 @@ public enum Keychain {
     /// - Parameters:
     ///   - service: 服务标识符。
     ///   - group: 访问组标识符，`nil` 表示不限定。
-    ///   - scope: 查询范围，控制匹配本地条目、同步条目或全部。默认仅匹配本地条目。
+    ///   - scope: 查询范围，控制匹配本地条目或同步条目。`nil` 表示不限制，同时匹配本地和同步条目。默认仅匹配本地条目。
     /// - Throws: ``KeychainError``。
     ///
     /// - Important: 此操作不可逆，调用前请确认意图。
-    public static func deleteAllItems(for service: String, group: String? = nil, scope: SynchronizableScope = .local) throws {
+    public static func deleteAllItems(for service: String, group: String? = nil, scope: SynchronizableScope? = .local) throws {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
-            kSecAttrSynchronizable as String: scope.secValue
+            kSecAttrSynchronizable as String: scope?.secValue ?? kSecAttrSynchronizableAny
         ]
         if let group = group {
             query[kSecAttrAccessGroup as String] = group
