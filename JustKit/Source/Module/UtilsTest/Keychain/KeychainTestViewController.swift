@@ -57,9 +57,9 @@ class KeychainTestViewController: UIViewController {
     }
     
     @IBAction func searchForAllAccountsAction(_ sender: Any) {
-        if let list = try? Keychain.accounts(for: service) {
-            accountList = list.map { account in
-                AccountModel(account: account)
+        if let list = try? Keychain.items(for: service) {
+            accountList = list.map { item in
+                AccountModel(account: item.account)
             }
             tableView.reloadData()
             print("search all accounts ========== success \(list)")

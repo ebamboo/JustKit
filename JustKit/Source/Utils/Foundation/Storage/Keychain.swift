@@ -26,7 +26,7 @@ import Foundation
 /// 因此，`service` 应作为业务级命名空间使用，不建议直接使用 Bundle Identifier 作为默认值，以避免后续服务拆分、组件共享或数据迁移时受到限制。
 public enum Keychain {
     
-    ///
+    /// Keychain 条目的摘要信息。
     public struct ItemInfo {
         public let group: String?
         public let service: String
@@ -75,6 +75,23 @@ public enum Keychain {
         /// 首次解锁后即可访问。
         /// 数据仅保存在当前设备，不参与备份和迁移。
         case afterFirstUnlockThisDeviceOnly
+        /// 从 `kSecAttrAccessible` 查询结果构造。
+        public init?(secValue: CFString) {
+            switch secValue {
+            case kSecAttrAccessibleWhenUnlocked:
+                self = .whenUnlocked
+            case kSecAttrAccessibleAfterFirstUnlock:
+                self = .afterFirstUnlock
+            case kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly:
+                self = .whenPasscodeSetThisDeviceOnly
+            case kSecAttrAccessibleWhenUnlockedThisDeviceOnly:
+                self = .whenUnlockedThisDeviceOnly
+            case kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly:
+                self = .afterFirstUnlockThisDeviceOnly
+            default:
+                return nil
+            }
+        }
         /// 对应 `kSecAttrAccessible` 属性值。
         public var secValue: CFString {
             switch self {
@@ -119,21 +136,20 @@ public enum Keychain {
         }
     }
     
-    /// 获取指定服务下的所有账号标识。
+    /// 获取指定服务下的所有条目摘要信息。
     ///
     /// - Parameters:
     ///   - service: 服务标识符。
     ///   - group: 访问组标识符，`nil` 表示不限定。
     ///   - scope: 查询范围，控制匹配本地条目或同步条目。`nil` 表示不限制，同时匹配本地和同步条目。默认仅匹配本地条目。
-    /// - Returns: 所有有效的 account。无匹配条目时返回空数组。返回顺序未定义。
+    /// - Returns: 匹配的条目信息列表。无匹配条目时返回空数组。返回顺序未定义。
     /// - Throws: ``KeychainError``。
-    /// 
+    ///
     /// - Note:
     ///   Apple 不允许同时使用 `kSecMatchLimitAll` 与 `kSecReturnData`。
-    ///   因此该方法仅返回账号列表，不返回对应密码数据。
+    ///   因此该方法仅返回条目摘要信息，不返回对应密码数据。
     ///   如需读取密码数据，请使用 ``data(for:service:group:scope:)``。
-    /// - Note: 当 `scope` 为 `nil` 时，同一账号若同时存在本地和同步条目，返回结果中可能出现重复的账号名。
-    public static func accounts(for service: String, group: String? = nil, scope: SynchronizableScope? = .local) throws -> [String] {
+    public static func items(for service: String, group: String? = nil, scope: SynchronizableScope? = .local) throws -> [ItemInfo] {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -145,17 +161,28 @@ public enum Keychain {
         if let group = group {
             query[kSecAttrAccessGroup as String] = group
         }
-        var items: CFTypeRef?
-        let status = SecItemCopyMatching(query as CFDictionary, &items)
+        var result: CFTypeRef?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
         switch status {
         case errSecItemNotFound:
             return []
         case errSecSuccess:
-            guard let list = items as? [[String: Any]] else {
+            guard let list = result as? [[String: Any]] else {
                 throw KeychainError.invalidDataFormat
             }
-            // 过滤无 account 的异常条目
-            return list.compactMap { $0[kSecAttrAccount as String] as? String }
+            // 过滤异常条目
+            return list.compactMap { info in
+                guard let account = info[kSecAttrAccount as String] as? String else { return nil }
+                //                    $0[kSecAttrAccount as String] as? String
+                let accessible: Accessibility?
+                if let rawValue = info[kSecAttrAccessible as String] as? String {
+                    accessible = Accessibility(secValue: rawValue as CFString)
+                } else {
+                    // 异常条目，忽略
+                    return nil
+                }
+                return ItemInfo(group: group, service: service, account: account, synchronizable: true, accessible: accessible)
+            }
         default:
             throw KeychainError.operationFailed(status: status)
         }
@@ -176,20 +203,19 @@ public enum Keychain {
             kSecAttrService as String: service,
             kSecAttrAccount as String: account,
             kSecAttrSynchronizable as String: scope.secValue,
-            // 因主键为 service+account 查询结果最多返回一个条目
             kSecMatchLimit as String: kSecMatchLimitOne,
             kSecReturnData as String: true
         ]
         if let group = group {
             query[kSecAttrAccessGroup as String] = group
         }
-        var item: CFTypeRef?
-        let status = SecItemCopyMatching(query as CFDictionary, &item)
+        var result: CFTypeRef?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
         switch status {
         case errSecItemNotFound:
             return nil
         case errSecSuccess:
-            guard let data = item as? Data else {
+            guard let data = result as? Data else {
                 throw KeychainError.invalidDataFormat
             }
             return data
