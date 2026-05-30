@@ -13,17 +13,17 @@ import Foundation
 ///
 /// ## 关键说明
 ///
-/// Keychain 中 Generic Password（kSecClassGenericPassword）类型数据主要通过以下属性进行标识：
+/// Keychain 中 Generic Password（`kSecClassGenericPassword`）类型数据主要通过以下属性进行标识：
 ///
-/// - kSecAttrService：业务域标识，用于隔离不同业务模块的数据。
-/// - kSecAttrAccount：账号标识，用于区分同一服务下的不同用户。
-/// - kSecAttrAccessGroup：Keychain Sharing 分组标识。
+/// - `kSecAttrService`：业务域标识，用于隔离不同业务模块的数据。
+/// - `kSecAttrAccount`：账号标识，用于区分同一服务下的不同用户。
+/// - `kSecAttrAccessGroup`：Keychain Sharing 分组标识。
 ///
-/// 对于 Generic Password 项，Apple 将 kSecAttrService 与 kSecAttrAccount 视为主要查询键（Primary Keys）。
+/// 对于 Generic Password 项，Apple 将 `kSecAttrService` 与 `kSecAttrAccount` 视为主要查询键（Primary Keys）。
 ///
 /// 当多个应用通过 Keychain Sharing 共享数据时，访问组（Access Group）、服务标识（Service）与账号标识（Account）必须保持一致。
 ///
-/// 因此，service 应作为业务级命名空间使用，不建议直接使用 Bundle Identifier 作为默认值，以避免后续服务拆分、组件共享或数据迁移时受到限制。
+/// 因此，`service` 应作为业务级命名空间使用，不建议直接使用 Bundle Identifier 作为默认值，以避免后续服务拆分、组件共享或数据迁移时受到限制。
 public enum Keychain {
     
     /// Keychain 操作相关错误。
@@ -66,7 +66,7 @@ public enum Keychain {
         /// 首次解锁后即可访问。
         /// 数据仅保存在当前设备，不参与备份和迁移。
         case afterFirstUnlockThisDeviceOnly
-        /// 对应 `kSecAttrAccessible` 属性值
+        /// 对应 `kSecAttrAccessible` 属性值。
         public var value: CFString {
             switch self {
             case .whenUnlocked:
@@ -107,9 +107,8 @@ public enum Keychain {
         }
         var items: CFTypeRef?
         let status = SecItemCopyMatching(query as CFDictionary, &items)
-        
         if status == errSecItemNotFound { return [] }
-        guard status == errSecSuccess else { throw KeychainError.operationFailed(status: status) }
+        if status != errSecSuccess { throw KeychainError.operationFailed(status: status) }
         guard let itemList = items as? [[String: Any]] else {
             throw KeychainError.invalidDataFormat
         }
@@ -139,9 +138,8 @@ public enum Keychain {
         }
         var item: CFTypeRef?
         let status = SecItemCopyMatching(query as CFDictionary, &item)
-        
         if status == errSecItemNotFound { return nil }
-        guard status == errSecSuccess else { throw KeychainError.operationFailed(status: status) }
+        if status != errSecSuccess { throw KeychainError.operationFailed(status: status) }
         guard let data = item as? Data else {
             throw KeychainError.invalidDataFormat
         }
@@ -237,7 +235,6 @@ public enum Keychain {
             query[kSecAttrAccessGroup as String] = group
         }
         let status = SecItemDelete(query as CFDictionary)
-        
         guard status == errSecItemNotFound || status == errSecSuccess else {
             throw KeychainError.operationFailed(status: status)
         }
@@ -263,7 +260,6 @@ public enum Keychain {
             query[kSecAttrAccessGroup as String] = group
         }
         let status = SecItemDelete(query as CFDictionary)
-        
         guard status == errSecItemNotFound || status == errSecSuccess else {
             throw KeychainError.operationFailed(status: status)
         }
