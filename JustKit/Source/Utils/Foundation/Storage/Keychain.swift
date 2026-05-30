@@ -11,7 +11,7 @@ import Foundation
 ///
 /// 本工具提供了一组类型安全的静态方法，用于存取 `kSecClassGenericPassword` 类型的敏感数据，如密码、令牌、密钥等。
 ///
-/// ## 概述
+/// ## 关键说明
 ///
 /// Keychain 中 Generic Password（kSecClassGenericPassword）类型数据主要通过以下属性进行标识：
 ///
@@ -81,7 +81,15 @@ public enum Keychain {
         }
     }
     
-    /// 读取所有账号
+    /// 获取指定服务下的所有账号标识。
+    ///
+    /// - Parameters:
+    ///   - service: 服务标识符。
+    ///   - group: 访问组标识符，`nil` 表示不限定。
+    /// - Returns: 所有有效的 account。无匹配条目时返回空数组。
+    /// - Throws: ``KeychainError``。
+    /// 
+    /// - Note: Apple 不允许同时使用 `kSecMatchLimitAll` 与 `kSecReturnData`。因此该方法仅返回账号列表，不返回对应密码数据。
     public static func accounts(for service: String, group: String? = nil) throws -> [String] {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
@@ -105,13 +113,21 @@ public enum Keychain {
         return itemList.compactMap { $0[kSecAttrAccount as String] as? String }
     }
     
-    /// 读取数据
+    /// 读取指定账号的密码数据。
+    ///
+    /// - Parameters:
+    ///   - account: 账号标识符。
+    ///   - service: 服务标识符。
+    ///   - group: 访问组标识符，`nil` 表示不限定。
+    /// - Returns: 条目关联的二进制数据；条目不存在时返回 `nil`。
+    /// - Throws: ``KeychainError``。
     public static func data(for account: String, service: String, group: String? = nil) throws -> Data? {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: account,
-            kSecMatchLimit as String: kSecMatchLimitOne, // 主键为 service+account 因此最多存在一个（如果 Keychain 中已存在则无法再次添加）
+            // 主键为 service+account 因此最多存在一个
+            kSecMatchLimit as String: kSecMatchLimitOne,
             kSecReturnData as String: true
         ]
         if let group = group {
@@ -128,56 +144,44 @@ public enum Keychain {
         return data
     }
     
-    /// 保存数据
+    /// 保存或更新指定账号的密码数据。
+    ///
+    /// 采用 update-or-add 策略：优先尝试更新已有条目，若不存在则新增。
     ///
     /// - Parameters:
-    ///   - data: 要保存的数据
-    ///   - account: 用户唯一标识
-    ///   - service: 服务唯一标识
-    ///   - group: 钥匙串共享组
-    ///   - accessible: 数据可访问性策略
+    ///   - data: 要保存的二进制数据。
+    ///   - account: 账号标识符。
+    ///   - service: 服务标识符。
+    ///   - group: 访问组标识符，`nil` 表示不限定。
+    ///   - accessible: 数据保护级别。
+    ///     当传入 `nil` 时，更新操作不变更现有级别，新增操作默认使用 ``Accessibility.whenUnlocked``。
+    /// - Throws: ``KeychainError``。
     ///
-    /// 保存逻辑：
-    ///
-    /// 1. 若 item 已存在，则执行 update
-    /// 2. 若 item 不存在，则执行 add
-    ///
-    /// 注意：
-    ///
-    /// kSecAttrAccessible 属于 item 元数据，
-    /// update 时也可以同步更新 accessibility。
-    ///
+    /// - Note: `kSecAttrAccessible` 属于条目元数据，可在更新时同步变更，无需删除后重建（有些版本要求必须同步修改 `kSecValueData`）。
+    /// - Note: `SecItemAdd` 时若未指定 `account` 或指定为空串 `""`，Keychain 中该条目的 `kSecAttrAccount` 均存储为 `""`。
     public static func setData(
         _ data: Data,
         for account: String,
         service: String,
         group: String? = nil,
-        accessible: Accessibility? = nil // 当为 nil 时，更新操作不更新 kSecAttrAccessible，添加操作默认设置为 whenUnlocked
+        accessible: Accessibility? = nil
     ) throws {
-        
-        // 查询条件（主键）
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: account
         ]
-        
         if let group = group {
             query[kSecAttrAccessGroup as String] = group
         }
-        
-        // update 的属性
         var attributes: [String: Any] = [kSecValueData as String: data]
         if let accessible = accessible {
             attributes[kSecAttrAccessible as String] = accessible.value
         }
-        
-        // 先尝试更新
         let updateStatus = SecItemUpdate(
             query as CFDictionary,
             attributes as CFDictionary
         )
-        
         switch updateStatus {
             
         case errSecSuccess:
@@ -205,7 +209,20 @@ public enum Keychain {
         }
     }
     
-    /// 删除  kSecAttrService 为 service 且 kSecAttrAccount 为 account 的 item
+    /// 删除指定账号的 Keychain 条目。
+    ///
+    /// 精确匹配 `service` + `account`，仅删除对应的单条记录。
+    /// 条目不存在时视为成功，不会抛出错误。
+    ///
+    /// - Parameters:
+    ///   - account: 账号标识符。
+    ///   - service: 服务标识符。
+    ///   - group: 访问组标识符，`nil` 表示不限定。
+    /// - Throws: ``KeychainError``。
+    ///
+    /// - Note: 本方法显式指定了 `account`，仅匹配该账号对应的条目。
+    ///   若不指定 `account`，`SecItemDelete` 将删除 `service` 下的所有条目——
+    ///   这正是 ``deleteAllItems(for:group:)`` 的行为。
     public static func deleteItem(for account: String, service: String, group: String? = nil) throws {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
@@ -222,7 +239,17 @@ public enum Keychain {
         }
     }
     
-    /// 删除 kSecAttrService 为 service 的所有 items
+    /// 批量删除指定服务下的所有 Keychain 条目。
+    ///
+    /// 不限定 `account`，将删除匹配 `service`（及 `group`）的全部条目。
+    /// 无匹配条目时视为成功，不会抛出错误。
+    ///
+    /// - Parameters:
+    ///   - service: 服务标识符。
+    ///   - group: 访问组标识符，`nil` 表示不限定。
+    /// - Throws: ``KeychainError``。
+    ///
+    /// - Important: 此操作不可逆，调用前请确认意图。
     public static func deleteAllItems(for service: String, group: String? = nil) throws {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
