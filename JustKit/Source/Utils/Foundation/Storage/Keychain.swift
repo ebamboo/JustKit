@@ -95,6 +95,24 @@ public enum Keychain {
         }
     }
     
+    /// 条目查询范围
+    public enum SynchronizableScope {
+        /// 仅匹配本地条目（默认）。
+        case local
+        /// 仅匹配同步条目。
+        case synchronizable
+        /// 同时匹配本地和同步条目。
+        case any
+        /// 对应 `kSecAttrSynchronizable` 属性值。
+        public var secValue: Any {
+            switch self {
+            case .local: false
+            case .synchronizable: true
+            case .any: kSecAttrSynchronizableAny
+            }
+        }
+    }
+    
     /// 获取指定服务下的所有账号标识。
     ///
     /// - Parameters:
