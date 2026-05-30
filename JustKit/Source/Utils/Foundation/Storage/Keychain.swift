@@ -196,27 +196,19 @@ public enum Keychain {
             attributes as CFDictionary
         )
         switch updateStatus {
-            
         case errSecSuccess:
             return
-            
-        case errSecItemNotFound:
-            
-            // 不存在则新增
+        case errSecItemNotFound: // 条目不存在则新增条目
             var newItem = query
-            
             newItem[kSecValueData as String] = data
             newItem[kSecAttrAccessible as String] = (accessible ?? .whenUnlocked).value
-            
             let addStatus = SecItemAdd(
                 newItem as CFDictionary,
                 nil
             )
-            
             guard addStatus == errSecSuccess else {
                 throw KeychainError.operationFailed(status: addStatus)
             }
-            
         default:
             throw KeychainError.operationFailed(status: updateStatus)
         }
