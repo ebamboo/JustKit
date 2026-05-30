@@ -202,8 +202,12 @@ public enum Keychain {
     ///   - group: 访问组标识符，`nil` 表示不限定。
     ///   - accessible: 数据保护级别。
     ///     当传入 `nil` 时，更新操作不变更现有级别，新增操作默认使用 ``Accessibility.whenUnlocked``。
+    ///   - synchronizable: 是否将条目标记为可同步（iCloud Keychain）。默认 `false`。
+    ///     同步与非同步条目即使 `service` + `account` 相同，也被视为独立的两条记录。
     /// - Throws: ``KeychainError``。
     ///
+    /// - Important: `synchronizable = true` 与带 `ThisDeviceOnly` 后缀的 ``Accessibility`` 互斥。
+    ///   新增条目时若检测到此冲突，将抛出 `errSecParam` 错误。
     /// - Note: `kSecAttrAccessible` 属于条目元数据，可在更新时同步变更，无需删除后重建（有些版本要求必须同步修改 `kSecValueData`）。
     /// - Note: `SecItemAdd` 时若未指定 `account` 或指定为空串 `""`，Keychain 中该条目的 `kSecAttrAccount` 均存储为 `""`。
     public static func setData(
@@ -217,7 +221,8 @@ public enum Keychain {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
-            kSecAttrAccount as String: account
+            kSecAttrAccount as String: account,
+            kSecAttrSynchronizable as String: synchronizable
         ]
         if let group = group {
             query[kSecAttrAccessGroup as String] = group
@@ -234,9 +239,14 @@ public enum Keychain {
         case errSecSuccess:
             return
         case errSecItemNotFound: // 条目不存在则新增条目
+            let accessible = accessible ?? .whenUnlocked
+            // 同步条目不兼容 ThisDeviceOnly 级别的访问策略
+            if synchronizable, accessible.isThisDeviceOnly {
+                throw KeychainError.operationFailed(status: errSecParam)
+            }
             var newItem = query
             newItem[kSecValueData as String] = data
-            newItem[kSecAttrAccessible as String] = (accessible ?? .whenUnlocked).secValue
+            newItem[kSecAttrAccessible as String] = accessible.secValue
             let addStatus = SecItemAdd(
                 newItem as CFDictionary,
                 nil
