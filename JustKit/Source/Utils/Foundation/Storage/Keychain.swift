@@ -24,17 +24,14 @@ import Foundation
 /// 当多个应用通过 Keychain Sharing 共享数据时，访问组（Access Group）、服务标识（Service）与账号标识（Account）必须保持一致。
 ///
 /// 因此，service 应作为业务级命名空间使用，不建议直接使用 Bundle Identifier 作为默认值，以避免后续服务拆分、组件共享或数据迁移时受到限制。
-///
-/// ## 查询限制
-///
-/// > You can’t combine the kSecReturnData and kSecMatchLimitAll options when copying password items, because copying each password item could require additional authentication.
-///
-/// 受此限制，批量查询账号时仅返回属性信息，不包含密码数据。如需读取所有密码，应先获取账号列表，再逐条读取。
 public enum Keychain {
     
     public enum KeychainError: Error, LocalizedError {
+        /// 返回的数据无法转换为预期类型。
         case invalidDataFormat
+        /// Keychain API 调用失败，附带 `OSStatus` 状态码。
         case operationFailed(status: OSStatus)
+        /// 错误信息描述
         public var errorDescription: String? {
             switch self {
             case .invalidDataFormat:
@@ -48,31 +45,38 @@ public enum Keychain {
         }
     }
     
+    /// Keychain 数据可访问性策略。对应 `kSecAttrAccessible` 属性。
+    ///
+    /// 带有 `ThisDeviceOnly` 后缀的级别会阻止条目随备份迁移至其他设备
     public enum Accessibility {
-        
+        /// 设备解锁期间可访问。系统默认项。
+        /// 设备锁定后不可读取。
         case whenUnlocked
+        /// 设备重启后首次解锁完成即可访问。
+        /// 即使随后设备再次锁定，后台任务仍可访问。
         case afterFirstUnlock
+        /// 仅当设备设置了密码且解锁时可访问。
+        /// 数据不会迁移到其他设备。
         case whenPasscodeSetThisDeviceOnly
+        /// 设备解锁期间可访问。
+        /// 数据仅保存在当前设备，不参与备份和迁移。
         case whenUnlockedThisDeviceOnly
+        /// 首次解锁后即可访问。
+        /// 数据仅保存在当前设备，不参与备份和迁移。
         case afterFirstUnlockThisDeviceOnly
-        
+        /// 对应 `kSecAttrAccessible` 属性值
         public var value: CFString {
             switch self {
-                
             case .whenUnlocked:
-                return kSecAttrAccessibleWhenUnlocked
-                
+                kSecAttrAccessibleWhenUnlocked
             case .afterFirstUnlock:
-                return kSecAttrAccessibleAfterFirstUnlock
-                
+                kSecAttrAccessibleAfterFirstUnlock
             case .whenPasscodeSetThisDeviceOnly:
-                return kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly
-                
+                kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly
             case .whenUnlockedThisDeviceOnly:
-                return kSecAttrAccessibleWhenUnlockedThisDeviceOnly
-                
+                kSecAttrAccessibleWhenUnlockedThisDeviceOnly
             case .afterFirstUnlockThisDeviceOnly:
-                return kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+                kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
             }
         }
     }
