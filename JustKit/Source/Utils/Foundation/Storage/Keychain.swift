@@ -4,29 +4,6 @@
 
 import Foundation
 
-/// 使用钥匙串管理账号和密码数据
-/// 密码数据不仅仅指一个简单的字符串，还可以是一些其他敏感数据
-///
-/// kSecAttrAccessGroup 表示共享组唯一标识
-/// kSecAttrService 表示服务唯一标识
-/// kSecAttrAccount 一般用于表示用户唯一标识
-/// 同一个开发者账号下多个 app 通过钥匙串共享数据时，以上三个参数必须相同。
-/// 因此，共享组名称和服务名称要设置为一个有意义的名称，不可如网上所说的那样简单地把 service 设置为 bundle identifier。
-///
-/// Apple 关于 Keychain 的文档
-/// https://developer.apple.com/documentation/security/keychain_services
-///
-/// 注意一：
-/// 1. For generic passwords, the primary keys include kSecAttrAccount and kSecAttrService.
-/// 对于 kSecClassGenericPassword 密码数据，主键包含 kSecAttrAccount 和 kSecAttrService
-/// 2. You can’t combine the kSecReturnData and kSecMatchLimitAll options when copying password items, because copying each password item could require additional authentication. Instead, request a reference or persistent reference to the items, then request the data for only the specific passwords that you actually require.
-/// 查询时不能同时使用 kSecReturnData 和 kSecMatchLimitAll，所以不能同时读取所有的 kSecAttrAccount 和 kSecValueData。基于此，可以先获取所有 accounts，再按需使用 account 读取密码数据（kSecValueData）
-///
-/// 注意二：
-/// 调用 SecItemAdd 时， 不设置 kSecAttrAccount 或者设置 kSecAttrAccount 为 "" 等效 ------ Keychain 中存储为 ""
-/// 调用 SecItemCopyMatching 或者 SecItemDelete 时，
-/// 不设置 kSecAttrAccount 则操作对象为所有 kSecAttrService 为 service 的 items
-/// 设置 kSecAttrAccount 为 "" 则操作对象为所有 kSecAttrService 为 service 且 kSecAttrAccount 为 "" 的 items
 public enum Keychain {
     
     public enum KeychainError: Error, LocalizedError {
