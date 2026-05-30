@@ -26,12 +26,13 @@ import Foundation
 /// 因此，service 应作为业务级命名空间使用，不建议直接使用 Bundle Identifier 作为默认值，以避免后续服务拆分、组件共享或数据迁移时受到限制。
 public enum Keychain {
     
+    /// Keychain 操作相关错误。
     public enum KeychainError: Error, LocalizedError {
         /// 返回的数据无法转换为预期类型。
         case invalidDataFormat
         /// Keychain API 调用失败，附带 `OSStatus` 状态码。
         case operationFailed(status: OSStatus)
-        /// 错误信息描述
+        /// 错误信息描述。
         public var errorDescription: String? {
             switch self {
             case .invalidDataFormat:
@@ -47,7 +48,7 @@ public enum Keychain {
     
     /// Keychain 数据可访问性策略。对应 `kSecAttrAccessible` 属性。
     ///
-    /// 带有 `ThisDeviceOnly` 后缀的级别会阻止条目随备份迁移至其他设备
+    /// 带有 `ThisDeviceOnly` 后缀的级别会阻止条目随备份迁移至其他设备。
     public enum Accessibility {
         /// 设备解锁期间可访问。系统默认项。
         /// 设备锁定后不可读取。
@@ -57,6 +58,7 @@ public enum Keychain {
         case afterFirstUnlock
         /// 仅当设备设置了密码且解锁时可访问。
         /// 数据不会迁移到其他设备。
+        /// - Note: 若用户移除设备密码，受此级别保护的条目将被系统自动删除。
         case whenPasscodeSetThisDeviceOnly
         /// 设备解锁期间可访问。
         /// 数据仅保存在当前设备，不参与备份和迁移。
@@ -89,7 +91,10 @@ public enum Keychain {
     /// - Returns: 所有有效的 account。无匹配条目时返回空数组。
     /// - Throws: ``KeychainError``。
     /// 
-    /// - Note: Apple 不允许同时使用 `kSecMatchLimitAll` 与 `kSecReturnData`。因此该方法仅返回账号列表，不返回对应密码数据。
+    /// - Note:
+    ///   Apple 不允许同时使用 `kSecMatchLimitAll` 与 `kSecReturnData`。
+    ///   因此该方法仅返回账号列表，不返回对应密码数据。
+    ///   如需读取密码数据，请使用 ``data(for:service:group:)``。
     public static func accounts(for service: String, group: String? = nil) throws -> [String] {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
@@ -108,8 +113,7 @@ public enum Keychain {
         guard let itemList = items as? [[String: Any]] else {
             throw KeychainError.invalidDataFormat
         }
-        // 如果 Keychain 中存在无kSecAttrAccount的项（比如旧版本遗留数据、其他工具存储的项），调用 accounts 方法会直接抛出错误，导致无法获取任何有效账号。
-        // 但方法的设计目标是「获取所有有效账号」，无账号的项本就应该被过滤，而非让整个调用失败。
+        // 过滤无 account 的异常条目
         return itemList.compactMap { $0[kSecAttrAccount as String] as? String }
     }
     
