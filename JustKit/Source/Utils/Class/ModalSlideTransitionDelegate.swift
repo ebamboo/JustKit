@@ -13,8 +13,8 @@ import UIKit
 ///
 /// ```swift
 /// let transitionDelegate = ModalSlideTransitionDelegate(
-///     presentConfiguration: .init(direction: .fromRight),
-///     dismissConfiguration: .init(direction: .fromLeft)
+///     presentConfiguration: .init(direction: .left),
+///     dismissConfiguration: .init(direction: .right)
 /// )
 ///
 /// viewController.modalPresentationStyle = .custom
@@ -29,10 +29,10 @@ public class ModalSlideTransitionDelegate: NSObject {
     public struct Configuration {
         
         public enum Direction {
-            case fromLeft
-            case fromRight
-            case fromTop
-            case fromBottom
+            case left
+            case right
+            case top
+            case bottom
         }
         
         public let direction: Direction
@@ -55,8 +55,8 @@ public class ModalSlideTransitionDelegate: NSObject {
     private let dismissConfiguration: Configuration
     
     public init(
-        presentConfiguration: Configuration = .init(direction: .fromRight),
-        dismissConfiguration: Configuration = .init(direction: .fromLeft)
+        presentConfiguration: Configuration = .init(direction: .left),
+        dismissConfiguration: Configuration = .init(direction: .right)
     ) {
         self.presentConfiguration = presentConfiguration
         self.dismissConfiguration = dismissConfiguration
@@ -96,47 +96,47 @@ fileprivate class Animator: NSObject {
     
     private func presentingInitialFrame(finalFrame: CGRect) -> CGRect {
         switch configuration.direction {
-        case .fromLeft:
-            return finalFrame.offsetBy(
-                dx: -finalFrame.width,
-                dy: 0
-            )
-        case .fromRight:
+        case .left:
             return finalFrame.offsetBy(
                 dx: finalFrame.width,
                 dy: 0
             )
-        case .fromTop:
+        case .right:
             return finalFrame.offsetBy(
-                dx: 0,
-                dy: -finalFrame.height
+                dx: -finalFrame.width,
+                dy: 0
             )
-        case .fromBottom:
+        case .top:
             return finalFrame.offsetBy(
                 dx: 0,
                 dy: finalFrame.height
+            )
+        case .bottom:
+            return finalFrame.offsetBy(
+                dx: 0,
+                dy: -finalFrame.height
             )
         }
     }
 
     private func dismissingFinalFrame(currentFrame: CGRect) -> CGRect {
         switch configuration.direction {
-        case .fromLeft:
+        case .left:
             return currentFrame.offsetBy(
                 dx: -currentFrame.width,
                 dy: 0
             )
-        case .fromRight:
+        case .right:
             return currentFrame.offsetBy(
                 dx: currentFrame.width,
                 dy: 0
             )
-        case .fromTop:
+        case .top:
             return currentFrame.offsetBy(
                 dx: 0,
                 dy: -currentFrame.height
             )
-        case .fromBottom:
+        case .bottom:
             return currentFrame.offsetBy(
                 dx: 0,
                 dy: currentFrame.height
