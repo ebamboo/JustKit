@@ -63,7 +63,7 @@ private extension ModalSlideTransitionDelegate {
         let direction: Direction
         let duration: TimeInterval
         
-        init(operation: Operation, direction: ModalSlideTransitionDelegate.Direction, duration: TimeInterval = 0.4) {
+        init(operation: Operation, direction: Direction, duration: TimeInterval) {
             self.operation = operation
             self.direction = direction
             self.duration = duration
@@ -137,7 +137,7 @@ private extension ModalSlideTransitionDelegate {
                     endFrame = containerFrame.offsetBy(dx: 0, dy: -containerFrame.size.height)
                 }
                 
-                UIView.animate(withDuration: self.transitionDuration(using: transitionContext)) {
+                UIView.animate(withDuration: duration) {
                     fromView.frame = endFrame
                 } completion: { (finished) in
                     transitionContext.completeTransition(!transitionContext.transitionWasCancelled)
