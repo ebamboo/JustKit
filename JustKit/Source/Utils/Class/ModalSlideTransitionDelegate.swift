@@ -155,41 +155,60 @@ private extension ModalSlideTransitionDelegate {
         }
         
         func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
-            // 1. 获取相关控制器和视图。
-            guard let fromVC = transitionContext.viewController(forKey: .from) else { return }
-            guard let toVC = transitionContext.viewController(forKey: .to) else { return }
+            
+            // 获取参与转场的控制器及对应视图
+            guard let fromVC = transitionContext.viewController(forKey: .from),
+                  let toVC = transitionContext.viewController(forKey: .to) else {
+                return
+            }
+            
             let fromView = transitionContext.view(forKey: .from) ?? fromVC.view!
             let toView = transitionContext.view(forKey: .to) ?? toVC.view!
-            // 2. 分类处理转场动画。
+            
             switch operation {
+                
             case .present:
-                // 3. 计算动画相关 frame 及准备工作。
-                let endFrame = transitionContext.initialFrame(for: fromVC)
-                let beginFrame = presentingInitialFrame(finalFrame: endFrame)
-                toView.frame = beginFrame
+                
+                // presented 控制器最终应处于的位置
+                let finalFrame = transitionContext.finalFrame(for: toVC)
+                
+                // 根据转场方向计算动画起始位置
+                let initialFrame = presentingInitialFrame(finalFrame: finalFrame)
+                
+                // Present 转场时 UIKit 尚未将 toView 加入容器视图，需要手动添加
+                toView.frame = initialFrame
                 transitionContext.containerView.addSubview(toView)
-                // 4. 执行转场动画。
+                
                 UIView.animate(withDuration: duration) {
-                    toView.frame = endFrame
-                } completion: { finished in
-                    // 上报转场结束并且是否成功情况，否则会认为还在转场 无法交互
-                    transitionContext.completeTransition(!transitionContext.transitionWasCancelled)
-                    if transitionContext.transitionWasCancelled {
-                        // 取消时把要加入的 toView 移除
+                    toView.frame = finalFrame
+                } completion: { _ in
+                    let completed = !transitionContext.transitionWasCancelled
+                    // 转场被取消时，需要恢复视图层级
+                    if !completed {
                         toView.removeFromSuperview()
                     }
+                    // 必须通知 UIKit 转场已经结束
+                    transitionContext.completeTransition(completed)
                 }
+                
             case .dismiss:
-                // 3. 计算动画相关 frame
-                let currentFrame = transitionContext.initialFrame(for: fromVC)
-                let endFrame = dismissingFinalFrame(currentFrame: currentFrame)
-                // 4. 执行转场动画。
+                
+                // 当前展示位置作为动画起点
+                let currentFrame = fromView.frame
+                
+                // 根据转场方向计算移出屏幕后的目标位置
+                let finalFrame = dismissingFinalFrame(currentFrame: currentFrame)
+                
                 UIView.animate(withDuration: duration) {
-                    fromView.frame = endFrame
-                } completion: { (finished) in
-                    transitionContext.completeTransition(!transitionContext.transitionWasCancelled)
+                    fromView.frame = finalFrame
+                } completion: { _ in
+                    // 必须通知 UIKit 转场已经结束
+                    transitionContext.completeTransition(
+                        !transitionContext.transitionWasCancelled
+                    )
                 }
             }
+            
         }
         
     }
