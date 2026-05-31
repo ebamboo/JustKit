@@ -258,20 +258,9 @@ public extension Keychain {
         public let synchronizable: Bool
     }
     
-    enum KeychainError: Error, LocalizedError {
+    enum KeychainError: Error {
         case invalidDataFormat
         case operationFailed(status: OSStatus)
-        public var errorDescription: String? {
-            switch self {
-            case .invalidDataFormat:
-                return "Invalid keychain data format"
-            case .operationFailed(let status):
-                if let msg = SecCopyErrorMessageString(status, nil) {
-                    return msg as String
-                }
-                return "Keychain operation failed: \(status)"
-            }
-        }
     }
     
     enum Accessibility {
@@ -321,7 +310,7 @@ public extension Keychain {
     }
     
     enum SynchronizableScope {
-        /// 仅匹配本地条目（默认）。
+        /// 仅匹配本地条目。
         case local
         /// 仅匹配同步条目。
         case synchronizable
