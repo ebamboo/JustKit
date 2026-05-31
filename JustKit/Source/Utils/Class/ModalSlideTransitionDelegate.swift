@@ -48,11 +48,11 @@ public class ModalSlideTransitionDelegate: NSObject {
 extension ModalSlideTransitionDelegate: UIViewControllerTransitioningDelegate {
     
     public func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        return Animator(direction: presentDirection, duration: presentDuration)
+        return Animator(operation: .present, direction: presentDirection, duration: presentDuration)
     }
     
     public func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        return Animator(direction: dismissDirection, duration: dismissDuration)
+        return Animator(operation: .dismiss, direction: dismissDirection, duration: dismissDuration)
     }
     
 }
@@ -61,11 +61,21 @@ extension ModalSlideTransitionDelegate: UIViewControllerTransitioningDelegate {
 
 private extension ModalSlideTransitionDelegate {
     
+    
+    
     class Animator: NSObject, UIViewControllerAnimatedTransitioning {
         
+        enum Operation {
+            case present
+            case dismiss
+        }
+        
+        let operation: Operation
         let direction: Direction
         let duration: TimeInterval
-        init(direction: ModalSlideTransitionDelegate.Direction, duration: TimeInterval = 0.4) {
+        
+        init(operation: Operation, direction: ModalSlideTransitionDelegate.Direction, duration: TimeInterval = 0.4) {
+            self.operation = operation
             self.direction = direction
             self.duration = duration
         }
@@ -75,17 +85,6 @@ private extension ModalSlideTransitionDelegate {
         }
         
         func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
-            // MARK: - 第一步：获取相关视图和视图控制器
-            guard let fromVC = transitionContext.viewController(forKey: .from) else { return }
-            guard let toVC = transitionContext.viewController(forKey: .to) else { return }
-            let fromView = transitionContext.view(forKey: .from) ?? fromVC.view!
-            let toView = transitionContext.view(forKey: .to) ?? toVC.view!
-            
-            // MARK: - 第二步：判断当前转场发生的具体形式
-            let present = toVC.presentingViewController == fromVC
-            let dismiss = fromVC.presentingViewController == toVC
-            
-            // MARK: - 第三步：根据不同场景执行不同动画
             ///
             /// !!!!!!一定要理解视图层次!!!!!!
             /// UIViewController --> UIView --> Transition View --> Wrapper View
@@ -97,7 +96,13 @@ private extension ModalSlideTransitionDelegate {
             /// 做动画时注意 custom 和 fullScreen 的视图的层次结构
             /// 一般设置成 custom
             ///
-            if present {
+            guard let fromVC = transitionContext.viewController(forKey: .from) else { return }
+            guard let toVC = transitionContext.viewController(forKey: .to) else { return }
+            let fromView = transitionContext.view(forKey: .from) ?? fromVC.view!
+            let toView = transitionContext.view(forKey: .to) ?? toVC.view!
+            
+            switch operation {
+            case .present:
                 let containerFrame = transitionContext.initialFrame(for: fromVC)
                 let beginFrame: CGRect!
                 switch direction {
@@ -112,7 +117,7 @@ private extension ModalSlideTransitionDelegate {
                 }
                 let endFrame = containerFrame
                 
-                // 发生 present 转场时 toView 还么有在 containerView，需要添加 toView 到 containerView
+                // 发生 present 转场时 toView 还没有在 containerView，需要添加 toView 到 containerView
                 toView.frame = beginFrame
                 transitionContext.containerView.addSubview(toView)
                 UIView.animate(withDuration: duration) {
@@ -125,9 +130,7 @@ private extension ModalSlideTransitionDelegate {
                         toView.removeFromSuperview()
                     }
                 }
-                return
-            }
-            if dismiss {
+            case .dismiss:
                 let containerFrame = transitionContext.initialFrame(for: fromVC)
                 let endFrame: CGRect!
                 switch direction {
@@ -146,7 +149,6 @@ private extension ModalSlideTransitionDelegate {
                 } completion: { (finished) in
                     transitionContext.completeTransition(!transitionContext.transitionWasCancelled)
                 }
-                return
             }
         }
         
