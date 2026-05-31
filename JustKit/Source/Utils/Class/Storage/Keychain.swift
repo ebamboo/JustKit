@@ -39,12 +39,15 @@ public enum Keychain {
     ///   Apple 不允许同时使用 `kSecMatchLimitAll` 与 `kSecReturnData`。
     ///   因此该方法仅返回条目元信息，不返回对应密码数据。
     ///   如需读取密码数据，请使用 ``data(for:service:group:scope:)``。
-    public static func items(for service: String, group: String? = nil, scope: SynchronizableScope? = .local) throws -> [Item] {
+    public static func items(
+        for service: String,
+        group: String? = nil,
+        scope: SynchronizableScope? = .local
+    ) throws -> [Item] {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrSynchronizable as String: scope?.secValue ?? kSecAttrSynchronizableAny,
-            // 设置为 `kSecMatchLimitAll` 返回列表
             kSecMatchLimit as String: kSecMatchLimitAll,
             kSecReturnAttributes as String: true
         ]
@@ -84,7 +87,12 @@ public enum Keychain {
     ///   - scope: 查询范围。
     /// - Returns: 匹配的条目关联的二进制数据；无匹配条目时返回 `nil`。
     /// - Throws: ``KeychainError``。
-    public static func data(for account: String, service: String, group: String? = nil, scope: SynchronizableScope = .local) throws -> Data? {
+    public static func data(
+        for account: String,
+        service: String,
+        group: String? = nil,
+        scope: SynchronizableScope = .local
+    ) throws -> Data? {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -160,7 +168,7 @@ public enum Keychain {
         switch updateStatus {
         case errSecSuccess:
             return
-        case errSecItemNotFound: // 条目不存在则新增条目
+        case errSecItemNotFound:
             var newItem = query
             newItem[kSecValueData as String] = data
             newItem[kSecAttrAccessible as String] = (accessible ?? .whenUnlocked).secValue
@@ -190,7 +198,12 @@ public enum Keychain {
     /// - Note: 本方法显式指定了 `account`，仅匹配该账号对应的条目。
     ///   若不指定 `account`，`SecItemDelete` 将删除 `service` 下的所有条目——
     ///   这正是 ``deleteAllItems(for:group:scope:)`` 的行为。
-    public static func deleteItem(for account: String, service: String, group: String? = nil, scope: SynchronizableScope? = .local) throws {
+    public static func deleteItem(
+        for account: String,
+        service: String,
+        group: String? = nil,
+        scope: SynchronizableScope? = .local
+    ) throws {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -217,7 +230,11 @@ public enum Keychain {
     /// - Throws: ``KeychainError``。
     ///
     /// - Important: 此操作不可逆，调用前请确认意图。
-    public static func deleteAllItems(for service: String, group: String? = nil, scope: SynchronizableScope? = .local) throws {
+    public static func deleteAllItems(
+        for service: String,
+        group: String? = nil,
+        scope: SynchronizableScope? = .local
+    ) throws {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
