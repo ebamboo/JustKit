@@ -28,7 +28,7 @@ public enum ExecutionLimiter {
     ) {
         lock.lock()
         let remain = storage[label] ?? limit
-        // 保证首次调用时必然注册 limit，后续调用不再更新。
+        // 保证首次调用时必然注册 limit，后续调用不再重新注册。
         storage[label] = remain
         guard remain > 0 else {
             lock.unlock()
