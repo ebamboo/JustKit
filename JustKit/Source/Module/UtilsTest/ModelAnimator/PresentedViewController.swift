@@ -6,7 +6,7 @@ import UIKit
 
 class PresentedViewController: UIViewController {
     
-    let animator = TransitioningDelegate(presentStyle: .rightToLeft, presentDuration: 1.2, dismissStyle: .leftToRight, dismissDuration: 1.2)
+    let animator = ModalSlideTransitionDelegate(presentDirection: .rightToLeft, presentDuration: 1.2, dismissDirection: .leftToRight, dismissDuration: 1.2)
     
     override func viewDidLoad() {
         super.viewDidLoad()
