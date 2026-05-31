@@ -9,16 +9,23 @@ import UIKit
 /// 为模态展示（Present）和关闭（Dismiss）提供滑动转场动画，
 /// 支持上下左右四个方向。
 ///
-/// 使用方式：
+/// 典型用法 — 在被展示的控制器中持有并配置：
 ///
 /// ```swift
-/// let transitionDelegate = ModalSlideTransitionDelegate(
-///     presentConfiguration: .init(direction: .left),
-///     dismissConfiguration: .init(direction: .right)
-/// )
+/// class PresentedViewController: UIViewController {
 ///
-/// viewController.modalPresentationStyle = .custom
-/// viewController.transitioningDelegate = transitionDelegate
+///     let transition = ModalSlideTransitionDelegate(
+///         presentConfiguration: .init(direction: .left),
+///         dismissConfiguration: .init(direction: .right)
+///     )
+///
+///     override init(nibName: String?, bundle: Bundle?) {
+///         super.init(nibName: nibName, bundle: bundle)
+///         transitioningDelegate = transition
+///         modalPresentationStyle = .custom
+///     }
+///
+/// }
 /// ```
 ///
 /// - Important:
