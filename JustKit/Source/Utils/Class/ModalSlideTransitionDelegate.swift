@@ -4,17 +4,10 @@
 
 import UIKit
 
+/// 模态滑动转场代理，支持上下左右四个方向
 ///
-/// 自定义模态动画
-/// 目前仅支持四个方向的动画
-/// 只需要把需要自定义模态动画的 vc 的属性 transitioningDelegate
-/// 设置为 ModalSlideTransitionDelegate 实例即可
-/// 注意 ModalSlideTransitionDelegate 实例的生命周期
-///
-
-
-// MARK: - 自定义模态转场
-
+/// 赋值给 vc 的 `transitioningDelegate` 属性即可生效
+/// 需持有该实例以保证其生命周期
 public class ModalSlideTransitionDelegate: NSObject {
     
     public enum Direction {
@@ -43,8 +36,6 @@ public class ModalSlideTransitionDelegate: NSObject {
     
 }
 
-// MARK: - 转场实现
-
 extension ModalSlideTransitionDelegate: UIViewControllerTransitioningDelegate {
     
     public func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
@@ -57,13 +48,11 @@ extension ModalSlideTransitionDelegate: UIViewControllerTransitioningDelegate {
     
 }
 
-// MARK: - 动画实现
-
 private extension ModalSlideTransitionDelegate {
     
-    
-    
     class Animator: NSObject, UIViewControllerAnimatedTransitioning {
+        
+        // MARK: - Definition
         
         enum Operation {
             case present
@@ -80,11 +69,15 @@ private extension ModalSlideTransitionDelegate {
             self.duration = duration
         }
         
+        // MARK: - UIViewControllerAnimatedTransitioning
+        
         func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
             return duration
         }
         
         func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
+            // ================== animate begin =========================
+            
             ///
             /// !!!!!!一定要理解视图层次!!!!!!
             /// UIViewController --> UIView --> Transition View --> Wrapper View
@@ -150,8 +143,10 @@ private extension ModalSlideTransitionDelegate {
                     transitionContext.completeTransition(!transitionContext.transitionWasCancelled)
                 }
             }
+            
+            // ================== animate end =========================
         }
         
     }
-
+    
 }
