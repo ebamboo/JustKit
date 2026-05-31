@@ -250,13 +250,13 @@ public extension Keychain {
     
     enum KeychainError: Error {
         case invalidDataFormat
-        case operationFailed(status: OSStatus)
+        case operationFailed(status: Int32)
     }
     
     enum SynchronizableScope {
         case local
         case synchronizable
-        public var secValue: CFBoolean {
+        fileprivate var secValue: CFBoolean {
             switch self {
             case .local: kCFBooleanFalse
             case .synchronizable: kCFBooleanTrue
@@ -270,7 +270,7 @@ public extension Keychain {
         case whenPasscodeSetThisDeviceOnly
         case whenUnlockedThisDeviceOnly
         case afterFirstUnlockThisDeviceOnly
-        public var secValue: CFString {
+        fileprivate var secValue: CFString {
             switch self {
             case .whenUnlocked:
                 kSecAttrAccessibleWhenUnlocked
@@ -284,7 +284,7 @@ public extension Keychain {
                 kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
             }
         }
-        public var isThisDeviceOnly: Bool {
+        fileprivate var isThisDeviceOnly: Bool {
             switch self {
             case .whenPasscodeSetThisDeviceOnly,
                  .whenUnlockedThisDeviceOnly,
