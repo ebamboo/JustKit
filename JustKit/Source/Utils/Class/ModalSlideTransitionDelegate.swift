@@ -13,8 +13,8 @@ import UIKit
 ///
 /// ```swift
 /// let transitionDelegate = ModalSlideTransitionDelegate(
-///     presentDirection: .fromRight,
-///     dismissDirection: .fromLeft
+///     presentConfiguration: .init(direction: .fromRight),
+///     dismissConfiguration: .init(direction: .fromLeft)
 /// )
 ///
 /// viewController.modalPresentationStyle = .custom
@@ -26,28 +26,40 @@ import UIKit
 ///   - 必须配合 `.custom` 模态展示样式使用。
 public class ModalSlideTransitionDelegate: NSObject {
     
-    public enum Direction {
-        case fromLeft
-        case fromRight
-        case fromTop
-        case fromBottom
+    public struct Configuration {
+        
+        public enum Direction {
+            case fromLeft
+            case fromRight
+            case fromTop
+            case fromBottom
+        }
+        
+        public let direction: Direction
+        public let duration: TimeInterval
+        public let animationOptions: UIView.AnimationOptions
+        
+        public init(
+            direction: Direction,
+            duration: TimeInterval = 0.35,
+            animationOptions: UIView.AnimationOptions = .curveEaseOut
+        ) {
+            self.direction = direction
+            self.duration = duration
+            self.animationOptions = animationOptions
+        }
+        
     }
     
-    private let presentDirection: Direction
-    private let presentDuration: TimeInterval
-    private let dismissDirection: Direction
-    private let dismissDuration: TimeInterval
+    private let presentConfiguration: Configuration
+    private let dismissConfiguration: Configuration
     
     public init(
-        presentDirection: Direction = .fromRight,
-        presentDuration: TimeInterval = 0.3,
-        dismissDirection: Direction = .fromLeft,
-        dismissDuration: TimeInterval = 0.3
+        presentConfiguration: Configuration = .init(direction: .fromRight),
+        dismissConfiguration: Configuration = .init(direction: .fromLeft)
     ) {
-        self.presentDirection = presentDirection
-        self.presentDuration = presentDuration
-        self.dismissDirection = dismissDirection
-        self.dismissDuration = dismissDuration
+        self.presentConfiguration = presentConfiguration
+        self.dismissConfiguration = dismissConfiguration
     }
     
 }
@@ -55,11 +67,11 @@ public class ModalSlideTransitionDelegate: NSObject {
 extension ModalSlideTransitionDelegate: UIViewControllerTransitioningDelegate {
     
     public func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        return Animator(operation: .present, direction: presentDirection, duration: presentDuration)
+        return Animator(operation: .present, configuration: presentConfiguration)
     }
     
     public func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        return Animator(operation: .dismiss, direction: dismissDirection, duration: dismissDuration)
+        return Animator(operation: .dismiss, configuration: dismissConfiguration)
     }
     
 }
@@ -72,17 +84,18 @@ fileprivate class Animator: NSObject {
     }
     
     let operation: Operation
-    let direction: ModalSlideTransitionDelegate.Direction
-    let duration: TimeInterval
+    let configuration: ModalSlideTransitionDelegate.Configuration
     
-    init(operation: Operation, direction: ModalSlideTransitionDelegate.Direction, duration: TimeInterval) {
+    init(
+        operation: Operation,
+        configuration: ModalSlideTransitionDelegate.Configuration
+    ) {
         self.operation = operation
-        self.direction = direction
-        self.duration = duration
+        self.configuration = configuration
     }
     
     private func presentingInitialFrame(finalFrame: CGRect) -> CGRect {
-        switch direction {
+        switch configuration.direction {
         case .fromLeft:
             return finalFrame.offsetBy(
                 dx: -finalFrame.width,
@@ -107,7 +120,7 @@ fileprivate class Animator: NSObject {
     }
 
     private func dismissingFinalFrame(currentFrame: CGRect) -> CGRect {
-        switch direction {
+        switch configuration.direction {
         case .fromLeft:
             return currentFrame.offsetBy(
                 dx: -currentFrame.width,
@@ -136,14 +149,13 @@ fileprivate class Animator: NSObject {
 extension Animator: UIViewControllerAnimatedTransitioning {
     
     func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
-        return duration
+        return configuration.duration
     }
     
     func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
         
         guard let fromVC = transitionContext.viewController(forKey: .from),
               let toVC = transitionContext.viewController(forKey: .to) else {
-            // 必须通知 UIKit 转场已经结束
             transitionContext.completeTransition(false)
             return
         }
@@ -162,7 +174,7 @@ extension Animator: UIViewControllerAnimatedTransitioning {
             toView.frame = initialFrame
             transitionContext.containerView.addSubview(toView)
             
-            UIView.animate(withDuration: duration) {
+            UIView.animate(withDuration: configuration.duration, delay: 0, options: configuration.animationOptions) {
                 toView.frame = finalFrame
             } completion: { _ in
                 let completed = !transitionContext.transitionWasCancelled
@@ -170,7 +182,6 @@ extension Animator: UIViewControllerAnimatedTransitioning {
                 if !completed {
                     toView.removeFromSuperview()
                 }
-                // 必须通知 UIKit 转场已经结束
                 transitionContext.completeTransition(completed)
             }
             
@@ -179,7 +190,7 @@ extension Animator: UIViewControllerAnimatedTransitioning {
             let currentFrame = fromView.frame
             let finalFrame = dismissingFinalFrame(currentFrame: currentFrame)
             
-            UIView.animate(withDuration: duration) {
+            UIView.animate(withDuration: configuration.duration, delay: 0, options: configuration.animationOptions) {
                 fromView.frame = finalFrame
             } completion: { _ in
                 let completed = !transitionContext.transitionWasCancelled
@@ -187,7 +198,6 @@ extension Animator: UIViewControllerAnimatedTransitioning {
                 if !completed {
                     fromView.frame = currentFrame
                 }
-                // 必须通知 UIKit 转场已经结束
                 transitionContext.completeTransition(completed)
             }
             
