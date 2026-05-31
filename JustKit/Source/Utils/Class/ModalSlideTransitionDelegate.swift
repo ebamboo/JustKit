@@ -4,10 +4,33 @@
 
 import UIKit
 
+
+
 /// 模态滑动转场代理，支持上下左右四个方向
 ///
 /// 赋值给 vc 的 `transitioningDelegate` 属性即可生效
 /// 需持有该实例以保证其生命周期
+///
+/// !!!!!!一定要理解视图层次!!!!!!
+/// UIViewController --> UIView --> Transition View --> Wrapper View
+/// UIWindowScene、UITabBarController、UINavigationController
+/// 除了以上三种控制器会生成 Transition View
+/// 模态时也会生成 Transition View，并且 Transition View 直接在 window 上
+/// presentedView 直接在 Transition View
+///
+/// 做动画时注意 custom 和 fullScreen 的视图的层次结构
+/// 一般设置成 custom
+///
+///
+///
+///  1。// 发生 present 转场时 toView 还没有在 containerView，需要添加 toView 到 containerView
+///
+
+
+
+
+
+
 public class ModalSlideTransitionDelegate: NSObject {
     
     public enum Direction {
@@ -132,32 +155,20 @@ private extension ModalSlideTransitionDelegate {
         }
         
         func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
-            // ================== animate begin =========================
-            
-            ///
-            /// !!!!!!一定要理解视图层次!!!!!!
-            /// UIViewController --> UIView --> Transition View --> Wrapper View
-            /// UIWindowScene、UITabBarController、UINavigationController
-            /// 除了以上三种控制器会生成 Transition View
-            /// 模态时也会生成 Transition View，并且 Transition View 直接在 window 上
-            /// presentedView 直接在 Transition View
-            ///
-            /// 做动画时注意 custom 和 fullScreen 的视图的层次结构
-            /// 一般设置成 custom
-            ///
+            // 1. 获取相关控制器和视图。
             guard let fromVC = transitionContext.viewController(forKey: .from) else { return }
             guard let toVC = transitionContext.viewController(forKey: .to) else { return }
             let fromView = transitionContext.view(forKey: .from) ?? fromVC.view!
             let toView = transitionContext.view(forKey: .to) ?? toVC.view!
-            
+            // 2. 分类处理转场动画。
             switch operation {
             case .present:
+                // 3. 计算动画相关 frame 及准备工作。
                 let endFrame = transitionContext.initialFrame(for: fromVC)
                 let beginFrame = presentingInitialFrame(finalFrame: endFrame)
-                
-                // 发生 present 转场时 toView 还没有在 containerView，需要添加 toView 到 containerView
                 toView.frame = beginFrame
                 transitionContext.containerView.addSubview(toView)
+                // 4. 执行转场动画。
                 UIView.animate(withDuration: duration) {
                     toView.frame = endFrame
                 } completion: { finished in
@@ -169,17 +180,16 @@ private extension ModalSlideTransitionDelegate {
                     }
                 }
             case .dismiss:
+                // 3. 计算动画相关 frame
                 let currentFrame = transitionContext.initialFrame(for: fromVC)
                 let endFrame = dismissingFinalFrame(currentFrame: currentFrame)
-                
+                // 4. 执行转场动画。
                 UIView.animate(withDuration: duration) {
                     fromView.frame = endFrame
                 } completion: { (finished) in
                     transitionContext.completeTransition(!transitionContext.transitionWasCancelled)
                 }
             }
-            
-            // ================== animate end =========================
         }
         
     }
