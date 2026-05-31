@@ -140,9 +140,11 @@ extension Animator: UIViewControllerAnimatedTransitioning {
     }
     
     func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
-        // 获取参与转场的控制器及对应视图
+        
         guard let fromVC = transitionContext.viewController(forKey: .from),
               let toVC = transitionContext.viewController(forKey: .to) else {
+            // 必须通知 UIKit 转场已经结束
+            transitionContext.completeTransition(false)
             return
         }
         
@@ -153,10 +155,7 @@ extension Animator: UIViewControllerAnimatedTransitioning {
             
         case .present:
             
-            // presented 控制器最终应处于的位置
             let finalFrame = transitionContext.finalFrame(for: toVC)
-            
-            // 根据转场方向计算动画起始位置
             let initialFrame = presentingInitialFrame(finalFrame: finalFrame)
             
             // Present 转场时 UIKit 尚未将 toView 加入容器视图，需要手动添加
@@ -167,7 +166,7 @@ extension Animator: UIViewControllerAnimatedTransitioning {
                 toView.frame = finalFrame
             } completion: { _ in
                 let completed = !transitionContext.transitionWasCancelled
-                // 转场被取消时，需要恢复视图层级
+                // 转场被取消时，将 toView 移出视图层级
                 if !completed {
                     toView.removeFromSuperview()
                 }
@@ -177,19 +176,19 @@ extension Animator: UIViewControllerAnimatedTransitioning {
             
         case .dismiss:
             
-            // 当前展示位置作为动画起点
             let currentFrame = fromView.frame
-            
-            // 根据转场方向计算移出屏幕后的目标位置
             let finalFrame = dismissingFinalFrame(currentFrame: currentFrame)
             
             UIView.animate(withDuration: duration) {
                 fromView.frame = finalFrame
             } completion: { _ in
+                let completed = !transitionContext.transitionWasCancelled
+                // 转场被取消时，将 fromView 恢复到动画前的位置
+                if !completed {
+                    fromView.frame = currentFrame
+                }
                 // 必须通知 UIKit 转场已经结束
-                transitionContext.completeTransition(
-                    !transitionContext.transitionWasCancelled
-                )
+                transitionContext.completeTransition(completed)
             }
             
         }
