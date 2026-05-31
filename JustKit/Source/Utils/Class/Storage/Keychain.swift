@@ -253,6 +253,17 @@ public extension Keychain {
         case operationFailed(status: OSStatus)
     }
     
+    enum SynchronizableScope {
+        case local
+        case synchronizable
+        public var secValue: CFBoolean {
+            switch self {
+            case .local: kCFBooleanFalse
+            case .synchronizable: kCFBooleanTrue
+            }
+        }
+    }
+    
     enum Accessibility {
         case whenUnlocked
         case afterFirstUnlock
@@ -282,17 +293,6 @@ public extension Keychain {
             case .whenUnlocked,
                  .afterFirstUnlock:
                 return false
-            }
-        }
-    }
-    
-    enum SynchronizableScope {
-        case local
-        case synchronizable
-        public var secValue: CFBoolean {
-            switch self {
-            case .local: kCFBooleanFalse
-            case .synchronizable: kCFBooleanTrue
             }
         }
     }
