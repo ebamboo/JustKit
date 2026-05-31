@@ -18,10 +18,10 @@ import UIKit
 public class ModalSlideTransitionDelegate: NSObject {
     
     public enum Direction {
-        case leftToRight
-        case rightToLeft
-        case topToBottom
-        case bottomToTop
+        case toRight
+        case toLeft
+        case toBottom
+        case toTop
     }
     
     private let presentDirection: Direction
@@ -30,9 +30,9 @@ public class ModalSlideTransitionDelegate: NSObject {
     private let dismissDuration: TimeInterval
     
     public init(
-        presentDirection: Direction = .rightToLeft,
+        presentDirection: Direction = .toLeft,
         presentDuration: TimeInterval = 0.3,
-        dismissDirection: Direction = .leftToRight,
+        dismissDirection: Direction = .toRight,
         dismissDuration: TimeInterval = 0.3
     ) {
         self.presentDirection = presentDirection
@@ -101,13 +101,13 @@ private extension ModalSlideTransitionDelegate {
                 let containerFrame = transitionContext.initialFrame(for: fromVC)
                 let beginFrame: CGRect!
                 switch direction {
-                case .leftToRight:
+                case .toRight:
                     beginFrame = containerFrame.offsetBy(dx: -containerFrame.size.width, dy: 0)
-                case .rightToLeft:
+                case .toLeft:
                     beginFrame = containerFrame.offsetBy(dx: containerFrame.size.width, dy: 0)
-                case .topToBottom:
+                case .toBottom:
                     beginFrame = containerFrame.offsetBy(dx: 0, dy: -containerFrame.size.height)
-                case .bottomToTop:
+                case .toTop:
                     beginFrame = containerFrame.offsetBy(dx: 0, dy: containerFrame.size.height)
                 }
                 let endFrame = containerFrame
@@ -131,13 +131,13 @@ private extension ModalSlideTransitionDelegate {
                 let containerFrame = transitionContext.initialFrame(for: fromVC)
                 let endFrame: CGRect!
                 switch direction {
-                case .leftToRight:
+                case .toRight:
                     endFrame = containerFrame.offsetBy(dx: containerFrame.size.width, dy: 0)
-                case .rightToLeft:
+                case .toLeft:
                     endFrame = containerFrame.offsetBy(dx: -containerFrame.size.width, dy: 0)
-                case .topToBottom:
+                case .toBottom:
                     endFrame = containerFrame.offsetBy(dx: 0, dy: containerFrame.size.height)
-                case .bottomToTop:
+                case .toTop:
                     endFrame = containerFrame.offsetBy(dx: 0, dy: -containerFrame.size.height)
                 }
                 
