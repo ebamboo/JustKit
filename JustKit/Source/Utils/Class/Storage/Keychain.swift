@@ -264,23 +264,11 @@ public extension Keychain {
     }
     
     enum Accessibility {
-        /// 设备解锁期间可访问（系统默认）。
-        /// 设备锁定后不可读取。
         case whenUnlocked
-        /// 设备重启后首次解锁完成即可访问。
-        /// 即使随后设备再次锁定，后台任务仍可访问。
         case afterFirstUnlock
-        /// 仅当设备设置了密码且解锁时可访问。
-        /// 数据不会迁移到其他设备。
-        /// - Note: 若用户移除设备密码，受此级别保护的条目将被系统自动删除。
         case whenPasscodeSetThisDeviceOnly
-        /// 设备解锁期间可访问。
-        /// 数据仅保存在当前设备，不参与备份和迁移。
         case whenUnlockedThisDeviceOnly
-        /// 首次解锁后即可访问。
-        /// 数据仅保存在当前设备，不参与备份和迁移。
         case afterFirstUnlockThisDeviceOnly
-        /// 对应 `kSecAttrAccessible` 属性值。
         public var secValue: CFString {
             switch self {
             case .whenUnlocked:
@@ -295,7 +283,6 @@ public extension Keychain {
                 kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
             }
         }
-        /// 判断当前访问策略是否为设备专属。
         public var isThisDeviceOnly: Bool {
             switch self {
             case .whenPasscodeSetThisDeviceOnly,
@@ -310,11 +297,8 @@ public extension Keychain {
     }
     
     enum SynchronizableScope {
-        /// 仅匹配本地条目。
         case local
-        /// 仅匹配同步条目。
         case synchronizable
-        /// 对应 `kSecAttrSynchronizable` 属性值。
         public var secValue: CFBoolean {
             switch self {
             case .local: kCFBooleanFalse
