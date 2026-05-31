@@ -116,13 +116,13 @@ public enum Keychain {
         }
     }
     
-    /// 获取指定服务下的所有条目元信息。
+    /// 获取指定服务下的所有条目。
     ///
     /// - Parameters:
     ///   - service: 服务标识符。
     ///   - group: 访问组标识符，`nil` 表示不限定。
-    ///   - scope: 查询范围，控制匹配本地条目或同步条目。`nil` 表示不限制，同时匹配本地和同步条目。默认仅匹配本地条目。
-    /// - Returns: 匹配的条目信息列表。无匹配条目时返回空数组。返回顺序未定义。
+    ///   - scope: 查询范围，`nil` 表示不限定。
+    /// - Returns: 匹配的条目列表。无匹配条目时返回空数组。返回顺序未定义。
     /// - Throws: ``KeychainError``。
     ///
     /// - Note:
@@ -165,14 +165,14 @@ public enum Keychain {
         }
     }
     
-    /// 读取指定账号的密码数据。
+    /// 获取指定账号对应的密码数据。
     ///
     /// - Parameters:
     ///   - account: 账号标识符。
     ///   - service: 服务标识符。
     ///   - group: 访问组标识符，`nil` 表示不限定。
-    ///   - scope: 查询范围，控制匹配本地条目或同步条目。默认仅匹配本地条目。
-    /// - Returns: 条目关联的二进制数据；条目不存在时返回 `nil`。
+    ///   - scope: 查询范围。
+    /// - Returns: 匹配的条目关联的二进制数据；无匹配条目时返回 `nil`。
     /// - Throws: ``KeychainError``。
     public static func data(for account: String, service: String, group: String? = nil, scope: SynchronizableScope = .local) throws -> Data? {
         var query: [String: Any] = [
@@ -268,16 +268,15 @@ public enum Keychain {
         }
     }
     
-    /// 删除指定账号的 Keychain 条目。
+    /// 删除指定账号对应的条目。
     ///
-    /// 精确匹配 `service` + `account`，仅删除对应的单条记录。
-    /// 条目不存在时视为成功，不会抛出错误。
+    /// 无匹配条目时视为成功，不会抛出错误。
     ///
     /// - Parameters:
     ///   - account: 账号标识符。
     ///   - service: 服务标识符。
     ///   - group: 访问组标识符，`nil` 表示不限定。
-    ///   - scope: 查询范围，控制匹配本地条目或同步条目。`nil` 表示不限制，同时匹配本地和同步条目。默认仅匹配本地条目。
+    ///   - scope: 查询范围，`nil` 表示不限定。
     /// - Throws: ``KeychainError``。
     ///
     /// - Note: 本方法显式指定了 `account`，仅匹配该账号对应的条目。
@@ -299,15 +298,14 @@ public enum Keychain {
         }
     }
     
-    /// 批量删除指定服务下的所有 Keychain 条目。
+    /// 删除指定服务下的所有条目。
     ///
-    /// 不限定 `account`，将删除匹配 `service`（及 `group`）的全部条目。
     /// 无匹配条目时视为成功，不会抛出错误。
     ///
     /// - Parameters:
     ///   - service: 服务标识符。
     ///   - group: 访问组标识符，`nil` 表示不限定。
-    ///   - scope: 查询范围，控制匹配本地条目或同步条目。`nil` 表示不限制，同时匹配本地和同步条目。默认仅匹配本地条目。
+    ///   - scope: 查询范围，`nil` 表示不限定。
     /// - Throws: ``KeychainError``。
     ///
     /// - Important: 此操作不可逆，调用前请确认意图。
