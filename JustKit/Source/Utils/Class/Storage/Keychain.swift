@@ -26,96 +26,6 @@ import Foundation
 /// 因此，`service` 应作为业务级命名空间使用，不建议直接使用 Bundle Identifier 作为默认值，以避免后续服务拆分、组件共享或数据迁移时受到限制。
 public enum Keychain {
     
-    /// Keychain 条目元数据。
-    public struct Item {
-        public let account: String
-        public let synchronizable: Bool
-    }
-    
-    /// Keychain 操作相关错误。
-    public enum KeychainError: Error, LocalizedError {
-        /// 返回的数据无法转换为预期类型。
-        case invalidDataFormat
-        /// Keychain API 调用失败，附带 `OSStatus` 状态码。
-        case operationFailed(status: OSStatus)
-        /// 错误信息描述。
-        public var errorDescription: String? {
-            switch self {
-            case .invalidDataFormat:
-                return "Invalid keychain data format"
-            case .operationFailed(let status):
-                if let msg = SecCopyErrorMessageString(status, nil) {
-                    return msg as String
-                }
-                return "Keychain operation failed: \(status)"
-            }
-        }
-    }
-    
-    /// Keychain 数据可访问性策略。对应 `kSecAttrAccessible` 属性。
-    ///
-    /// 带有 `ThisDeviceOnly` 后缀的级别会阻止条目随备份迁移至其他设备。
-    public enum Accessibility {
-        /// 设备解锁期间可访问。系统默认项。
-        /// 设备锁定后不可读取。
-        case whenUnlocked
-        /// 设备重启后首次解锁完成即可访问。
-        /// 即使随后设备再次锁定，后台任务仍可访问。
-        case afterFirstUnlock
-        /// 仅当设备设置了密码且解锁时可访问。
-        /// 数据不会迁移到其他设备。
-        /// - Note: 若用户移除设备密码，受此级别保护的条目将被系统自动删除。
-        case whenPasscodeSetThisDeviceOnly
-        /// 设备解锁期间可访问。
-        /// 数据仅保存在当前设备，不参与备份和迁移。
-        case whenUnlockedThisDeviceOnly
-        /// 首次解锁后即可访问。
-        /// 数据仅保存在当前设备，不参与备份和迁移。
-        case afterFirstUnlockThisDeviceOnly
-        /// 对应 `kSecAttrAccessible` 属性值。
-        public var secValue: CFString {
-            switch self {
-            case .whenUnlocked:
-                kSecAttrAccessibleWhenUnlocked
-            case .afterFirstUnlock:
-                kSecAttrAccessibleAfterFirstUnlock
-            case .whenPasscodeSetThisDeviceOnly:
-                kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly
-            case .whenUnlockedThisDeviceOnly:
-                kSecAttrAccessibleWhenUnlockedThisDeviceOnly
-            case .afterFirstUnlockThisDeviceOnly:
-                kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
-            }
-        }
-        /// 判断当前访问策略是否为设备专属。
-        public var isThisDeviceOnly: Bool {
-            switch self {
-            case .whenPasscodeSetThisDeviceOnly,
-                 .whenUnlockedThisDeviceOnly,
-                 .afterFirstUnlockThisDeviceOnly:
-                return true
-            case .whenUnlocked,
-                 .afterFirstUnlock:
-                return false
-            }
-        }
-    }
-    
-    /// 条目查询范围。
-    public enum SynchronizableScope {
-        /// 仅匹配本地条目（默认）。
-        case local
-        /// 仅匹配同步条目。
-        case synchronizable
-        /// 对应 `kSecAttrSynchronizable` 属性值。
-        public var secValue: CFBoolean {
-            switch self {
-            case .local: kCFBooleanFalse
-            case .synchronizable: kCFBooleanTrue
-            }
-        }
-    }
-    
     /// 获取指定服务下的所有条目。
     ///
     /// - Parameters:
@@ -319,6 +229,91 @@ public enum Keychain {
         let status = SecItemDelete(query as CFDictionary)
         guard status == errSecItemNotFound || status == errSecSuccess else {
             throw KeychainError.operationFailed(status: status)
+        }
+    }
+    
+}
+
+public extension Keychain {
+    
+    struct Item {
+        public let account: String
+        public let synchronizable: Bool
+    }
+    
+    enum KeychainError: Error, LocalizedError {
+        case invalidDataFormat
+        case operationFailed(status: OSStatus)
+        public var errorDescription: String? {
+            switch self {
+            case .invalidDataFormat:
+                return "Invalid keychain data format"
+            case .operationFailed(let status):
+                if let msg = SecCopyErrorMessageString(status, nil) {
+                    return msg as String
+                }
+                return "Keychain operation failed: \(status)"
+            }
+        }
+    }
+    
+    enum Accessibility {
+        /// 设备解锁期间可访问（系统默认）。
+        /// 设备锁定后不可读取。
+        case whenUnlocked
+        /// 设备重启后首次解锁完成即可访问。
+        /// 即使随后设备再次锁定，后台任务仍可访问。
+        case afterFirstUnlock
+        /// 仅当设备设置了密码且解锁时可访问。
+        /// 数据不会迁移到其他设备。
+        /// - Note: 若用户移除设备密码，受此级别保护的条目将被系统自动删除。
+        case whenPasscodeSetThisDeviceOnly
+        /// 设备解锁期间可访问。
+        /// 数据仅保存在当前设备，不参与备份和迁移。
+        case whenUnlockedThisDeviceOnly
+        /// 首次解锁后即可访问。
+        /// 数据仅保存在当前设备，不参与备份和迁移。
+        case afterFirstUnlockThisDeviceOnly
+        /// 对应 `kSecAttrAccessible` 属性值。
+        public var secValue: CFString {
+            switch self {
+            case .whenUnlocked:
+                kSecAttrAccessibleWhenUnlocked
+            case .afterFirstUnlock:
+                kSecAttrAccessibleAfterFirstUnlock
+            case .whenPasscodeSetThisDeviceOnly:
+                kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly
+            case .whenUnlockedThisDeviceOnly:
+                kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+            case .afterFirstUnlockThisDeviceOnly:
+                kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+            }
+        }
+        /// 判断当前访问策略是否为设备专属。
+        public var isThisDeviceOnly: Bool {
+            switch self {
+            case .whenPasscodeSetThisDeviceOnly,
+                 .whenUnlockedThisDeviceOnly,
+                 .afterFirstUnlockThisDeviceOnly:
+                return true
+            case .whenUnlocked,
+                 .afterFirstUnlock:
+                return false
+            }
+        }
+    }
+    
+    enum SynchronizableScope {
+        /// 仅匹配本地条目（默认）。
+        case local
+        /// 仅匹配同步条目。
+        case synchronizable
+        /// 对应 `kSecAttrSynchronizable` 属性值。
+        public var secValue: CFBoolean {
+            switch self {
+            case .local: kCFBooleanFalse
+            case .synchronizable: kCFBooleanTrue
+            }
         }
     }
     
