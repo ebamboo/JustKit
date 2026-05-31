@@ -152,19 +152,8 @@ private extension ModalSlideTransitionDelegate {
             
             switch operation {
             case .present:
-                let containerFrame = transitionContext.initialFrame(for: fromVC)
-                let beginFrame: CGRect!
-                switch direction {
-                case .toRight:
-                    beginFrame = containerFrame.offsetBy(dx: -containerFrame.size.width, dy: 0)
-                case .toLeft:
-                    beginFrame = containerFrame.offsetBy(dx: containerFrame.size.width, dy: 0)
-                case .toBottom:
-                    beginFrame = containerFrame.offsetBy(dx: 0, dy: -containerFrame.size.height)
-                case .toTop:
-                    beginFrame = containerFrame.offsetBy(dx: 0, dy: containerFrame.size.height)
-                }
-                let endFrame = containerFrame
+                let endFrame = transitionContext.initialFrame(for: fromVC)
+                let beginFrame = presentingInitialFrame(finalFrame: endFrame)
                 
                 // 发生 present 转场时 toView 还没有在 containerView，需要添加 toView 到 containerView
                 toView.frame = beginFrame
@@ -180,18 +169,8 @@ private extension ModalSlideTransitionDelegate {
                     }
                 }
             case .dismiss:
-                let containerFrame = transitionContext.initialFrame(for: fromVC)
-                let endFrame: CGRect!
-                switch direction {
-                case .toRight:
-                    endFrame = containerFrame.offsetBy(dx: containerFrame.size.width, dy: 0)
-                case .toLeft:
-                    endFrame = containerFrame.offsetBy(dx: -containerFrame.size.width, dy: 0)
-                case .toBottom:
-                    endFrame = containerFrame.offsetBy(dx: 0, dy: containerFrame.size.height)
-                case .toTop:
-                    endFrame = containerFrame.offsetBy(dx: 0, dy: -containerFrame.size.height)
-                }
+                let currentFrame = transitionContext.initialFrame(for: fromVC)
+                let endFrame = dismissingFinalFrame(currentFrame: currentFrame)
                 
                 UIView.animate(withDuration: duration) {
                     fromView.frame = endFrame
