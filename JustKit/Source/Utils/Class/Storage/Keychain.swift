@@ -32,7 +32,7 @@ public enum Keychain {
     ///   - service: 服务标识符。
     ///   - group: 访问组标识符，`nil` 表示不限定。
     ///   - scope: 查询范围，`nil` 表示不限定。
-    /// - Returns: 匹配的条目列表。无匹配条目时返回空数组。返回顺序未定义。
+    /// - Returns: 匹配的条目列表。无匹配条目时返回空数组。自动过滤异常条目。返回顺序未定义。
     /// - Throws: ``KeychainError``。
     ///
     /// - Note:
@@ -63,13 +63,10 @@ public enum Keychain {
             guard let list = result as? [[String: Any]] else {
                 throw KeychainError.invalidDataFormat
             }
-            // 过滤异常条目
             return list.compactMap { info in
-                // 解析失败视为异常条目
                 guard let account = info[kSecAttrAccount as String] as? String else {
                     return nil
                 }
-                // 解析失败视为本地条目
                 let synchronizable = info[kSecAttrSynchronizable as String] as? Bool ?? false
                 return Item(account: account, synchronizable: synchronizable)
             }
@@ -144,7 +141,6 @@ public enum Keychain {
         synchronizable: Bool = false,
         accessible: Accessibility? = nil
     ) throws {
-        // 同步条目不兼容 ThisDeviceOnly 级别的访问策略
         if synchronizable, let accessible, accessible.isThisDeviceOnly {
             throw KeychainError.operationFailed(status: errSecParam)
         }
@@ -194,10 +190,6 @@ public enum Keychain {
     ///   - group: 访问组标识符，`nil` 表示不限定。
     ///   - scope: 查询范围，`nil` 表示不限定。
     /// - Throws: ``KeychainError``。
-    ///
-    /// - Note: 本方法显式指定了 `account`，仅匹配该账号对应的条目。
-    ///   若不指定 `account`，`SecItemDelete` 将删除 `service` 下的所有条目——
-    ///   这正是 ``deleteAllItems(for:group:scope:)`` 的行为。
     public static func deleteItem(
         for account: String,
         service: String,
@@ -228,8 +220,6 @@ public enum Keychain {
     ///   - group: 访问组标识符，`nil` 表示不限定。
     ///   - scope: 查询范围，`nil` 表示不限定。
     /// - Throws: ``KeychainError``。
-    ///
-    /// - Important: 此操作不可逆，调用前请确认意图。
     public static func deleteAllItems(
         for service: String,
         group: String? = nil,
