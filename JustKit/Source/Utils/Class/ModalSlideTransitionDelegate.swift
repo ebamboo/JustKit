@@ -69,6 +69,62 @@ private extension ModalSlideTransitionDelegate {
             self.duration = duration
         }
         
+        // MARK: - Helper
+        
+        private func presentingInitialFrame(
+            finalFrame: CGRect
+        ) -> CGRect {
+            switch direction {
+            case .toRight:
+                return finalFrame.offsetBy(
+                    dx: -finalFrame.width,
+                    dy: 0
+                )
+            case .toLeft:
+                return finalFrame.offsetBy(
+                    dx: finalFrame.width,
+                    dy: 0
+                )
+            case .toBottom:
+                return finalFrame.offsetBy(
+                    dx: 0,
+                    dy: -finalFrame.height
+                )
+            case .toTop:
+                return finalFrame.offsetBy(
+                    dx: 0,
+                    dy: finalFrame.height
+                )
+            }
+        }
+
+        private func dismissingFinalFrame(
+            currentFrame: CGRect
+        ) -> CGRect {
+            switch direction {
+            case .toRight:
+                return currentFrame.offsetBy(
+                    dx: currentFrame.width,
+                    dy: 0
+                )
+            case .toLeft:
+                return currentFrame.offsetBy(
+                    dx: -currentFrame.width,
+                    dy: 0
+                )
+            case .toBottom:
+                return currentFrame.offsetBy(
+                    dx: 0,
+                    dy: currentFrame.height
+                )
+            case .toTop:
+                return currentFrame.offsetBy(
+                    dx: 0,
+                    dy: -currentFrame.height
+                )
+            }
+        }
+        
         // MARK: - UIViewControllerAnimatedTransitioning
         
         func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
