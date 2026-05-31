@@ -23,8 +23,7 @@ import UIKit
 ///
 /// - Important:
 ///   - 需持有该实例，否则转场期间代理对象可能被提前释放。
-///   - 建议配合 `.custom` 模态展示样式使用。
-///   - 当前仅支持非交互式转场动画。
+///   - 必须配合 `.custom` 模态展示样式使用。
 public class ModalSlideTransitionDelegate: NSObject {
     
     public enum Direction {
@@ -65,146 +64,135 @@ extension ModalSlideTransitionDelegate: UIViewControllerTransitioningDelegate {
     
 }
 
-private extension ModalSlideTransitionDelegate {
+fileprivate class Animator: NSObject {
     
-    class Animator: NSObject, UIViewControllerAnimatedTransitioning {
-        
-        // MARK: - Definition
-        
-        enum Operation {
-            case present
-            case dismiss
+    enum Operation {
+        case present
+        case dismiss
+    }
+    
+    let operation: Operation
+    let direction: ModalSlideTransitionDelegate.Direction
+    let duration: TimeInterval
+    
+    init(operation: Operation, direction: ModalSlideTransitionDelegate.Direction, duration: TimeInterval) {
+        self.operation = operation
+        self.direction = direction
+        self.duration = duration
+    }
+    
+    private func presentingInitialFrame(finalFrame: CGRect) -> CGRect {
+        switch direction {
+        case .toRight:
+            return finalFrame.offsetBy(
+                dx: -finalFrame.width,
+                dy: 0
+            )
+        case .toLeft:
+            return finalFrame.offsetBy(
+                dx: finalFrame.width,
+                dy: 0
+            )
+        case .toBottom:
+            return finalFrame.offsetBy(
+                dx: 0,
+                dy: -finalFrame.height
+            )
+        case .toTop:
+            return finalFrame.offsetBy(
+                dx: 0,
+                dy: finalFrame.height
+            )
         }
-        
-        let operation: Operation
-        let direction: Direction
-        let duration: TimeInterval
-        
-        init(operation: Operation, direction: Direction, duration: TimeInterval) {
-            self.operation = operation
-            self.direction = direction
-            self.duration = duration
-        }
-        
-        // MARK: - Helper
-        
-        private func presentingInitialFrame(
-            finalFrame: CGRect
-        ) -> CGRect {
-            switch direction {
-            case .toRight:
-                return finalFrame.offsetBy(
-                    dx: -finalFrame.width,
-                    dy: 0
-                )
-            case .toLeft:
-                return finalFrame.offsetBy(
-                    dx: finalFrame.width,
-                    dy: 0
-                )
-            case .toBottom:
-                return finalFrame.offsetBy(
-                    dx: 0,
-                    dy: -finalFrame.height
-                )
-            case .toTop:
-                return finalFrame.offsetBy(
-                    dx: 0,
-                    dy: finalFrame.height
-                )
-            }
-        }
+    }
 
-        private func dismissingFinalFrame(
-            currentFrame: CGRect
-        ) -> CGRect {
-            switch direction {
-            case .toRight:
-                return currentFrame.offsetBy(
-                    dx: currentFrame.width,
-                    dy: 0
-                )
-            case .toLeft:
-                return currentFrame.offsetBy(
-                    dx: -currentFrame.width,
-                    dy: 0
-                )
-            case .toBottom:
-                return currentFrame.offsetBy(
-                    dx: 0,
-                    dy: currentFrame.height
-                )
-            case .toTop:
-                return currentFrame.offsetBy(
-                    dx: 0,
-                    dy: -currentFrame.height
-                )
-            }
+    private func dismissingFinalFrame(currentFrame: CGRect) -> CGRect {
+        switch direction {
+        case .toRight:
+            return currentFrame.offsetBy(
+                dx: currentFrame.width,
+                dy: 0
+            )
+        case .toLeft:
+            return currentFrame.offsetBy(
+                dx: -currentFrame.width,
+                dy: 0
+            )
+        case .toBottom:
+            return currentFrame.offsetBy(
+                dx: 0,
+                dy: currentFrame.height
+            )
+        case .toTop:
+            return currentFrame.offsetBy(
+                dx: 0,
+                dy: -currentFrame.height
+            )
+        }
+    }
+    
+}
+
+extension Animator: UIViewControllerAnimatedTransitioning {
+    
+    func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
+        return duration
+    }
+    
+    func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
+        // 获取参与转场的控制器及对应视图
+        guard let fromVC = transitionContext.viewController(forKey: .from),
+              let toVC = transitionContext.viewController(forKey: .to) else {
+            return
         }
         
-        // MARK: - UIViewControllerAnimatedTransitioning
+        let fromView = transitionContext.view(forKey: .from) ?? fromVC.view!
+        let toView = transitionContext.view(forKey: .to) ?? toVC.view!
         
-        func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
-            return duration
-        }
-        
-        func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
+        switch operation {
             
-            // 获取参与转场的控制器及对应视图
-            guard let fromVC = transitionContext.viewController(forKey: .from),
-                  let toVC = transitionContext.viewController(forKey: .to) else {
-                return
-            }
+        case .present:
             
-            let fromView = transitionContext.view(forKey: .from) ?? fromVC.view!
-            let toView = transitionContext.view(forKey: .to) ?? toVC.view!
+            // presented 控制器最终应处于的位置
+            let finalFrame = transitionContext.finalFrame(for: toVC)
             
-            switch operation {
-                
-            case .present:
-                
-                // presented 控制器最终应处于的位置
-                let finalFrame = transitionContext.finalFrame(for: toVC)
-                
-                // 根据转场方向计算动画起始位置
-                let initialFrame = presentingInitialFrame(finalFrame: finalFrame)
-                
-                // Present 转场时 UIKit 尚未将 toView 加入容器视图，需要手动添加
-                toView.frame = initialFrame
-                transitionContext.containerView.addSubview(toView)
-                
-                UIView.animate(withDuration: duration) {
-                    toView.frame = finalFrame
-                } completion: { _ in
-                    let completed = !transitionContext.transitionWasCancelled
-                    // 转场被取消时，需要恢复视图层级
-                    if !completed {
-                        toView.removeFromSuperview()
-                    }
-                    // 必须通知 UIKit 转场已经结束
-                    transitionContext.completeTransition(completed)
+            // 根据转场方向计算动画起始位置
+            let initialFrame = presentingInitialFrame(finalFrame: finalFrame)
+            
+            // Present 转场时 UIKit 尚未将 toView 加入容器视图，需要手动添加
+            toView.frame = initialFrame
+            transitionContext.containerView.addSubview(toView)
+            
+            UIView.animate(withDuration: duration) {
+                toView.frame = finalFrame
+            } completion: { _ in
+                let completed = !transitionContext.transitionWasCancelled
+                // 转场被取消时，需要恢复视图层级
+                if !completed {
+                    toView.removeFromSuperview()
                 }
-                
-            case .dismiss:
-                
-                // 当前展示位置作为动画起点
-                let currentFrame = fromView.frame
-                
-                // 根据转场方向计算移出屏幕后的目标位置
-                let finalFrame = dismissingFinalFrame(currentFrame: currentFrame)
-                
-                UIView.animate(withDuration: duration) {
-                    fromView.frame = finalFrame
-                } completion: { _ in
-                    // 必须通知 UIKit 转场已经结束
-                    transitionContext.completeTransition(
-                        !transitionContext.transitionWasCancelled
-                    )
-                }
+                // 必须通知 UIKit 转场已经结束
+                transitionContext.completeTransition(completed)
+            }
+            
+        case .dismiss:
+            
+            // 当前展示位置作为动画起点
+            let currentFrame = fromView.frame
+            
+            // 根据转场方向计算移出屏幕后的目标位置
+            let finalFrame = dismissingFinalFrame(currentFrame: currentFrame)
+            
+            UIView.animate(withDuration: duration) {
+                fromView.frame = finalFrame
+            } completion: { _ in
+                // 必须通知 UIKit 转场已经结束
+                transitionContext.completeTransition(
+                    !transitionContext.transitionWasCancelled
+                )
             }
             
         }
-        
     }
     
 }
