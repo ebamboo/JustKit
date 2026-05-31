@@ -4,33 +4,27 @@
 
 import UIKit
 
-
-
-/// 模态滑动转场代理，支持上下左右四个方向
+/// 模态滑动转场代理。
 ///
-/// 赋值给 vc 的 `transitioningDelegate` 属性即可生效
-/// 需持有该实例以保证其生命周期
+/// 为模态展示（Present）和关闭（Dismiss）提供滑动转场动画，
+/// 支持上下左右四个方向。
 ///
-/// !!!!!!一定要理解视图层次!!!!!!
-/// UIViewController --> UIView --> Transition View --> Wrapper View
-/// UIWindowScene、UITabBarController、UINavigationController
-/// 除了以上三种控制器会生成 Transition View
-/// 模态时也会生成 Transition View，并且 Transition View 直接在 window 上
-/// presentedView 直接在 Transition View
+/// 使用方式：
 ///
-/// 做动画时注意 custom 和 fullScreen 的视图的层次结构
-/// 一般设置成 custom
+/// ```swift
+/// let transitionDelegate = ModalSlideTransitionDelegate(
+///     presentDirection: .toLeft,
+///     dismissDirection: .toRight
+/// )
 ///
+/// viewController.modalPresentationStyle = .custom
+/// viewController.transitioningDelegate = transitionDelegate
+/// ```
 ///
-///
-///  1。// 发生 present 转场时 toView 还没有在 containerView，需要添加 toView 到 containerView
-///
-
-
-
-
-
-
+/// - Important:
+///   - 需持有该实例，否则转场期间代理对象可能被提前释放。
+///   - 建议配合 `.custom` 模态展示样式使用。
+///   - 当前仅支持非交互式转场动画。
 public class ModalSlideTransitionDelegate: NSObject {
     
     public enum Direction {
