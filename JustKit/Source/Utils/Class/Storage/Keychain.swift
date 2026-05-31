@@ -210,10 +210,8 @@ public enum Keychain {
     ///   - account: 账号标识符。
     ///   - service: 服务标识符。
     ///   - group: 访问组标识符，`nil` 表示不限定。
-    ///   - accessible: 数据保护级别。
-    ///     当传入 `nil` 时，更新操作不变更现有级别，新增操作默认使用 ``Accessibility.whenUnlocked``。
-    ///   - synchronizable: 是否将条目标记为可同步（iCloud Keychain）。默认 `false`。
-    ///     同步与非同步条目即使 `service` + `account` 相同，也被视为独立的两条记录。
+    ///   - synchronizable: 是否将条目标记为可同步。
+    ///   - accessible: 数据保护级别。当传入 `nil` 时，更新操作不变更现有级别，新增操作默认使用 ``.whenUnlocked``。
     /// - Throws: ``KeychainError``。
     ///
     /// - Important: `synchronizable = true` 与带 `ThisDeviceOnly` 后缀的 ``Accessibility`` 互斥。
@@ -225,8 +223,8 @@ public enum Keychain {
         for account: String,
         service: String,
         group: String? = nil,
-        accessible: Accessibility? = nil,
-        synchronizable: Bool = false
+        synchronizable: Bool = false,
+        accessible: Accessibility? = nil
     ) throws {
         // 同步条目不兼容 ThisDeviceOnly 级别的访问策略
         if synchronizable, let accessible, accessible.isThisDeviceOnly {
