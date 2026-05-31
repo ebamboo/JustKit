@@ -58,8 +58,8 @@ public class ModalSlideTransitionDelegate: NSObject {
         
     }
     
-    private let presentConfiguration: Configuration
-    private let dismissConfiguration: Configuration
+    public let presentConfiguration: Configuration
+    public let dismissConfiguration: Configuration
     
     public init(
         presentConfiguration: Configuration = .init(direction: .left),
@@ -83,7 +83,7 @@ extension ModalSlideTransitionDelegate: UIViewControllerTransitioningDelegate {
     
 }
 
-fileprivate class Animator: NSObject {
+private class Animator: NSObject {
     
     enum Operation {
         case present
@@ -101,7 +101,7 @@ fileprivate class Animator: NSObject {
         self.configuration = configuration
     }
     
-    private func presentingInitialFrame(finalFrame: CGRect) -> CGRect {
+    func presentingInitialFrame(finalFrame: CGRect) -> CGRect {
         switch configuration.direction {
         case .left:
             return finalFrame.offsetBy(
@@ -126,7 +126,7 @@ fileprivate class Animator: NSObject {
         }
     }
 
-    private func dismissingFinalFrame(currentFrame: CGRect) -> CGRect {
+    func dismissingFinalFrame(currentFrame: CGRect) -> CGRect {
         switch configuration.direction {
         case .left:
             return currentFrame.offsetBy(
