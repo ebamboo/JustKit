@@ -40,7 +40,7 @@ public enum Keychain {
         service: String,
         group: String? = nil,
         scope: SynchronizableScope = .local
-    ) throws -> Data? {
+    ) throws(KeychainError) -> Data? {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -91,7 +91,7 @@ public enum Keychain {
         group: String? = nil,
         synchronizable: Bool = false,
         accessible: Accessibility? = nil
-    ) throws {
+    ) throws(KeychainError) {
         if synchronizable, let accessible, accessible.isThisDeviceOnly {
             throw KeychainError.operationFailed(status: errSecParam)
         }
@@ -148,7 +148,7 @@ public enum Keychain {
         for service: String,
         group: String? = nil,
         scope: SynchronizableScope? = .local
-    ) throws -> [Item] {
+    ) throws(KeychainError) -> [Item] {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -191,11 +191,11 @@ public enum Keychain {
     ///   - scope: 查询范围，`nil` 表示不限定。
     /// - Throws: ``KeychainError``。
     public static func deleteItems(
-        for account: String? = nil,
+        for account: String?,
         service: String,
         group: String? = nil,
         scope: SynchronizableScope? = .local
-    ) throws {
+    ) throws(KeychainError) {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
