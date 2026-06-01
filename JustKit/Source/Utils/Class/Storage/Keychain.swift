@@ -34,7 +34,7 @@ public enum Keychain {
     ///   - service: 服务。
     ///   - group: 访问组，`nil` 表示不限定。
     ///   - scope: 查询范围。
-    /// - Returns: 匹配的条目关联的二进制数据；无匹配条目时返回 `nil`。
+    /// - Returns: 匹配条目的密码数据。无匹配条目时返回 `nil`。
     /// - Throws: ``KeychainError``。
     public static func data(
         forAccount account: String,
@@ -79,6 +79,7 @@ public enum Keychain {
     ///     当传入 `nil` 时，更新操作不变更该属性，新增操作默认使用 ``.whenUnlocked``。
     ///   - synchronizable: 是否将条目标记为可同步。
     /// - Throws: ``KeychainError``。
+    ///   若 `synchronizable` 为 `true` 且 `accessible` 为 `ThisDeviceOnly` 级别，则参数无效，抛出错误。
     public static func setData(
         _ data: Data,
         forAccount account: String,
