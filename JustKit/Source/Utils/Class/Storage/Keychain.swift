@@ -26,7 +26,7 @@ import Foundation
 /// 因此，`service` 应作为业务级命名空间使用，不建议直接使用 Bundle Identifier 作为默认值，以避免后续服务拆分、组件共享或数据迁移时受到限制。
 public enum Keychain {
     
-    /// 获取指定服务下的所有条目。
+    /// 获取指定服务下符合条件的条目。
     ///
     /// - Parameters:
     ///   - service: 服务标识符。
@@ -180,18 +180,18 @@ public enum Keychain {
         }
     }
     
-    /// 删除指定账号对应的条目。
+    /// 删除指定服务下符合条件的条目。
     ///
     /// 无匹配条目时视为成功，不会抛出错误。
     ///
     /// - Parameters:
-    ///   - account: 账号标识符。
+    ///   - account: 账号标识符，`nil` 表示不限定。
     ///   - service: 服务标识符。
     ///   - group: 访问组标识符，`nil` 表示不限定。
     ///   - scope: 查询范围，`nil` 表示不限定。
     /// - Throws: ``KeychainError``。
-    public static func deleteItem(
-        for account: String,
+    public static func deleteItems(
+        for account: String? = nil,
         service: String,
         group: String? = nil,
         scope: SynchronizableScope? = .local
@@ -199,37 +199,11 @@ public enum Keychain {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
-            kSecAttrAccount as String: account,
             kSecAttrSynchronizable as String: scope?.secValue ?? kSecAttrSynchronizableAny
         ]
-        if let group = group {
-            query[kSecAttrAccessGroup as String] = group
+        if let account = account {
+            query[kSecAttrAccount as String] = account
         }
-        let status = SecItemDelete(query as CFDictionary)
-        guard status == errSecItemNotFound || status == errSecSuccess else {
-            throw KeychainError.operationFailed(status: status)
-        }
-    }
-    
-    /// 删除指定服务下的所有条目。
-    ///
-    /// 无匹配条目时视为成功，不会抛出错误。
-    ///
-    /// - Parameters:
-    ///   - service: 服务标识符。
-    ///   - group: 访问组标识符，`nil` 表示不限定。
-    ///   - scope: 查询范围，`nil` 表示不限定。
-    /// - Throws: ``KeychainError``。
-    public static func deleteAllItems(
-        for service: String,
-        group: String? = nil,
-        scope: SynchronizableScope? = .local
-    ) throws {
-        var query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: service,
-            kSecAttrSynchronizable as String: scope?.secValue ?? kSecAttrSynchronizableAny
-        ]
         if let group = group {
             query[kSecAttrAccessGroup as String] = group
         }
