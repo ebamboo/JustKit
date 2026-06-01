@@ -25,7 +25,7 @@ import Foundation
 ///     print(password)
 /// }
 /// ```
-public enum Keychain {
+public extension Keychain {
     
     /// 读取指定账号对应的密码数据。
     ///
@@ -36,7 +36,7 @@ public enum Keychain {
     ///   - synchronizable: 是否为可同步条目。
     /// - Returns: 匹配条目的密码数据。无匹配条目时返回 `nil`。
     /// - Throws: ``KeychainError``。
-    public static func data(
+    static func data(
         forAccount account: String,
         service: String,
         group: String? = nil,
@@ -80,7 +80,7 @@ public enum Keychain {
     ///   - synchronizable: 是否为可同步条目。
     /// - Throws: ``KeychainError``。
     ///   若 `synchronizable` 为 `true` 且 `accessible` 为 `ThisDeviceOnly` 级别，则参数无效，抛出错误。
-    public static func setData(
+    static func setData(
         _ data: Data,
         accessible: Accessibility? = nil,
         forAccount account: String,
@@ -142,7 +142,7 @@ public enum Keychain {
     ///   （`kSecReturnData` 与 `kSecMatchLimitAll` 不可组合使用），
     ///   因为读取每条密码可能需要额外的身份验证。
     ///   如需读取密码数据，请使用 ``data(forAccount:service:group:synchronizable:)`` 逐条获取。
-    public static func items(
+    static func items(
         forService service: String,
         group: String? = nil,
         synchronizable: Bool? = false
@@ -186,7 +186,7 @@ public enum Keychain {
     ///   - group: 访问组，`nil` 表示不限定。
     ///   - synchronizable: 是否为可同步条目，`nil` 表示不限定。
     /// - Throws: ``KeychainError``。无匹配条目时视为成功，不会抛出错误。
-    public static func deleteItems(
+    static func deleteItems(
         forService service: String,
         account: String? = nil,
         group: String? = nil,
@@ -211,19 +211,19 @@ public enum Keychain {
     
 }
 
-public extension Keychain {
+public enum Keychain {
     
-    struct Item {
+    public struct Item {
         public let account: String
         public let synchronizable: Bool
     }
     
-    enum KeychainError: Error {
+    public enum KeychainError: Error {
         case invalidDataFormat
         case operationFailed(status: Int32)
     }
     
-    enum Accessibility {
+    public enum Accessibility {
         case whenUnlocked
         case afterFirstUnlock
         case whenPasscodeSetThisDeviceOnly
