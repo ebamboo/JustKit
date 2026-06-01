@@ -81,10 +81,11 @@ public enum Keychain {
     /// - Parameters:
     ///   - data: 密码数据。
     ///   - accessible: 访问策略。
-    ///     当传入 `nil` 时，更新操作不变更该属性，新增操作默认使用 ``.whenUnlocked``。
+    ///     当为 `nil` 时，更新操作不变更该属性，新增操作默认使用 ``.whenUnlocked``。
     ///   - account: 账户标识。
     ///   - service: 服务标识。
-    ///   - accessGroup: 访问组，`nil` 表示不限定。
+    ///   - accessGroup: 访问组。
+    ///     当为 `nil` 时，更新操作匹配所有可访问组，新增操作使用系统默认访问组。
     ///   - synchronizable: 是否为可同步条目。
     /// - Throws: ``KeychainError``。
     ///   若 `synchronizable` 为 `true` 且 `accessible` 为 `ThisDeviceOnly` 级别，则参数无效，抛出错误。
