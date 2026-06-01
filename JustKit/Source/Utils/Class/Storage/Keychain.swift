@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Security
 
 /// Keychain Services Wrapper for Generic Passwords
 ///
@@ -197,7 +198,7 @@ public enum Keychain {
         forService service: String,
         account: String? = nil,
         accessGroup: String? = nil,
-        synchronizable: Bool? = false
+        synchronizable: Bool? = nil
     ) throws(KeychainError) {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
