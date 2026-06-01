@@ -72,7 +72,7 @@ public enum Keychain {
     ///
     /// - Parameters:
     ///   - data: 密码数据。
-    ///   - accessible: 条目访问条件。
+    ///   - accessible: 访问策略。
     ///     当传入 `nil` 时，更新操作不变更该属性，新增操作默认使用 ``.whenUnlocked``。
     ///   - account: 账户标识。
     ///   - service: 服务标识。
@@ -137,10 +137,10 @@ public enum Keychain {
     /// - Throws: ``KeychainError``。
     ///
     /// - Note:
-    ///   本方法仅返回条目的元信息，不含密码数据。
-    ///   Keychain Services 不允许在批量查询中同时返回密码数据
-    ///   （`kSecReturnData` 与 `kSecMatchLimitAll` 不可组合使用），
-    ///   因为读取每条密码可能需要额外的身份验证。
+    ///   本方法仅返回匹配条目的元信息。
+    ///   对于 Generic Password 和 Internet Password 条目，
+    ///   Apple 不允许在使用 `kSecMatchLimitAll` 时同时请求 `kSecReturnData`。
+    ///   这是因为读取每个密码数据都可能触发额外的身份验证。
     ///   如需读取密码数据，请使用 ``data(forAccount:service:group:synchronizable:)`` 逐条获取。
     public static func items(
         forService service: String,
