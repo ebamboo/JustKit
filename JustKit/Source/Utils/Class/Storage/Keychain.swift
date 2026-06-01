@@ -33,20 +33,20 @@ public enum Keychain {
     ///   - account: 账户标识。
     ///   - service: 服务标识。
     ///   - group: 访问组，`nil` 表示不限定。
-    ///   - scope: 查询范围。
+    ///   - synchronizable: `true` 仅匹配同步条目，`false` 仅匹配本地条目。
     /// - Returns: 匹配条目的密码数据。无匹配条目时返回 `nil`。
     /// - Throws: ``KeychainError``。
     public static func data(
         forAccount account: String,
         service: String,
         group: String? = nil,
-        scope: SynchronizableScope = .local
+        synchronizable: Bool = false
     ) throws(KeychainError) -> Data? {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: account,
-            kSecAttrSynchronizable as String: scope.secValue,
+            kSecAttrSynchronizable as String: synchronizable,
             kSecMatchLimit as String: kSecMatchLimitOne,
             kSecReturnData as String: true
         ]
@@ -132,7 +132,7 @@ public enum Keychain {
     /// - Parameters:
     ///   - service: 服务标识。
     ///   - group: 访问组，`nil` 表示不限定。
-    ///   - scope: 查询范围，`nil` 表示不限定。
+    ///   - synchronizable: `true` 仅匹配同步条目，`false` 仅匹配本地条目，`nil` 表示不限定。
     /// - Returns: 匹配的条目列表。无匹配条目时返回空数组。自动过滤异常条目。返回顺序未定义。
     /// - Throws: ``KeychainError``。
     ///
@@ -141,16 +141,16 @@ public enum Keychain {
     ///   Keychain Services 不允许在批量查询中同时返回密码数据
     ///   （`kSecReturnData` 与 `kSecMatchLimitAll` 不可组合使用），
     ///   因为读取每条密码可能需要额外的身份验证。
-    ///   如需读取密码数据，请使用 ``data(forAccount:service:group:scope:)`` 逐条获取。
+    ///   如需读取密码数据，请使用 ``data(forAccount:service:group:synchronizable:)`` 逐条获取。
     public static func items(
         forService service: String,
         group: String? = nil,
-        scope: SynchronizableScope? = .local
+        synchronizable: Bool? = false
     ) throws(KeychainError) -> [Item] {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
-            kSecAttrSynchronizable as String: scope?.secValue ?? kSecAttrSynchronizableAny,
+            kSecAttrSynchronizable as String: synchronizable ?? kSecAttrSynchronizableAny,
             kSecMatchLimit as String: kSecMatchLimitAll,
             kSecReturnAttributes as String: true
         ]
@@ -184,18 +184,18 @@ public enum Keychain {
     ///   - service: 服务标识。
     ///   - account: 账户标识，`nil` 表示不限定。
     ///   - group: 访问组，`nil` 表示不限定。
-    ///   - scope: 查询范围，`nil` 表示不限定。
+    ///   - synchronizable: `true` 仅匹配同步条目，`false` 仅匹配本地条目，`nil` 表示不限定。
     /// - Throws: ``KeychainError``。无匹配条目时视为成功，不会抛出错误。
     public static func deleteItems(
         forService service: String,
         account: String? = nil,
         group: String? = nil,
-        scope: SynchronizableScope? = .local
+        synchronizable: Bool? = false
     ) throws(KeychainError) {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
-            kSecAttrSynchronizable as String: scope?.secValue ?? kSecAttrSynchronizableAny
+            kSecAttrSynchronizable as String: synchronizable ?? kSecAttrSynchronizableAny
         ]
         if let account = account {
             query[kSecAttrAccount as String] = account
@@ -221,17 +221,6 @@ public extension Keychain {
     enum KeychainError: Error {
         case invalidDataFormat
         case operationFailed(status: Int32)
-    }
-    
-    enum SynchronizableScope {
-        case local
-        case synchronizable
-        fileprivate var secValue: CFBoolean {
-            switch self {
-            case .local: kCFBooleanFalse
-            case .synchronizable: kCFBooleanTrue
-            }
-        }
     }
     
     enum Accessibility {
