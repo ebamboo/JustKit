@@ -36,7 +36,7 @@ public enum Keychain {
     /// - Returns: 匹配的条目关联的二进制数据；无匹配条目时返回 `nil`。
     /// - Throws: ``KeychainError``。
     public static func data(
-        for account: String,
+        forAccount account: String,
         service: String,
         group: String? = nil,
         scope: SynchronizableScope = .local
@@ -86,7 +86,7 @@ public enum Keychain {
     /// - Note: `SecItemAdd` 时若未指定 `account` 或指定为空串 `""`，Keychain 中该条目的 `kSecAttrAccount` 均存储为 `""`。
     public static func setData(
         _ data: Data,
-        for account: String,
+        forAccount account: String,
         service: String,
         group: String? = nil,
         synchronizable: Bool = false,
@@ -143,9 +143,9 @@ public enum Keychain {
     /// - Note:
     ///   Apple 不允许同时使用 `kSecMatchLimitAll` 与 `kSecReturnData`。
     ///   因此该方法仅返回条目元信息，不返回对应密码数据。
-    ///   如需读取密码数据，请使用 ``data(for:service:group:scope:)``。
+    ///   如需读取密码数据，请使用 ``data(forAccount:service:group:scope:)``。
     public static func items(
-        for service: String,
+        forService service: String,
         group: String? = nil,
         scope: SynchronizableScope? = .local
     ) throws(KeychainError) -> [Item] {
@@ -191,8 +191,8 @@ public enum Keychain {
     ///   - scope: 查询范围，`nil` 表示不限定。
     /// - Throws: ``KeychainError``。
     public static func deleteItems(
-        for service: String,
-        account: String?,
+        forService service: String,
+        account: String? = nil,
         group: String? = nil,
         scope: SynchronizableScope? = .local
     ) throws(KeychainError) {
