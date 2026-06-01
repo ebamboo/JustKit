@@ -27,7 +27,7 @@ import Foundation
 /// ```
 public enum Keychain {
     
-    /// 获取指定账号对应的密码数据。
+    /// 读取指定账号对应的密码数据。
     ///
     /// - Parameters:
     ///   - account: 账户标识。
@@ -127,7 +127,7 @@ public enum Keychain {
         }
     }
     
-    /// 获取指定服务下符合条件的条目。
+    /// 读取指定服务下符合条件的条目。
     ///
     /// - Parameters:
     ///   - service: 服务标识。
@@ -135,6 +135,13 @@ public enum Keychain {
     ///   - scope: 查询范围，`nil` 表示不限定。
     /// - Returns: 匹配的条目列表。无匹配条目时返回空数组。自动过滤异常条目。返回顺序未定义。
     /// - Throws: ``KeychainError``。
+    ///
+    /// - Note:
+    ///   本方法仅返回条目的元信息，不含密码数据。
+    ///   Keychain Services 不允许在批量查询中同时返回密码数据
+    ///   （`kSecReturnData` 与 `kSecMatchLimitAll` 不可组合使用），
+    ///   因为读取每条密码可能需要额外的身份验证。
+    ///   如需读取密码数据，请使用 ``data(forAccount:service:group:scope:)`` 逐条获取。
     public static func items(
         forService service: String,
         group: String? = nil,
