@@ -30,9 +30,9 @@ public enum Keychain {
     /// 获取指定账号对应的密码数据。
     ///
     /// - Parameters:
-    ///   - account: 账号标识符。
-    ///   - service: 服务标识符。
-    ///   - group: 访问组标识符，`nil` 表示不限定。
+    ///   - account: 账号。
+    ///   - service: 服务。
+    ///   - group: 访问组，`nil` 表示不限定。
     ///   - scope: 查询范围。
     /// - Returns: 匹配的条目关联的二进制数据；无匹配条目时返回 `nil`。
     /// - Throws: ``KeychainError``。
@@ -70,22 +70,15 @@ public enum Keychain {
     
     /// 保存或更新指定账号对应的密码数据。
     ///
-    /// 采用 update-or-add 策略：优先尝试更新已有条目，若不存在则新增。
-    ///
     /// - Parameters:
-    ///   - data: 要保存的二进制数据。
-    ///   - account: 账号标识符。
-    ///   - service: 服务标识符。
-    ///   - group: 访问组标识符，`nil` 表示不限定。
+    ///   - data: 密码数据。
+    ///   - account: 账号。
+    ///   - service: 服务。
+    ///   - group: 访问组，`nil` 表示不限定。
     ///   - accessible: 条目访问条件。
     ///     当传入 `nil` 时，更新操作不变更该属性，新增操作默认使用 ``.whenUnlocked``。
     ///   - synchronizable: 是否将条目标记为可同步。
     /// - Throws: ``KeychainError``。
-    ///
-    /// - Important: `synchronizable = true` 与带 `ThisDeviceOnly` 后缀的 ``Accessibility`` 互斥。
-    ///   若检测到此冲突，将抛出 `errSecParam` 错误。
-    /// - Note: `kSecAttrAccessible` 属于条目元数据，可在更新时同步变更，无需删除后重建（有些版本要求必须同步修改 `kSecValueData`）。
-    /// - Note: `SecItemAdd` 时若未指定 `account` 或指定为空串 `""`，Keychain 中该条目的 `kSecAttrAccount` 均存储为 `""`。
     public static func setData(
         _ data: Data,
         forAccount account: String,
@@ -136,16 +129,11 @@ public enum Keychain {
     /// 获取指定服务下符合条件的条目。
     ///
     /// - Parameters:
-    ///   - service: 服务标识符。
-    ///   - group: 访问组标识符，`nil` 表示不限定。
+    ///   - service: 服务。
+    ///   - group: 访问组，`nil` 表示不限定。
     ///   - scope: 查询范围，`nil` 表示不限定。
     /// - Returns: 匹配的条目列表。无匹配条目时返回空数组。自动过滤异常条目。返回顺序未定义。
     /// - Throws: ``KeychainError``。
-    ///
-    /// - Note:
-    ///   Apple 不允许同时使用 `kSecMatchLimitAll` 与 `kSecReturnData`。
-    ///   因此该方法仅返回条目元信息，不返回对应密码数据。
-    ///   如需读取密码数据，请使用 ``data(forAccount:service:group:scope:)``。
     public static func items(
         forService service: String,
         group: String? = nil,
@@ -185,9 +173,9 @@ public enum Keychain {
     /// 删除指定服务下符合条件的条目。
     ///
     /// - Parameters:
-    ///   - service: 服务标识符。
-    ///   - account: 账号标识符，`nil` 表示不限定。
-    ///   - group: 访问组标识符，`nil` 表示不限定。
+    ///   - service: 服务。
+    ///   - account: 账号，`nil` 表示不限定。
+    ///   - group: 访问组，`nil` 表示不限定。
     ///   - scope: 查询范围，`nil` 表示不限定。
     /// - Throws: ``KeychainError``。无匹配条目时视为成功，不会抛出错误。
     public static func deleteItems(
