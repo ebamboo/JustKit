@@ -9,21 +9,22 @@ import Foundation
 
 /// Keychain Services Wrapper for Generic Passwords
 ///
-/// 本工具提供了一组类型安全的静态方法，用于存取 `kSecClassGenericPassword` 类型的敏感数据，如密码、令牌、密钥等。
+/// 提供一组类型安全的静态方法，用于存取 Generic Passwords 类型的敏感数据，如密码、令牌、密钥等。
 ///
-/// ## 关键说明
+/// 使用示例：
 ///
-/// Keychain 中 Generic Password（`kSecClassGenericPassword`）类型数据主要通过以下属性进行标识：
+/// ```swift
+/// // 保存密码
+/// let password = "s3cretP@ss"
+/// let data = Data(password.utf8)
+/// try Keychain.setData(data, forAccount: "user@example.com", service: "com.app.auth")
 ///
-/// - `kSecAttrService`：业务域标识，用于隔离不同业务模块的数据。
-/// - `kSecAttrAccount`：账号标识，用于区分同一服务下的不同用户。
-/// - `kSecAttrAccessGroup`：Keychain Sharing 分组标识。
-///
-/// 对于 Generic Password 项，Apple 将 `kSecAttrService` 与 `kSecAttrAccount` 视为主要查询键（Primary Keys）。
-///
-/// 当多个应用通过 Keychain Sharing 共享数据时，访问组（Access Group）、服务标识（Service）与账号标识（Account）必须保持一致。
-///
-/// 因此，`service` 应作为业务级命名空间使用，不建议直接使用 Bundle Identifier 作为默认值，以避免后续服务拆分、组件共享或数据迁移时受到限制。
+/// // 读取密码
+/// if let data = try Keychain.data(forAccount: "user@example.com", service: "com.app.auth"),
+///    let password = String(data: data, encoding: .utf8) {
+///     print(password)
+/// }
+/// ```
 public enum Keychain {
     
     /// 获取指定账号对应的密码数据。
