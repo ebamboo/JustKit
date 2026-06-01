@@ -30,8 +30,8 @@ public enum Keychain {
     /// 获取指定账号对应的密码数据。
     ///
     /// - Parameters:
-    ///   - account: 账号。
-    ///   - service: 服务。
+    ///   - account: 账户标识。
+    ///   - service: 服务标识。
     ///   - group: 访问组，`nil` 表示不限定。
     ///   - scope: 查询范围。
     /// - Returns: 匹配条目的密码数据。无匹配条目时返回 `nil`。
@@ -72,8 +72,8 @@ public enum Keychain {
     ///
     /// - Parameters:
     ///   - data: 密码数据。
-    ///   - account: 账号。
-    ///   - service: 服务。
+    ///   - account: 账户标识。
+    ///   - service: 服务标识。
     ///   - group: 访问组，`nil` 表示不限定。
     ///   - accessible: 条目访问条件。
     ///     当传入 `nil` 时，更新操作不变更该属性，新增操作默认使用 ``.whenUnlocked``。
@@ -130,7 +130,7 @@ public enum Keychain {
     /// 获取指定服务下符合条件的条目。
     ///
     /// - Parameters:
-    ///   - service: 服务。
+    ///   - service: 服务标识。
     ///   - group: 访问组，`nil` 表示不限定。
     ///   - scope: 查询范围，`nil` 表示不限定。
     /// - Returns: 匹配的条目列表。无匹配条目时返回空数组。自动过滤异常条目。返回顺序未定义。
@@ -174,8 +174,8 @@ public enum Keychain {
     /// 删除指定服务下符合条件的条目。
     ///
     /// - Parameters:
-    ///   - service: 服务。
-    ///   - account: 账号，`nil` 表示不限定。
+    ///   - service: 服务标识。
+    ///   - account: 账户标识，`nil` 表示不限定。
     ///   - group: 访问组，`nil` 表示不限定。
     ///   - scope: 查询范围，`nil` 表示不限定。
     /// - Throws: ``KeychainError``。无匹配条目时视为成功，不会抛出错误。
