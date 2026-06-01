@@ -49,7 +49,7 @@ class KeychainTestViewController: UIViewController {
     @IBAction func saveAction(_ sender: Any) {
         let account = accountField.text ?? ""
         let password = passwordField.text ?? ""
-        if let _ = try? Keychain.setData(password.data(using: .utf8)!, for: account, service: service) {
+        if let _ = try? Keychain.setData(password.data(using: .utf8)!, forAccount: account, service: service) {
             print("save ========== success")
         } else {
             print("save ========== failure")
@@ -57,7 +57,7 @@ class KeychainTestViewController: UIViewController {
     }
     
     @IBAction func searchForAllAccountsAction(_ sender: Any) {
-        if let list = try? Keychain.items(for: service) {
+        if let list = try? Keychain.items(forService: service) {
             accountList = list.map { item in
                 AccountModel(account: item.account)
             }
@@ -69,7 +69,7 @@ class KeychainTestViewController: UIViewController {
     }
     
     @IBAction func deleteAllAccountsAction(_ sender: Any) {
-        if let _ = try? Keychain.deleteItems(for: nil, service: service) {
+        if let _ = try? Keychain.deleteItems(forService: service) {
             accountList = []
             tableView.reloadData()
             print("clear all accounts ========== success")
@@ -79,7 +79,7 @@ class KeychainTestViewController: UIViewController {
     }
     
     func deleteAccount(_ account: String) {
-        if let _ = try? Keychain.deleteItems(for: account, service: service) {
+        if let _ = try? Keychain.deleteItems(forService: service, account: account) {
             accountList = accountList.filter { model in
                 model.account != account
             }
@@ -91,7 +91,7 @@ class KeychainTestViewController: UIViewController {
     }
     
     func searchForAccount(_ account: String) {
-        if let data = try? Keychain.data(for: account, service: service) {
+        if let data = try? Keychain.data(forAccount: account, service: service) {
             let password = String(data: data, encoding: .utf8) ?? ""
             accountList.forEach { model in
                 if model.account == account {
