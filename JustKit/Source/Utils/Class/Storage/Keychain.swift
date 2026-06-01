@@ -32,14 +32,14 @@ public enum Keychain {
     /// - Parameters:
     ///   - account: 账户标识。
     ///   - service: 服务标识。
-    ///   - group: 访问组，`nil` 表示不限定。
+    ///   - accessGroup: 访问组，`nil` 表示不限定。
     ///   - synchronizable: 是否为可同步条目。
     /// - Returns: 匹配条目的密码数据。无匹配条目时返回 `nil`。
     /// - Throws: ``KeychainError``。
     public static func data(
         forAccount account: String,
         service: String,
-        group: String? = nil,
+        accessGroup: String? = nil,
         synchronizable: Bool = false
     ) throws(KeychainError) -> Data? {
         var query: [String: Any] = [
@@ -50,8 +50,8 @@ public enum Keychain {
             kSecMatchLimit as String: kSecMatchLimitOne,
             kSecReturnData as String: true
         ]
-        if let group = group {
-            query[kSecAttrAccessGroup as String] = group
+        if let accessGroup {
+            query[kSecAttrAccessGroup as String] = accessGroup
         }
         var result: CFTypeRef?
         let status = SecItemCopyMatching(query as CFDictionary, &result)
@@ -76,7 +76,7 @@ public enum Keychain {
     ///     当传入 `nil` 时，更新操作不变更该属性，新增操作默认使用 ``.whenUnlocked``。
     ///   - account: 账户标识。
     ///   - service: 服务标识。
-    ///   - group: 访问组，`nil` 表示不限定。
+    ///   - accessGroup: 访问组，`nil` 表示不限定。
     ///   - synchronizable: 是否为可同步条目。
     /// - Throws: ``KeychainError``。
     ///   若 `synchronizable` 为 `true` 且 `accessible` 为 `ThisDeviceOnly` 级别，则参数无效，抛出错误。
@@ -85,7 +85,7 @@ public enum Keychain {
         accessible: Accessibility? = nil,
         forAccount account: String,
         service: String,
-        group: String? = nil,
+        accessGroup: String? = nil,
         synchronizable: Bool = false
     ) throws(KeychainError) {
         if synchronizable, let accessible, accessible.isThisDeviceOnly {
@@ -97,8 +97,8 @@ public enum Keychain {
             kSecAttrAccount as String: account,
             kSecAttrSynchronizable as String: synchronizable
         ]
-        if let group = group {
-            query[kSecAttrAccessGroup as String] = group
+        if let accessGroup {
+            query[kSecAttrAccessGroup as String] = accessGroup
         }
         var attributes: [String: Any] = [kSecValueData as String: data]
         if let accessible = accessible {
@@ -131,7 +131,7 @@ public enum Keychain {
     ///
     /// - Parameters:
     ///   - service: 服务标识。
-    ///   - group: 访问组，`nil` 表示不限定。
+    ///   - accessGroup: 访问组，`nil` 表示不限定。
     ///   - synchronizable: 是否为可同步条目，`nil` 表示不限定。
     /// - Returns: 匹配的条目列表。无匹配条目时返回空数组。自动过滤异常条目。返回顺序未定义。
     /// - Throws: ``KeychainError``。
@@ -141,10 +141,10 @@ public enum Keychain {
     ///   对于 Generic Password 和 Internet Password 条目，
     ///   Apple 不允许在使用 `kSecMatchLimitAll` 时同时请求 `kSecReturnData`。
     ///   这是因为读取每个密码数据都可能触发额外的身份验证。
-    ///   如需读取密码数据，请使用 ``data(forAccount:service:group:synchronizable:)`` 逐条获取。
+    ///   如需读取密码数据，请使用 ``data(forAccount:service:accessGroup:synchronizable:)`` 逐条获取。
     public static func items(
         forService service: String,
-        group: String? = nil,
+        accessGroup: String? = nil,
         synchronizable: Bool? = false
     ) throws(KeychainError) -> [Item] {
         var query: [String: Any] = [
@@ -154,8 +154,8 @@ public enum Keychain {
             kSecMatchLimit as String: kSecMatchLimitAll,
             kSecReturnAttributes as String: true
         ]
-        if let group = group {
-            query[kSecAttrAccessGroup as String] = group
+        if let accessGroup {
+            query[kSecAttrAccessGroup as String] = accessGroup
         }
         var result: CFTypeRef?
         let status = SecItemCopyMatching(query as CFDictionary, &result)
@@ -183,13 +183,13 @@ public enum Keychain {
     /// - Parameters:
     ///   - service: 服务标识。
     ///   - account: 账户标识，`nil` 表示不限定。
-    ///   - group: 访问组，`nil` 表示不限定。
+    ///   - accessGroup: 访问组，`nil` 表示不限定。
     ///   - synchronizable: 是否为可同步条目，`nil` 表示不限定。
     /// - Throws: ``KeychainError``。无匹配条目时视为成功，不会抛出错误。
     public static func deleteItems(
         forService service: String,
         account: String? = nil,
-        group: String? = nil,
+        accessGroup: String? = nil,
         synchronizable: Bool? = false
     ) throws(KeychainError) {
         var query: [String: Any] = [
@@ -200,8 +200,8 @@ public enum Keychain {
         if let account = account {
             query[kSecAttrAccount as String] = account
         }
-        if let group = group {
-            query[kSecAttrAccessGroup as String] = group
+        if let accessGroup {
+            query[kSecAttrAccessGroup as String] = accessGroup
         }
         let status = SecItemDelete(query as CFDictionary)
         guard status == errSecItemNotFound || status == errSecSuccess else {
