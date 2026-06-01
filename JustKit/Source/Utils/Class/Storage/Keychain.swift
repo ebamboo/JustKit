@@ -26,55 +26,6 @@ import Foundation
 /// 因此，`service` 应作为业务级命名空间使用，不建议直接使用 Bundle Identifier 作为默认值，以避免后续服务拆分、组件共享或数据迁移时受到限制。
 public enum Keychain {
     
-    /// 获取指定服务下符合条件的条目。
-    ///
-    /// - Parameters:
-    ///   - service: 服务标识符。
-    ///   - group: 访问组标识符，`nil` 表示不限定。
-    ///   - scope: 查询范围，`nil` 表示不限定。
-    /// - Returns: 匹配的条目列表。无匹配条目时返回空数组。自动过滤异常条目。返回顺序未定义。
-    /// - Throws: ``KeychainError``。
-    ///
-    /// - Note:
-    ///   Apple 不允许同时使用 `kSecMatchLimitAll` 与 `kSecReturnData`。
-    ///   因此该方法仅返回条目元信息，不返回对应密码数据。
-    ///   如需读取密码数据，请使用 ``data(for:service:group:scope:)``。
-    public static func items(
-        for service: String,
-        group: String? = nil,
-        scope: SynchronizableScope? = .local
-    ) throws -> [Item] {
-        var query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: service,
-            kSecAttrSynchronizable as String: scope?.secValue ?? kSecAttrSynchronizableAny,
-            kSecMatchLimit as String: kSecMatchLimitAll,
-            kSecReturnAttributes as String: true
-        ]
-        if let group = group {
-            query[kSecAttrAccessGroup as String] = group
-        }
-        var result: CFTypeRef?
-        let status = SecItemCopyMatching(query as CFDictionary, &result)
-        switch status {
-        case errSecItemNotFound:
-            return []
-        case errSecSuccess:
-            guard let list = result as? [[String: Any]] else {
-                throw KeychainError.invalidDataFormat
-            }
-            return list.compactMap { info in
-                guard let account = info[kSecAttrAccount as String] as? String else {
-                    return nil
-                }
-                let synchronizable = info[kSecAttrSynchronizable as String] as? Bool ?? false
-                return Item(account: account, synchronizable: synchronizable)
-            }
-        default:
-            throw KeychainError.operationFailed(status: status)
-        }
-    }
-    
     /// 获取指定账号对应的密码数据。
     ///
     /// - Parameters:
@@ -116,7 +67,7 @@ public enum Keychain {
         }
     }
     
-    /// 保存或更新指定账号的密码数据。
+    /// 保存或更新指定账号对应的密码数据。
     ///
     /// 采用 update-or-add 策略：优先尝试更新已有条目，若不存在则新增。
     ///
@@ -177,6 +128,55 @@ public enum Keychain {
             }
         default:
             throw KeychainError.operationFailed(status: updateStatus)
+        }
+    }
+    
+    /// 获取指定服务下符合条件的条目。
+    ///
+    /// - Parameters:
+    ///   - service: 服务标识符。
+    ///   - group: 访问组标识符，`nil` 表示不限定。
+    ///   - scope: 查询范围，`nil` 表示不限定。
+    /// - Returns: 匹配的条目列表。无匹配条目时返回空数组。自动过滤异常条目。返回顺序未定义。
+    /// - Throws: ``KeychainError``。
+    ///
+    /// - Note:
+    ///   Apple 不允许同时使用 `kSecMatchLimitAll` 与 `kSecReturnData`。
+    ///   因此该方法仅返回条目元信息，不返回对应密码数据。
+    ///   如需读取密码数据，请使用 ``data(for:service:group:scope:)``。
+    public static func items(
+        for service: String,
+        group: String? = nil,
+        scope: SynchronizableScope? = .local
+    ) throws -> [Item] {
+        var query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrSynchronizable as String: scope?.secValue ?? kSecAttrSynchronizableAny,
+            kSecMatchLimit as String: kSecMatchLimitAll,
+            kSecReturnAttributes as String: true
+        ]
+        if let group = group {
+            query[kSecAttrAccessGroup as String] = group
+        }
+        var result: CFTypeRef?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+        switch status {
+        case errSecItemNotFound:
+            return []
+        case errSecSuccess:
+            guard let list = result as? [[String: Any]] else {
+                throw KeychainError.invalidDataFormat
+            }
+            return list.compactMap { info in
+                guard let account = info[kSecAttrAccount as String] as? String else {
+                    return nil
+                }
+                let synchronizable = info[kSecAttrSynchronizable as String] as? Bool ?? false
+                return Item(account: account, synchronizable: synchronizable)
+            }
+        default:
+            throw KeychainError.operationFailed(status: status)
         }
     }
     
