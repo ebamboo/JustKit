@@ -33,7 +33,7 @@ public enum Keychain {
     ///   - account: 账户标识。
     ///   - service: 服务标识。
     ///   - group: 访问组，`nil` 表示不限定。
-    ///   - synchronizable: `true` 仅匹配同步条目，`false` 仅匹配本地条目。
+    ///   - synchronizable: 是否为可同步条目。
     /// - Returns: 匹配条目的密码数据。无匹配条目时返回 `nil`。
     /// - Throws: ``KeychainError``。
     public static func data(
@@ -132,7 +132,7 @@ public enum Keychain {
     /// - Parameters:
     ///   - service: 服务标识。
     ///   - group: 访问组，`nil` 表示不限定。
-    ///   - synchronizable: `true` 仅匹配同步条目，`false` 仅匹配本地条目，`nil` 表示不限定。
+    ///   - synchronizable: 是否为可同步条目，`nil` 表示不限定。
     /// - Returns: 匹配的条目列表。无匹配条目时返回空数组。自动过滤异常条目。返回顺序未定义。
     /// - Throws: ``KeychainError``。
     ///
@@ -184,7 +184,7 @@ public enum Keychain {
     ///   - service: 服务标识。
     ///   - account: 账户标识，`nil` 表示不限定。
     ///   - group: 访问组，`nil` 表示不限定。
-    ///   - synchronizable: `true` 仅匹配同步条目，`false` 仅匹配本地条目，`nil` 表示不限定。
+    ///   - synchronizable: 是否为可同步条目，`nil` 表示不限定。
     /// - Throws: ``KeychainError``。无匹配条目时视为成功，不会抛出错误。
     public static func deleteItems(
         forService service: String,
