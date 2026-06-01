@@ -77,7 +77,7 @@ public enum Keychain {
     ///   - service: 服务标识符。
     ///   - group: 访问组标识符，`nil` 表示不限定。
     ///   - accessible: 条目访问条件。
-    ///     当传入 `nil` 时，更新操作不修改该属性，新增操作默认使用 ``.whenUnlocked``。
+    ///     当传入 `nil` 时，更新操作不变更该属性，新增操作默认使用 ``.whenUnlocked``。
     ///   - synchronizable: 是否将条目标记为可同步。
     /// - Throws: ``KeychainError``。
     ///
@@ -183,14 +183,12 @@ public enum Keychain {
     
     /// 删除指定服务下符合条件的条目。
     ///
-    /// 无匹配条目时视为成功，不会抛出错误。
-    ///
     /// - Parameters:
     ///   - service: 服务标识符。
     ///   - account: 账号标识符，`nil` 表示不限定。
     ///   - group: 访问组标识符，`nil` 表示不限定。
     ///   - scope: 查询范围，`nil` 表示不限定。
-    /// - Throws: ``KeychainError``。
+    /// - Throws: ``KeychainError``。无匹配条目时视为成功，不会抛出错误。
     public static func deleteItems(
         forService service: String,
         account: String? = nil,
