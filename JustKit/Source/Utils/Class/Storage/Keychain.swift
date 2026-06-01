@@ -185,14 +185,14 @@ public enum Keychain {
     /// 无匹配条目时视为成功，不会抛出错误。
     ///
     /// - Parameters:
-    ///   - account: 账号标识符，`nil` 表示不限定。
     ///   - service: 服务标识符。
+    ///   - account: 账号标识符，`nil` 表示不限定。
     ///   - group: 访问组标识符，`nil` 表示不限定。
     ///   - scope: 查询范围，`nil` 表示不限定。
     /// - Throws: ``KeychainError``。
     public static func deleteItems(
-        for account: String?,
-        service: String,
+        for service: String,
+        account: String?,
         group: String? = nil,
         scope: SynchronizableScope? = .local
     ) throws(KeychainError) {
