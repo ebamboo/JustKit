@@ -76,8 +76,9 @@ public enum Keychain {
     ///   - account: 账号标识符。
     ///   - service: 服务标识符。
     ///   - group: 访问组标识符，`nil` 表示不限定。
+    ///   - accessible: 条目访问条件。
+    ///     当传入 `nil` 时，更新操作不修改该属性，新增操作默认使用 ``.whenUnlocked``。
     ///   - synchronizable: 是否将条目标记为可同步。
-    ///   - accessible: 数据保护级别。当传入 `nil` 时，更新操作不变更现有级别，新增操作默认使用 ``.whenUnlocked``。
     /// - Throws: ``KeychainError``。
     ///
     /// - Important: `synchronizable = true` 与带 `ThisDeviceOnly` 后缀的 ``Accessibility`` 互斥。
@@ -89,8 +90,8 @@ public enum Keychain {
         forAccount account: String,
         service: String,
         group: String? = nil,
-        synchronizable: Bool = false,
-        accessible: Accessibility? = nil
+        accessible: Accessibility? = nil,
+        synchronizable: Bool = false
     ) throws(KeychainError) {
         if synchronizable, let accessible, accessible.isThisDeviceOnly {
             throw KeychainError.operationFailed(status: errSecParam)
