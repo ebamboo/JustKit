@@ -152,7 +152,7 @@ public enum Keychain {
     public static func items(
         forService service: String,
         accessGroup: String? = nil,
-        synchronizable: Bool? = false
+        synchronizable: Bool? = nil
     ) throws(KeychainError) -> [Item] {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
