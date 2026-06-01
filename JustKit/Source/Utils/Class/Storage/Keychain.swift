@@ -11,8 +11,6 @@ import Foundation
 ///
 /// 提供一组类型安全的静态方法，用于存取 Generic Passwords 类型的敏感数据，如密码、令牌、密钥等。
 ///
-/// 使用示例：
-///
 /// ```swift
 /// // 保存密码
 /// let password = "s3cretP@ss"
@@ -25,6 +23,15 @@ import Foundation
 ///     print(password)
 /// }
 /// ```
+///
+/// - Important: Generic Password 的复合主键由以下属性组成：
+///
+///   - `kSecAttrAccount`
+///   - `kSecAttrService`
+///   - `kSecAttrAccessGroup`
+///   - `kSecAttrSynchronizable`
+///
+///   所有主键属性值均相同的两个条目被视为同一条目，重复添加将产生 `errSecDuplicateItem` 错误。
 public enum Keychain {
     
     /// 读取指定账号对应的密码数据。

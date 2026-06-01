@@ -6,8 +6,6 @@ import Foundation
 
 /// 基于 `UserDefaults.standard` 的属性包装器，将属性的读写映射为对指定 key 的取存。
 ///
-/// 使用示例：
-///
 /// ```swift
 /// enum AppPreference {
 ///     /// 是否首次启动
