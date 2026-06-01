@@ -68,24 +68,24 @@ public enum Keychain {
         }
     }
     
-    /// 保存或更新指定账号对应的密码数据。
+    /// 保存指定账号对应的密码数据。
     ///
     /// - Parameters:
     ///   - data: 密码数据。
+    ///   - accessible: 条目访问条件。
+    ///     当传入 `nil` 时，更新操作不变更该属性，新增操作默认使用 ``.whenUnlocked``。
     ///   - account: 账户标识。
     ///   - service: 服务标识。
     ///   - group: 访问组，`nil` 表示不限定。
-    ///   - accessible: 条目访问条件。
-    ///     当传入 `nil` 时，更新操作不变更该属性，新增操作默认使用 ``.whenUnlocked``。
-    ///   - synchronizable: 是否将条目标记为可同步。
+    ///   - synchronizable: 是否为可同步条目。
     /// - Throws: ``KeychainError``。
     ///   若 `synchronizable` 为 `true` 且 `accessible` 为 `ThisDeviceOnly` 级别，则参数无效，抛出错误。
     public static func setData(
         _ data: Data,
+        accessible: Accessibility? = nil,
         forAccount account: String,
         service: String,
         group: String? = nil,
-        accessible: Accessibility? = nil,
         synchronizable: Bool = false
     ) throws(KeychainError) {
         if synchronizable, let accessible, accessible.isThisDeviceOnly {
