@@ -142,7 +142,7 @@ public enum Keychain {
     ///   - service: 服务标识。
     ///   - accessGroup: 访问组，`nil` 表示不限定。
     ///   - synchronizable: 是否为可同步条目，`nil` 表示不限定。
-    /// - Returns: 匹配的条目列表。无匹配条目时返回空数组。自动过滤异常条目。返回顺序未定义。
+    /// - Returns: 匹配的条目列表。无匹配条目时返回空数组。自动过滤无效条目。返回顺序未定义。
     /// - Throws: ``KeychainError``。
     ///
     /// - Note:
@@ -176,11 +176,27 @@ public enum Keychain {
                 throw KeychainError.invalidDataFormat
             }
             return list.compactMap { info in
-                guard let account = info[kSecAttrAccount as String] as? String else {
+                guard
+                    let accessGroup = info[kSecAttrAccessGroup as String] as? String,
+                    let service = info[kSecAttrService as String] as? String,
+                    let account = info[kSecAttrAccount as String] as? String,
+                    let synchronizable = info[kSecAttrSynchronizable as String] as? Bool,
+                    let secAccessible = info[kSecAttrAccessible as String] as? String,
+                    let accessible = Accessibility(secValue: secAccessible as CFString)
+                else {
                     return nil
                 }
-                let synchronizable = info[kSecAttrSynchronizable as String] as? Bool ?? false
-                return Item(account: account, synchronizable: synchronizable)
+                let creationDate = info[kSecAttrCreationDate as String] as? Date
+                let modificationDate = info[kSecAttrModificationDate as String] as? Date
+                return Item(
+                    accessGroup: accessGroup,
+                    service: service,
+                    account: account,
+                    synchronizable: synchronizable,
+                    accessible: accessible,
+                    creationDate: creationDate,
+                    modificationDate: modificationDate
+                )
             }
         default:
             throw KeychainError.operationFailed(status: status)
@@ -223,8 +239,14 @@ public enum Keychain {
 public extension Keychain {
     
     struct Item {
+        public let accessGroup: String
+        public let service: String
         public let account: String
         public let synchronizable: Bool
+        
+        public let accessible: Accessibility
+        public let creationDate: Date?
+        public let modificationDate: Date?
     }
     
     enum KeychainError: Error {
@@ -238,6 +260,22 @@ public extension Keychain {
         case whenPasscodeSetThisDeviceOnly
         case whenUnlockedThisDeviceOnly
         case afterFirstUnlockThisDeviceOnly
+        fileprivate init?(secValue: CFString) {
+            switch secValue {
+            case kSecAttrAccessibleWhenUnlocked:
+                self = .whenUnlocked
+            case kSecAttrAccessibleAfterFirstUnlock:
+                self = .afterFirstUnlock
+            case kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly:
+                self = .whenPasscodeSetThisDeviceOnly
+            case kSecAttrAccessibleWhenUnlockedThisDeviceOnly:
+                self = .whenUnlockedThisDeviceOnly
+            case kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly:
+                self = .afterFirstUnlockThisDeviceOnly
+            default:
+                return nil
+            }
+        }
         fileprivate var secValue: CFString {
             switch self {
             case .whenUnlocked:
