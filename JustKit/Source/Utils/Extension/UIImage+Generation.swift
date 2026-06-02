@@ -7,6 +7,33 @@ import CoreImage.CIFilterBuiltins
 
 public extension UIImage {
     
+    // MARK: - 颜色生图
+    
+    /// 创建指定颜色和尺寸的纯色图片
+    ///
+    /// 内部使用 UIGraphicsImageRenderer 绘制，
+    /// 输出图片的 opaque 为 false、scale 跟随屏幕分辨率
+    ///
+    /// - Parameters:
+    ///   - color: 填充颜色
+    ///   - size: 图片尺寸，默认 1×1 pt
+    /// - Returns: 纯色填充的 UIImage
+    static func filled(
+        with color: UIColor,
+        size: CGSize = .init(width: 1, height: 1)
+    ) -> UIImage {
+        let safeSize = size.width > 0 && size.height > 0
+            ? size
+            : .init(width: 1, height: 1)
+        let renderer = UIGraphicsImageRenderer(size: safeSize)
+        return renderer.image { ctx in
+            color.setFill()
+            ctx.fill(.init(origin: .zero, size: safeSize))
+        }
+    }
+    
+    // MARK: - 动态外观适配
+    
     /// 创建 能随 UITraitCollection 变化而自动切换外观的 图片
     ///
     /// 内部通过 UIImageAsset 注册不同 trait 对应的图片变体，
@@ -34,28 +61,7 @@ public extension UIImage {
         return asset.image(with: .current)
     }
     
-    /// 创建指定颜色和尺寸的纯色图片
-    ///
-    /// 内部使用 UIGraphicsImageRenderer 绘制，
-    /// 输出图片的 opaque 为 false、scale 跟随屏幕分辨率
-    ///
-    /// - Parameters:
-    ///   - color: 填充颜色
-    ///   - size: 图片尺寸，默认 1×1 pt
-    /// - Returns: 纯色填充的 UIImage
-    static func filled(
-        with color: UIColor,
-        size: CGSize = .init(width: 1, height: 1)
-    ) -> UIImage {
-        let safeSize = size.width > 0 && size.height > 0
-            ? size
-            : .init(width: 1, height: 1)
-        let renderer = UIGraphicsImageRenderer(size: safeSize)
-        return renderer.image { ctx in
-            color.setFill()
-            ctx.fill(.init(origin: .zero, size: safeSize))
-        }
-    }
+    // MARK: - 生成二维码
     
     /// 二维码纠错等级
     ///
