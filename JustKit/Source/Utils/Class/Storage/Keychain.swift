@@ -33,6 +33,10 @@ import Security
 ///   - `kSecAttrSynchronizable`
 ///
 ///   所有主键属性值均相同的两个条目被视为同一条目，重复添加将产生 `errSecDuplicateItem` 错误。
+///
+/// - Important: 若需使用 `kSecAttrAccessGroup` 实现跨 App 共享钥匙串条目，
+///   须在 Xcode 中开启 **Keychain Sharing** capability，并配置对应的 Keychain Access Group。
+///   未开启时，系统使用 App 自身默认的访问组，条目仅对当前 App 可见。
 public enum Keychain {
     
     /// 读取指定账号对应的密码数据。
