@@ -144,6 +144,7 @@ public enum Keychain {
     ///
     /// - Parameters:
     ///   - service: 服务标识。
+    ///   - account: 账户标识，`nil` 表示不限定。
     ///   - accessGroup: 访问组，`nil` 表示不限定。
     ///   - synchronizable: 是否为可同步条目，`nil` 表示不限定。
     /// - Returns: 匹配的条目列表。无匹配条目时返回空数组。自动过滤无效条目。返回顺序未定义。
@@ -157,6 +158,7 @@ public enum Keychain {
     ///   如需读取密码数据，请使用 ``data(forAccount:service:accessGroup:synchronizable:)`` 逐条获取。
     public static func items(
         forService service: String,
+        account: String? = nil,
         accessGroup: String? = nil,
         synchronizable: Bool? = nil
     ) throws(KeychainError) -> [Item] {
@@ -167,6 +169,9 @@ public enum Keychain {
             kSecMatchLimit as String: kSecMatchLimitAll,
             kSecReturnAttributes as String: true
         ]
+        if let account {
+            query[kSecAttrAccount as String] = account
+        }
         if let accessGroup {
             query[kSecAttrAccessGroup as String] = accessGroup
         }
