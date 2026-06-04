@@ -4,17 +4,28 @@
 
 import UIKit
 
-/// 仿 UISwitch 样式的自定义开关控件：
+/// 仿 `UISwitch` 样式的自定义开关控件，弥补系统控件的以下限制：
+/// - 支持自定义关闭状态背景色（`UISwitch` 仅支持 `onTintColor`）
+/// - 支持任意尺寸（`UISwitch` 固定为 51×31）
 /// - 支持自定义圆钮颜色
-/// - 支持自定义开/关状态颜色（UISwitch 不支持关状态颜色）
-/// - 支持修改控件高度和宽度（UISwitch 不支持修改尺寸）
 ///
-/// 通过 `UIControl.Event.valueChanged` 来处理点击切换事件
+/// 用户点击切换时，控件发送 `.valueChanged` 事件，通过读取 `isOn` 获取当前状态。
+///
+/// ```swift
+/// let toggle = ToggleSwitch()
+/// toggle.onTintColor = .systemBlue
+/// toggle.offTintColor = .systemGray5
+/// toggle.addTarget(self, action: #selector(switchChanged(_:)), for: .valueChanged)
+///
+/// @objc func switchChanged(_ sender: ToggleSwitch) {
+///     print("当前状态: \(sender.isOn)")
+/// }
+/// ```
 public final class ToggleSwitch: UIControl {
     
     // MARK: - 配置属性
     
-    /// 控件是否开启
+    /// 开关状态，`true` 为开启，`false` 为关闭。修改后立即更新外观。
     @IBInspectable public var isOn: Bool = true {
         didSet {
             updateThumbPosition()
@@ -22,20 +33,20 @@ public final class ToggleSwitch: UIControl {
         }
     }
     
-    /// 两次有效点击之间最小时间间隔（单位秒，0 表示不设置最小时间间隔）
+    /// 防抖间隔（单位秒）。在此时间内，控件将忽略重复点击。设为 0 表示不启用防抖。
     @IBInspectable public var debounceInterval: TimeInterval = 0
     
-    /// 开启时的背景颜色
+    /// 开启状态的轨道背景色
     @IBInspectable public var onTintColor: UIColor = .systemGreen {
         didSet { updateAppearance() }
     }
     
-    /// 关闭时的背景颜色
+    /// 关闭状态的轨道背景色
     @IBInspectable public var offTintColor: UIColor = .init(red: 120/255, green: 120/255, blue: 128/255, alpha: 0.16) {
         didSet { updateAppearance() }
     }
     
-    /// 圆钮的颜色
+    /// 圆钮颜色
     @IBInspectable public var thumbTintColor: UIColor = .white {
         didSet { updateAppearance() }
     }
