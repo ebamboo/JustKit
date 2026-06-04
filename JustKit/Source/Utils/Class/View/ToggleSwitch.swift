@@ -27,7 +27,7 @@ public final class ToggleSwitch: UIControl {
     
     private static let padding: CGFloat = 2
     
-    // MARK: - 配置属性
+    // MARK: - Configuration
     
     /// 开关状态，`true` 为开启，`false` 为关闭。修改后立即更新外观。
     @IBInspectable public var isOn: Bool = false {
@@ -109,11 +109,14 @@ public final class ToggleSwitch: UIControl {
     
     public override func endTracking(_ touch: UITouch?, with event: UIEvent?) {
         super.endTracking(touch, with: event)
+        // 校验触摸位置是否在控件范围内
         guard let touch = touch else { return }
         let location = touch.location(in: self)
         guard bounds.contains(location) else { return }
+        // 切换状态并发送事件
         isOn.toggle()
         sendActions(for: .valueChanged)
+        // 防抖：在指定间隔内禁用交互
         if debounceInterval > 0 {
             isEnabled = false
             DispatchQueue.main.asyncAfter(deadline: .now() + debounceInterval) { [weak self] in
