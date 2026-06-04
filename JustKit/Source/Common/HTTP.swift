@@ -33,7 +33,8 @@ import Combine
  ---
 
  ## 定义 API
- 
+
+ ```swift
  enum TestAPI: HTTPRequest {
      case login(account: String, password: String)
      case userInfo(userId: Int)
@@ -65,11 +66,13 @@ import Combine
              return .none
          }
      }
-     
+
  }
+ ```
 
  ## 实际调用
- 
+
+ ```swift
  let api = TestAPI.login(account: "test", password: "123")
  HTTP.dataRequest(api) { result in
      switch result {
@@ -80,6 +83,7 @@ import Combine
          print(error)
      }
  }
+ ```
  
 */
 
