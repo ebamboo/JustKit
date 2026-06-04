@@ -10,7 +10,7 @@ import UIKit
 ///   如需同时使用阴影，需要额外嵌套一个容器视图来承载阴影。
 public class UnevenCornerView: UIView {
 
-    // MARK: - 配置属性
+    // MARK: - Configuration
 
     @IBInspectable public var topLeftRadius: CGFloat = 0.0
     @IBInspectable public var topRightRadius: CGFloat = 0.0

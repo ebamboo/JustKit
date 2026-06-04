@@ -7,7 +7,7 @@ import UIKit
 /// 渐变色文字的 `UILabel` 子类，支持多行。
 public class GradientLabel: UILabel {
 
-    // MARK: - 配置属性
+    // MARK: - Configuration
 
     /// 渐变色数组，支持动态颜色（如暗黑模式自适应颜色）
     public var colors: [UIColor] = [.red, .orange, .blue] {

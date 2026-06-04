@@ -11,7 +11,7 @@ import UIKit
 /// - 垂直方向时，粗细 = 视图宽度
 public class DashLine: UIView {
 
-    // MARK: - 配置属性
+    // MARK: - Configuration
 
     /// 是否为水平方向
     @IBInspectable public var isHorizontal: Bool = true

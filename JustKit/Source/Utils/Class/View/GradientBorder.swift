@@ -18,7 +18,7 @@ import UIKit
 /// ```
 public class GradientBorder: UIView {
     
-    // MARK: - 配置属性
+    // MARK: - Configuration
     
     /// 圆角半径
     @IBInspectable public var cornerRadius: CGFloat = 12 {
