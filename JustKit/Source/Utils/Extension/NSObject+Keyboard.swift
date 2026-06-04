@@ -46,12 +46,12 @@ public extension NSObject {
     
     /// 键盘事件信息
     struct KeyboardInfo {
-        let isLocal: Bool
-        let frameBegin: CGRect
-        let frameEnd: CGRect
-        let animationDuration: TimeInterval
-        let animationCurve: UIView.AnimationOptions
-        init?(_ notification: Notification) {
+        public let isLocal: Bool
+        public let frameBegin: CGRect
+        public let frameEnd: CGRect
+        public let animationDuration: TimeInterval
+        public let animationCurve: UIView.AnimationOptions
+        fileprivate init?(_ notification: Notification) {
             guard let userInfo = notification.userInfo,
                   let isLocal = userInfo[UIResponder.keyboardIsLocalUserInfoKey] as? Bool,
                   let frameBegin = userInfo[UIResponder.keyboardFrameBeginUserInfoKey] as? CGRect,

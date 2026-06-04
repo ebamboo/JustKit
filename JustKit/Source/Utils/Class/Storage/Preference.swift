@@ -22,6 +22,9 @@ import Foundation
 @propertyWrapper
 public struct Preference<Value> {
     public let key: String
+    public init(key: String) {
+        self.key = key
+    }
     public var wrappedValue: Value? {
         get {
             UserDefaults.standard.object(forKey: key) as? Value

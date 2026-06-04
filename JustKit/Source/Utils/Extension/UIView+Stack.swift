@@ -4,7 +4,7 @@
 
 import UIKit
 
-extension UIView {
+public extension UIView {
     
     /// 在 UIStackView 中时，自定义当前视图与下一个排列元素之间的间距
     /// 仅当父视图为 UIStackView 时生效；支持 Interface Builder 设置
