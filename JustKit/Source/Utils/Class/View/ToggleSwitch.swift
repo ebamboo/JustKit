@@ -44,23 +44,33 @@ public final class ToggleSwitch: UIControl {
     
     // MARK: - Components
     
-    private lazy var trackView = {
+    private lazy var trackView: UIView = {
         let v = UIView()
         v.isUserInteractionEnabled = false
         v.backgroundColor = isOn ? onTintColor : offTintColor
-        self.addSubview(v)
         return v
     }()
     
-    private lazy var thumbView = {
+    private lazy var thumbView: UIView = {
         let v = UIView()
         v.isUserInteractionEnabled = false
         v.backgroundColor = thumbTintColor
-        self.addSubview(v)
         return v
     }()
     
     // MARK: - Override
+    
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
+        addSubview(trackView)
+        addSubview(thumbView)
+    }
+    
+    public required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        addSubview(trackView)
+        addSubview(thumbView)
+    }
     
     public override func layoutSubviews() {
         super.layoutSubviews()
@@ -68,7 +78,7 @@ public final class ToggleSwitch: UIControl {
         trackView.frame = bounds
         trackView.layer.cornerRadius = bounds.height / 2
         // 设置 thumbView 的 frame 及圆角。
-        let thumbSide = bounds.height - 2 * padding
+        let thumbSide = max(bounds.height - 2 * padding, 0)
         let thumbMinX = padding
         let thumbMaxX = bounds.width - thumbSide - padding
         thumbView.frame = .init(
