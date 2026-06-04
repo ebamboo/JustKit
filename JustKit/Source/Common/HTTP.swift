@@ -5,76 +5,81 @@
 import Alamofire
 import Combine
 
-///
-/// # HTTP 网络请求工具
-///
-/// 基于 Alamofire 封装的协议驱动式 HTTP 网络请求工具。
-/// 通过 `HTTPRequest` 协议定义接口，推荐以枚举方式组织 API，每个 case 对应一个具体接口。
-///
-/// ## 核心能力
-/// - `HTTP.dataRequest`     — 普通数据请求（GET / POST / PUT / DELETE 等）
-/// - `HTTP.uploadRequest`   — 文件上传（支持 multipart、fileData、fileURL）
-/// - `HTTP.downloadRequest` — 文件下载（返回本地存储路径）
-///
-/// ## 请求体格式（HTTP.Body）
-/// `none` / `binary` / `plain` / `json` / `form` / `multipart` / `fileData` / `fileURL`
-///
-/// ## 全局错误监听
-/// 订阅 `HTTPRequestDidFail`（Combine PassthroughSubject）可统一拦截请求失败，
-/// 适用于 401 未授权跳转登录、网络异常提示等全局场景。
-///
-/// ## 自动刷新 Token
-/// 所有请求方法均支持传入 `interceptor` 参数。
-/// 可在业务工具层基于 Alamofire 的 `AuthenticationInterceptor` 封装自动刷新 Token 逻辑，
-/// 实现 Token 过期后自动刷新并重发请求，对业务调用方完全透明。
-/// 参考：https://github.com/Alamofire/Alamofire/blob/master/Documentation/AdvancedUsage.md#authenticationinterceptor
-///
-
-// MARK: - example
-
 /*
 
-enum TestAPI: HTTPRequest {
-    case login(account: String, password: String)
-    case userInfo(userId: Int)
-}
+ # HTTP 网络请求工具
 
-extension TestAPI {
+ 基于 Alamofire 封装的协议驱动式 HTTP 网络请求工具。
+ 通过 `HTTPRequest` 协议定义接口，推荐以枚举方式组织 API，每个 case 对应一个具体接口。
 
-    var method: HTTP.Method {
-        switch self {
-        case .login:   return .post
-        case .userInfo: return .get
-        }
-    }
+ ## 核心能力
+ - `HTTP.dataRequest`     — 普通数据请求（GET / POST / PUT / DELETE 等）
+ - `HTTP.uploadRequest`   — 文件上传（支持 multipart、fileData、fileURL）
+ - `HTTP.downloadRequest` — 文件下载（返回本地存储路径）
 
-    var url: String {
-        switch self {
-        case .login:           return "https://api.example.com/login"
-        case .userInfo(let id): return "https://api.example.com/users/\(id)"
-        }
-    }
+ ## 请求体格式（HTTP.Body）
+ `none` / `binary` / `plain` / `json` / `form` / `multipart` / `fileData` / `fileURL`
 
-    var headers: [String: String] { ["Token": "xxx"] }
+ ## 全局错误监听
+ 订阅 `HTTPRequestDidFail`（Combine PassthroughSubject）可统一拦截请求失败，
+ 适用于 401 未授权跳转登录、网络异常提示等全局场景。
 
-    var body: HTTP.Body {
-        switch self {
-        case .login(let account, let password):
-            return .json(["account": account, "password": password])
-        case .userInfo:
-            return .none
-        }
-    }
-    
-}
+ ## 自动刷新 Token
+ 所有请求方法均支持传入 `interceptor` 参数。
+ 可在业务工具层基于 Alamofire 的 `AuthenticationInterceptor` 封装自动刷新 Token 逻辑，
+ 实现 Token 过期后自动刷新并重发请求，对业务调用方完全透明。
+ 参考：https://github.com/Alamofire/Alamofire/blob/master/Documentation/AdvancedUsage.md#authenticationinterceptor
 
-HTTP.dataRequest(TestAPI.login(account: "test", password: "123")) { result in
-    
-}
+ ---
 
-HTTP.dataRequest(TestAPI.userInfo(userId: 23)) { result in
-    
-}
+ ## 定义 API
+ 
+ enum TestAPI: HTTPRequest {
+     case login(account: String, password: String)
+     case userInfo(userId: Int)
+ }
+
+ extension TestAPI {
+
+     var method: HTTP.Method {
+         switch self {
+         case .login:   return .post
+         case .userInfo: return .get
+         }
+     }
+
+     var url: String {
+         switch self {
+         case .login:           return "https://api.example.com/login"
+         case .userInfo(let id): return "https://api.example.com/users/\(id)"
+         }
+     }
+
+     var headers: [String: String] { ["Token": "xxx"] }
+
+     var body: HTTP.Body {
+         switch self {
+         case .login(let account, let password):
+             return .json(["account": account, "password": password])
+         case .userInfo:
+             return .none
+         }
+     }
+     
+ }
+
+ ## 实际调用
+ 
+ let api = TestAPI.login(account: "test", password: "123")
+ HTTP.dataRequest(api) { result in
+     switch result {
+     case .success(let response):
+         print(response.headers)
+         print(response.body ?? Data())
+     case .failure(let error):
+         print(error)
+     }
+ }
  
 */
 
