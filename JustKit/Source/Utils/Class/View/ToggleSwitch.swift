@@ -7,9 +7,11 @@ import UIKit
 /// 仿 `UISwitch` 样式的自定义开关控件。
 ///
 /// 支持以下功能：
-/// - 支持自定义关闭状态背景色（`UISwitch` 仅支持 `onTintColor`）
-/// - 支持任意尺寸（`UISwitch` 的尺寸不可自定义）
-/// - 支持自定义圆钮颜色
+/// - 自定义圆钮颜色
+/// - 自定义开启状态背景色
+/// - 自定义关闭状态背景色（`UISwitch` 不支持）
+/// - 自定义控件尺寸（`UISwitch` 不支持）
+/// - 点击防抖，避免快速连续点击导致状态异常（`UISwitch` 不支持）
 ///
 /// 用户点击切换时，控件发送 `.valueChanged` 事件，通过读取 `isOn` 获取当前状态。
 ///
@@ -17,6 +19,7 @@ import UIKit
 /// let toggle = ToggleSwitch()
 /// toggle.onTintColor = .systemBlue
 /// toggle.offTintColor = .systemGray5
+/// toggle.debounceInterval = 0.5
 /// toggle.addTarget(self, action: #selector(switchChanged(_:)), for: .valueChanged)
 ///
 /// @objc func switchChanged(_ sender: ToggleSwitch) {
