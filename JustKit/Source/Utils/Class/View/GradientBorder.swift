@@ -13,33 +13,36 @@ public class GradientBorder: UIView {
     
     // MARK: - 配置属性
     
-    /// 渐变边框的圆角半径
+    /// 圆角半径
     @IBInspectable public var cornerRadius: CGFloat = 12 {
         didSet {
             gradientLayer.cornerRadius = cornerRadius
             maskLayer.path = UIBezierPath(roundedRect: bounds, cornerRadius: cornerRadius).cgPath
         }
     }
-    /// 渐变边框的边框厚度
+    
+    /// 边框厚度
     @IBInspectable public var borderWidth: CGFloat = 2 {
         didSet {
             maskLayer.lineWidth = borderWidth * 2
         }
     }
     
-    /// 渐变色
+    /// 渐变色数组，支持动态颜色（如暗黑模式自适应颜色）
     public var colors: [UIColor] = [UIColor.red, UIColor.orange, UIColor.systemTeal] {
         didSet {
             gradientLayer.colors = colors.map(\.cgColor)
         }
     }
-    /// 渐变起点位置
+    
+    /// 渐变起点
     @IBInspectable public var startPoint: CGPoint = .init(x: 0, y: 0.5) {
         didSet {
             gradientLayer.startPoint = startPoint
         }
     }
-    /// 渐变终点位置
+    
+    /// 渐变终点
     @IBInspectable public var endPoint: CGPoint = .init(x: 1, y: 0.5) {
         didSet {
             gradientLayer.endPoint = endPoint
