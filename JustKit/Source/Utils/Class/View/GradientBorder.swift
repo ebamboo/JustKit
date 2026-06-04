@@ -4,11 +4,18 @@
 
 import UIKit
 
+/// 渐变色圆角边框视图。
 ///
-/// 渐变色圆角边框/圆环
+/// 当视图为正方形且 `cornerRadius` 为边长一半时，表现为圆环。
 ///
-/// 当视图为正方形，且圆角半径为边长一半时，表现为圆环
-///
+/// ```swift
+/// let border = GradientBorder()
+/// border.cornerRadius = 20
+/// border.borderWidth = 3
+/// border.colors = [.systemPink, .systemPurple, .systemBlue]
+/// border.startPoint = CGPoint(x: 0, y: 0)
+/// border.endPoint = CGPoint(x: 1, y: 1)
+/// ```
 public class GradientBorder: UIView {
     
     // MARK: - 配置属性

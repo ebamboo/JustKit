@@ -4,7 +4,7 @@
 
 import UIKit
 
-/// 渐变色文字的 `UILabel` 子类，支持多行，可在 Interface Builder 中配置渐变方向。
+/// 渐变色文字的 `UILabel` 子类，支持多行。
 public class GradientLabel: UILabel {
 
     // MARK: - 配置属性
