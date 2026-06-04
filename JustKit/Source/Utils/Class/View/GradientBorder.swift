@@ -28,9 +28,9 @@ public class GradientBorder: UIView {
     }
     
     /// 渐变色
-    public var colors: [CGColor] = [UIColor.red.cgColor, UIColor.orange.cgColor, UIColor.systemTeal.cgColor] {
+    public var colors: [UIColor] = [UIColor.red, UIColor.orange, UIColor.systemTeal] {
         didSet {
-            gradientLayer.colors = colors
+            gradientLayer.colors = colors.map(\.cgColor)
         }
     }
     /// 渐变起点位置
@@ -51,7 +51,7 @@ public class GradientBorder: UIView {
     private lazy var gradientLayer: CAGradientLayer = {
         let layer = CAGradientLayer()
         layer.cornerRadius = cornerRadius
-        layer.colors = colors
+        layer.colors = colors.map(\.cgColor)
         layer.startPoint = startPoint
         layer.endPoint = endPoint
         return layer
@@ -86,6 +86,13 @@ public class GradientBorder: UIView {
         gradientLayer.frame = bounds
         maskLayer.frame = bounds
         maskLayer.path = UIBezierPath(roundedRect: bounds, cornerRadius: cornerRadius).cgPath
+    }
+    
+    public override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            gradientLayer.colors = colors.map(\.cgColor)
+        }
     }
     
 }
