@@ -4,7 +4,7 @@
 
 import UIKit
 
-/// 支持为四个角分别设置不同圆角半径的 `UIView` 子类，可在 Interface Builder 中直接配置。
+/// 支持为四个角分别设置不同圆角半径的 `UIView` 子类。
 ///
 /// - Note: 使用 `layer.mask` 裁剪，设置了 `layer.shadow` 的阴影将不可见。
 ///   如需同时使用阴影，需要额外嵌套一个容器视图来承载阴影。
