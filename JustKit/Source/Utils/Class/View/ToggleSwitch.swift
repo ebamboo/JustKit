@@ -4,7 +4,9 @@
 
 import UIKit
 
-/// 仿 `UISwitch` 样式的自定义开关控件，弥补系统控件的以下限制：
+/// 仿 `UISwitch` 样式的自定义开关控件。
+///
+/// 支持以下功能：
 /// - 支持自定义关闭状态背景色（`UISwitch` 仅支持 `onTintColor`）
 /// - 支持任意尺寸（`UISwitch` 的尺寸不可自定义）
 /// - 支持自定义圆钮颜色
@@ -40,17 +42,17 @@ public final class ToggleSwitch: UIControl {
     /// 防抖间隔（单位秒）。在此时间内，控件将忽略重复点击。设为 0 表示不启用防抖。
     @IBInspectable public var debounceInterval: TimeInterval = 0
     
-    /// 开启状态的轨道背景色
+    /// 开启状态的轨道背景色。
     @IBInspectable public var onTintColor: UIColor = .systemGreen {
         didSet { updateAppearance() }
     }
     
-    /// 关闭状态的轨道背景色
+    /// 关闭状态的轨道背景色。
     @IBInspectable public var offTintColor: UIColor = .init(red: 120/255, green: 120/255, blue: 128/255, alpha: 0.16) {
         didSet { updateAppearance() }
     }
     
-    /// 圆钮颜色
+    /// 圆钮颜色。
     @IBInspectable public var thumbTintColor: UIColor = .white {
         didSet { updateAppearance() }
     }
@@ -109,14 +111,14 @@ public final class ToggleSwitch: UIControl {
     
     public override func endTracking(_ touch: UITouch?, with event: UIEvent?) {
         super.endTracking(touch, with: event)
-        // 校验触摸位置是否在控件范围内
+        // 校验触摸位置是否在控件范围内。
         guard let touch = touch else { return }
         let location = touch.location(in: self)
         guard bounds.contains(location) else { return }
-        // 切换状态并发送事件
+        // 切换状态并发送事件。
         isOn.toggle()
         sendActions(for: .valueChanged)
-        // 防抖：在指定间隔内禁用交互
+        // 防抖：在指定间隔内禁用交互。
         if debounceInterval > 0 {
             isEnabled = false
             DispatchQueue.main.asyncAfter(deadline: .now() + debounceInterval) { [weak self] in
