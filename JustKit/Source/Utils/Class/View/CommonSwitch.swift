@@ -4,14 +4,12 @@
 
 import UIKit
 
-///
-///  一个仿 UISwitch 样式自定义的开关控件：
+///  仿 UISwitch 样式的自定义开关控件：
 /// - 支持自定义圆钮颜色
 /// - 支持自定义开/关状态颜色（UISwitch不支持关状态颜色）
 /// - 支持修改控件高度和宽度（UISwitch不支持修改尺寸）
 ///
 ///  通过 UIControl.Event.valueChanged 来处理点击切换事件
-///
 public class CommonSwitch: UIControl {
     
     // MARK: public
