@@ -40,24 +40,6 @@ public final class ToggleSwitch: UIControl {
         didSet { updateAppearance() }
     }
     
-    private let padding: CGFloat = 2
-    
-    // MARK: - Components
-    
-    private lazy var trackView: UIView = {
-        let v = UIView()
-        v.isUserInteractionEnabled = false
-        v.backgroundColor = isOn ? onTintColor : offTintColor
-        return v
-    }()
-    
-    private lazy var thumbView: UIView = {
-        let v = UIView()
-        v.isUserInteractionEnabled = false
-        v.backgroundColor = thumbTintColor
-        return v
-    }()
-    
     // MARK: - Override
     
     public override init(frame: CGRect) {
@@ -90,14 +72,11 @@ public final class ToggleSwitch: UIControl {
         thumbView.layer.cornerRadius = thumbSide / 2
     }
     
-    public override func beginTracking(_ touch: UITouch, with event: UIEvent?) -> Bool {
-        return true
-    }
-    
     public override func endTracking(_ touch: UITouch?, with event: UIEvent?) {
         super.endTracking(touch, with: event)
-        guard let touch = touch,
-              bounds.contains(touch.location(in: self)) else { return }
+        guard let touch = touch else { return }
+        let location = touch.location(in: self)
+        guard bounds.contains(location)  else { return }
         isOn.toggle()
         sendActions(for: .valueChanged)
         if debounceInterval > 0 {
@@ -109,6 +88,22 @@ public final class ToggleSwitch: UIControl {
     }
     
     // MARK: - Private
+    
+    private let padding: CGFloat = 2
+    
+    private lazy var trackView: UIView = {
+        let v = UIView()
+        v.isUserInteractionEnabled = false
+        v.backgroundColor = isOn ? onTintColor : offTintColor
+        return v
+    }()
+    
+    private lazy var thumbView: UIView = {
+        let v = UIView()
+        v.isUserInteractionEnabled = false
+        v.backgroundColor = thumbTintColor
+        return v
+    }()
     
     private func updateAppearance() {
         trackView.backgroundColor = isOn ? onTintColor : offTintColor
