@@ -9,57 +9,57 @@ import UIKit
 ///
 /// 当视图为正方形，且圆角半径为边长一半时，表现为圆环
 ///
-@IBDesignable class GradientBorderView: UIView {
+public class GradientBorder: UIView {
     
-    // MARK: public
+    // MARK: - 配置属性
     
     /// 渐变边框的圆角半径
-    @IBInspectable var gradientCornerRadius: CGFloat = 12 {
+    @IBInspectable public var cornerRadius: CGFloat = 12 {
         didSet {
-            gradientLayer.cornerRadius = gradientCornerRadius
-            maskLayer.path = UIBezierPath(roundedRect: bounds, cornerRadius: gradientCornerRadius).cgPath
+            gradientLayer.cornerRadius = cornerRadius
+            maskLayer.path = UIBezierPath(roundedRect: bounds, cornerRadius: cornerRadius).cgPath
         }
     }
     /// 渐变边框的边框厚度
-    @IBInspectable var gradientBorderWidth: CGFloat = 2 {
+    @IBInspectable public var borderWidth: CGFloat = 2 {
         didSet {
-            maskLayer.lineWidth = gradientBorderWidth * 2
+            maskLayer.lineWidth = borderWidth * 2
         }
     }
     
     /// 渐变色
-    var gradientColors: [CGColor] = [UIColor.red.cgColor, UIColor.orange.cgColor, UIColor.systemTeal.cgColor] {
+    public var colors: [CGColor] = [UIColor.red.cgColor, UIColor.orange.cgColor, UIColor.systemTeal.cgColor] {
         didSet {
-            gradientLayer.colors = gradientColors
+            gradientLayer.colors = colors
         }
     }
     /// 渐变起点位置
-    @IBInspectable var gradientStartPoint: CGPoint = .init(x: 0, y: 0.5) {
+    @IBInspectable public var startPoint: CGPoint = .init(x: 0, y: 0.5) {
         didSet {
-            gradientLayer.startPoint = gradientStartPoint
+            gradientLayer.startPoint = startPoint
         }
     }
     /// 渐变终点位置
-    @IBInspectable var gradientEndPoint: CGPoint = .init(x: 1, y: 0.5) {
+    @IBInspectable public var endPoint: CGPoint = .init(x: 1, y: 0.5) {
         didSet {
-            gradientLayer.endPoint = gradientEndPoint
+            gradientLayer.endPoint = endPoint
         }
     }
     
-    // MARK: ui
+    // MARK: - Components
     
     private lazy var gradientLayer: CAGradientLayer = {
         let layer = CAGradientLayer()
-        layer.cornerRadius = gradientCornerRadius
-        layer.colors = gradientColors
-        layer.startPoint = gradientStartPoint
-        layer.endPoint = gradientEndPoint
+        layer.cornerRadius = cornerRadius
+        layer.colors = colors
+        layer.startPoint = startPoint
+        layer.endPoint = endPoint
         return layer
     }()
     
     private lazy var maskLayer: CAShapeLayer = {
         let layer = CAShapeLayer()
-        layer.lineWidth = gradientBorderWidth * 2
+        layer.lineWidth = borderWidth * 2
         layer.lineJoin = .round
         layer.lineCap = .round
         layer.strokeColor = UIColor.black.cgColor
@@ -67,28 +67,25 @@ import UIKit
         return layer
     }()
     
-    // MARK: life
+    // MARK: - Override
     
-    override init(frame: CGRect) {
+    public override init(frame: CGRect) {
         super.init(frame: frame)
-        commonInit()
-    }
-    
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        commonInit()
-    }
-    
-    func commonInit() {
         gradientLayer.mask = maskLayer
         layer.addSublayer(gradientLayer)
     }
     
-    override func layoutSubviews() {
+    public required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        gradientLayer.mask = maskLayer
+        layer.addSublayer(gradientLayer)
+    }
+    
+    public override func layoutSubviews() {
         super.layoutSubviews()
         gradientLayer.frame = bounds
         maskLayer.frame = bounds
-        maskLayer.path = UIBezierPath(roundedRect: bounds, cornerRadius: gradientCornerRadius).cgPath
+        maskLayer.path = UIBezierPath(roundedRect: bounds, cornerRadius: cornerRadius).cgPath
     }
     
 }
