@@ -9,7 +9,7 @@ class UtilsHomeViewController: UIViewController {
     let titles = [
         "Keychain", "ModelAnimator", "渐变视图测试",
         "自定义虚线视图DashLine", "自定义UIView每个圆角大小UnevenCornerView", "仿UISwitch控件ToggleSwitch",
-        "UIImage+Rotation 测试", "自定义 Stepper", "自定义渐变圆角边框/渐变文字",
+        "UIImage+Rotation 测试", "工具已删除", "自定义渐变圆角边框/渐变文字",
         "标签样式CollectionViewTagLayout", "Popover弹窗工具测试", "普通视图支持上下文菜单",
         "SwiftUI风格封装UICollectionView新布局"
     ]
@@ -80,7 +80,7 @@ extension UtilsHomeViewController: UITableViewDataSource, UITableViewDelegate {
             return
         }
         if indexPath.row == 7 {
-            navigationController?.pushViewController(StepperTestViewController(), animated: true)
+            
             return
         }
         if indexPath.row == 8 {
