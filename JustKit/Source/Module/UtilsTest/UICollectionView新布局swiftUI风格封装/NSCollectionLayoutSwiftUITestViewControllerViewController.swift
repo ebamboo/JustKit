@@ -98,116 +98,114 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
             guard self.testData.count > sectionIndex else { return nil }
             let section = self.testData[sectionIndex]
             switch section {
-            case .banner: return self.bannerSection.realValue
-            case .hot: return self.hotSection.realValue
-            case .shop: return self.shopSection.realValue
+            case .banner: return self.bannerSection.value
+            case .hot: return self.hotSection.value
+            case .shop: return self.shopSection.value
             }
         }
-        layout.configuration = config.realValue
+        layout.configuration = config.value
         return layout
     }
     
-    var bannerSection: CollectionSection {
-        CollectionSection {
-            CollectionGroup(axis: .vertical, width: .absolute(100), height: .absolute(210)) {
+    var bannerSection: CompositionalLayout.Section {
+        CompositionalLayout.Section {
+            CompositionalLayout.Group(axis: .vertical, width: .absolute(100), height: .absolute(210)) {
                 
-                CollectionItem(width: .fractionalWidth(1), height: .fractionalHeight(0.5)) {
-                    CollectionBadge(
+                CompositionalLayout.Item(width: .fractionalWidth(1), height: .fractionalHeight(0.5)) {
+                    CompositionalLayout.Supplementary(
                         width: .absolute(20),
                         height: .absolute(20),
                         kind: "badge-1",
                         alignment: [.top, .trailing],
                         offset: .fractional(.init(x: -0.5, y: 0))
-                    ).setup { badge in
+                    ).configured { badge in
                         badge.zIndex = 7
                     }
-                    CollectionBadge(
+                    CompositionalLayout.Supplementary(
                         width: .absolute(20),
                         height: .absolute(20),
                         kind: "badge-2",
                         alignment: [.top, .trailing],
                         offset: .fractional(.init(x: 0, y: 0))
-                    ).setup { badge in
+                    ).configured { badge in
                         badge.zIndex = 6
                     }
                 }
                 
             }
-            .setup { group in
+            .configured { group in
                 group.interItemSpacing = .fixed(10)
             }
         }
-        .setup { section in
+        .configured { section in
             section.interGroupSpacing = 10
             section.orthogonalScrollingBehavior = .continuous
         }
     }
     
-    var hotSection: CollectionSection {
-        CollectionSection {
-            CollectionGroup(width: .fractionalWidth(1), height: .estimated(200)) {
+    var hotSection: CompositionalLayout.Section {
+        CompositionalLayout.Section {
+            CompositionalLayout.Group(width: .fractionalWidth(1), height: .estimated(200)) {
                 
                 for w in [0.08, 0.12, 0.18] {
-                    CollectionItem(width: .fractionalWidth(w), height: .absolute(160))
+                    CompositionalLayout.Item(width: .fractionalWidth(w), height: .absolute(160))
                 }
                 
             }
-            .setup { group in
+            .configured { group in
                 group.interItemSpacing = .fixed(10)
             }
-        } boundarys: {
+        } boundaries: {
             if needHotHeadder {
-                CollectionBoundary(kind: "section-header", alignment: .top)
-                    .setup { header in
+                CompositionalLayout.BoundarySupplementary(kind: "section-header", alignment: .top)
+                    .configured { header in
                         header.pinToVisibleBounds = true
                     }
             }
             if needHotFooter {
-                CollectionBoundary(kind: "section-footer", alignment: .bottom)
+                CompositionalLayout.BoundarySupplementary(kind: "section-footer", alignment: .bottom)
             }
-        } backgrounds: {
-            
         }
-        .setup { section in
+        .configured { section in
             section.interGroupSpacing = 10
         }
     }
     
-    var shopSection: CollectionSection {
-        CollectionSection {
-            CollectionGroup(width: .fractionalWidth(1), height: .estimated(200)) {
+    var shopSection: CompositionalLayout.Section {
+        CompositionalLayout.Section {
+            CompositionalLayout.Group(width: .fractionalWidth(1), height: .estimated(200)) {
                 
-                CollectionItem(width: .fractionalWidth(0.5), height: .fractionalWidth(0.5))
+                CompositionalLayout.Item(width: .fractionalWidth(0.5), height: .fractionalWidth(0.5))
                 
-                CollectionGroup(axis: .vertical, width: .fractionalWidth(0.5), height: .fractionalWidth(0.5)) {
-                    CollectionItem(width: .fractionalWidth(1), height: .fractionalHeight(0.33333))
+                CompositionalLayout.Group(axis: .vertical, width: .fractionalWidth(0.5), height: .fractionalWidth(0.5)) {
+                    CompositionalLayout.Item(width: .fractionalWidth(1), height: .fractionalHeight(0.33333))
                 }
-                .setup { group in
+                .configured { group in
                     group.interItemSpacing = .fixed(10)
                 }
                 
             }
-            .setup { group in
+            .configured { group in
                 group.interItemSpacing = .fixed(10)
-            } 
-        } backgrounds: {
+            }
+        } decorations: {
             if needBack {
-                CollectionBackground(kind: "ConvenienceCollectionViewTestSectionBackView")
-                    .setup { back in
+                CompositionalLayout.Decoration(kind: "ConvenienceCollectionViewTestSectionBackView")
+                    .configured { back in
                         back.contentInsets = .init(top: 10, leading: 10, bottom: 10, trailing: 10)
                     }
             }
         }
-        .setup { section in
+        .configured { section in
             section.contentInsets = .init(top: 40, leading: 40, bottom: 40, trailing: 40)
             section.interGroupSpacing = 10
         }
     }
     
-    var config: CollectionConfiguration {
-        CollectionConfiguration {
-            CollectionBoundary(kind: "header", alignment: .top)
-            CollectionBoundary(kind: "footer", alignment: .bottom)
+    var config: CompositionalLayout.Configuration {
+        CompositionalLayout.Configuration {
+            CompositionalLayout.BoundarySupplementary(kind: "header", alignment: .top)
+            CompositionalLayout.BoundarySupplementary(kind: "footer", alignment: .bottom)
         }
     }
     
