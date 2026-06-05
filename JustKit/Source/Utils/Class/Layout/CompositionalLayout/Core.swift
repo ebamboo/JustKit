@@ -6,6 +6,8 @@ import UIKit
 
 enum CompositionalLayout {
     
+    /// 遵循该协议的类型须为 struct；
+    /// configured 默认实现通过 var copy = self 值拷贝来实现不可变调用链，class 类型无法正确拷贝。
     protocol Element {
         func configured(_ block: (inout Self) -> Void) -> Self
     }

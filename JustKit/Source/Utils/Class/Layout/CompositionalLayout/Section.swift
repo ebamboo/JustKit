@@ -85,7 +85,7 @@ extension CompositionalLayout {
     
     struct Section: Element {
         
-        let groups: [Group]
+        let group: Group
         let boundaries: [BoundarySupplementary]
         let decorations: [Decoration]
         
@@ -95,43 +95,42 @@ extension CompositionalLayout {
         var orthogonalScrollingBehavior: UICollectionLayoutSectionOrthogonalScrollingBehavior = .none
         
         init(
-            @ElementBuilder<Group> groups: () -> [Group]
+            group: () -> Group
         ) {
-            self.groups = groups()
+            self.group = group()
             self.boundaries = []
             self.decorations = []
         }
         
         init(
-            @ElementBuilder<Group> groups: () -> [Group],
+            group: () -> Group,
             @ElementBuilder<BoundarySupplementary> boundaries: () -> [BoundarySupplementary]
         ) {
-            self.groups = groups()
+            self.group = group()
             self.boundaries = boundaries()
             self.decorations = []
         }
         
         init(
-            @ElementBuilder<Group> groups: () -> [Group],
+            group: () -> Group,
             @ElementBuilder<Decoration> decorations: () -> [Decoration]
         ) {
-            self.groups = groups()
+            self.group = group()
             self.boundaries = []
             self.decorations = decorations()
         }
         
         init(
-            @ElementBuilder<Group> groups: () -> [Group],
+            group: () -> Group,
             @ElementBuilder<BoundarySupplementary> boundaries: () -> [BoundarySupplementary],
             @ElementBuilder<Decoration> decorations: () -> [Decoration]
         ) {
-            self.groups = groups()
+            self.group = group()
             self.boundaries = boundaries()
             self.decorations = decorations()
         }
         
         var value: NSCollectionLayoutSection {
-            guard let group = groups.first else { fatalError("section 中必须定义 group") }
             let result: NSCollectionLayoutSection = .init(group: group.value)
             result.boundarySupplementaryItems = boundaries.map({ $0.value })
             result.decorationItems = decorations.map({ $0.value })

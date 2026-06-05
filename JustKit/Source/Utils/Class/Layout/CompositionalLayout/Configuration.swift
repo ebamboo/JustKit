@@ -14,6 +14,13 @@ extension CompositionalLayout {
         var interSectionSpacing: CGFloat = 0
         
         init(
+            scrollDirection: UICollectionView.ScrollDirection = .vertical
+        ) {
+            self.scrollDirection = scrollDirection
+            self.boundaries = []
+        }
+        
+        init(
             scrollDirection: UICollectionView.ScrollDirection = .vertical,
             @ElementBuilder<BoundarySupplementary> boundaries: () -> [BoundarySupplementary]
         ) {

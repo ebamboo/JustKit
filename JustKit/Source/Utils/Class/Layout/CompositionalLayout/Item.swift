@@ -28,7 +28,7 @@ extension CompositionalLayout {
             height: NSCollectionLayoutDimension,
             kind: String,
             alignment: NSDirectionalRectEdge,
-            offset: Offset
+            offset: Offset = .absolute(.zero)
         ) {
             self.layoutSize = .init(widthDimension: width, heightDimension: height)
             self.kind = kind
