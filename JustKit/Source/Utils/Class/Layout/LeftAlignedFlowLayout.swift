@@ -4,6 +4,21 @@
 
 import UIKit
 
+/// 左对齐的 UICollectionViewFlowLayout。
+///
+/// 修正 UICollectionViewFlowLayout 默认的行内均匀分散行为，使每行元素从左侧紧凑排列。
+/// 适用于标签（Tag）、筛选条件等不定宽度元素的自动换行布局。
+///
+/// ```swift
+/// let layout = LeftAlignedFlowLayout()
+/// layout.minimumInteritemSpacing = 8
+/// layout.minimumLineSpacing = 8
+/// layout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
+/// let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+/// ```
+///
+/// - Note: `minimumInteritemSpacing` 在此布局中表现为精确的行内间距，而非最小值。
+/// - Important: 仅支持垂直滚动方向（`scrollDirection = .vertical`）。
 public final class LeftAlignedFlowLayout: UICollectionViewFlowLayout {
     
     public override func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
