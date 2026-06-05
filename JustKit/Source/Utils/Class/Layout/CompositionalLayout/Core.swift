@@ -27,4 +27,75 @@ extension CompositionalLayout.Element {
 
 extension CompositionalLayout {
     
+    @resultBuilder
+    struct ElementBuilder<Expression: Element> {
+        
+        typealias Component = [Expression]
+        
+        static func buildExpression(_ expression: Expression) -> Component {
+            [expression]
+        }
+        
+        static func buildBlock() -> Component {
+            []
+        }
+        
+        static func buildBlock(_ components: Component...) -> Component {
+            components.flatMap { $0 }
+        }
+        
+        static func buildOptional(_ component: Component?) -> Component {
+            component ?? []
+        }
+        
+        static func buildEither(first component: Component) -> Component {
+            component
+        }
+        
+        static func buildEither(second component: Component) -> Component {
+            component
+        }
+        
+        static func buildArray(_ components: [Component]) -> Component {
+            components.flatMap { $0 }
+        }
+        
+    }
+    
+    @resultBuilder
+    struct ItemConvertibleBuilder {
+        
+        typealias Expression = any ItemConvertible
+        typealias Component = [Expression]
+        
+        static func buildExpression(_ expression: Expression) -> Component {
+            [expression]
+        }
+        
+        static func buildBlock() -> Component {
+            []
+        }
+        
+        static func buildBlock(_ components: Component...) -> Component {
+            components.flatMap { $0 }
+        }
+        
+        static func buildOptional(_ component: Component?) -> Component {
+            component ?? []
+        }
+        
+        static func buildEither(first component: Component) -> Component {
+            component
+        }
+        
+        static func buildEither(second component: Component) -> Component {
+            component
+        }
+        
+        static func buildArray(_ components: [Component]) -> Component {
+            components.flatMap { $0 }
+        }
+        
+    }
+    
 }
