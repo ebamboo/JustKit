@@ -7,31 +7,29 @@ import MBProgressHUD
 
 extension UIView {
     
-    /// HUD 前景颜色
-    private static let HUDForegroundColor = UIColor.white
-    /// HUD 背景颜色
-    private static let HUDBackgroundColor = UIColor.black
+    private static let hudForegroundColor = UIColor.white
+    private static let hudBackgroundColor = UIColor.black
     
-    func show(message: String, detail: String? = nil, last: TimeInterval = 1.5, completion: (() -> Void)? = nil) {
+    func showToast(message: String, detail: String? = nil, duration: TimeInterval = 1.5, completion: (() -> Void)? = nil) {
         let hud = MBProgressHUD.showAdded(to: self, animated: true)
         hud.mode = .text
         hud.removeFromSuperViewOnHide = true
-        hud.contentColor = UIView.HUDForegroundColor
-        hud.bezelView.color = UIView.HUDBackgroundColor
+        hud.contentColor = UIView.hudForegroundColor
+        hud.bezelView.color = UIView.hudBackgroundColor
         hud.bezelView.style = .solidColor
         
         hud.label.text = message
         hud.detailsLabel.text = detail
         hud.completionBlock = completion
-        hud.hide(animated: true, afterDelay: last)
+        hud.hide(animated: true, afterDelay: duration)
     }
     
-    func startLoading(with message: String? = nil, detail: String? = nil) {
+    func startLoading(message: String? = nil, detail: String? = nil) {
         let hud = MBProgressHUD.showAdded(to: self, animated: true)
         hud.mode = .indeterminate
         hud.removeFromSuperViewOnHide = true
-        hud.contentColor = UIView.HUDForegroundColor
-        hud.bezelView.color = UIView.HUDBackgroundColor
+        hud.contentColor = UIView.hudForegroundColor
+        hud.bezelView.color = UIView.hudBackgroundColor
         hud.bezelView.style = .solidColor
         
         hud.label.text = message
