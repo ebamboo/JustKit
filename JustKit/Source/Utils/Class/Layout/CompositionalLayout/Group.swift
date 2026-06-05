@@ -6,21 +6,21 @@ import UIKit
 
 extension CompositionalLayout {
     
-    struct Group: ItemConvertible {
+    public struct Group: ItemConvertible {
         
-        enum Axis {
+        public enum Axis {
             case horizontal
             case vertical
         }
         
-        let axis: Axis
-        let layoutSize: NSCollectionLayoutSize
-        let subitems: [any ItemConvertible]
+        public let axis: Axis
+        public let layoutSize: NSCollectionLayoutSize
+        public let subitems: [any ItemConvertible]
         
-        var contentInsets: NSDirectionalEdgeInsets = .zero
-        var interItemSpacing: NSCollectionLayoutSpacing?
+        public var contentInsets: NSDirectionalEdgeInsets = .zero
+        public var interItemSpacing: NSCollectionLayoutSpacing?
         
-        init(
+        public init(
             axis: Axis = .horizontal,
             width: NSCollectionLayoutDimension,
             height: NSCollectionLayoutDimension,
@@ -31,7 +31,7 @@ extension CompositionalLayout {
             self.subitems = subitems()
         }
         
-        var value: NSCollectionLayoutGroup {
+        public var value: NSCollectionLayoutGroup {
             let result: NSCollectionLayoutGroup
             switch axis {
             case .horizontal:

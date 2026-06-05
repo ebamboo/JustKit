@@ -8,18 +8,18 @@ import UIKit
 
 extension CompositionalLayout {
     
-    struct BoundarySupplementary: Element {
+    public struct BoundarySupplementary: Element {
         
-        let layoutSize: NSCollectionLayoutSize
-        let kind: String
-        let alignment: NSRectAlignment
-        let offset: CGPoint // 对齐之后，进行偏移; 可能会影响 section 布局，以达到不会遮盖其他 section 内容；
+        public let layoutSize: NSCollectionLayoutSize
+        public let kind: String
+        public let alignment: NSRectAlignment
+        public let offset: CGPoint // 对齐之后，进行偏移; 可能会影响 section 布局，以达到不会遮盖其他 section 内容；
         
-        var contentInsets: NSDirectionalEdgeInsets = .zero
-        var zIndex: Int = 0 // pinToVisibleBounds 为 true 时，zIndex 无效
-        var pinToVisibleBounds: Bool = false // 是否吸附
+        public var contentInsets: NSDirectionalEdgeInsets = .zero
+        public var zIndex: Int = 0 // pinToVisibleBounds 为 true 时，zIndex 无效
+        public var pinToVisibleBounds: Bool = false // 是否吸附
         
-        init(
+        public init(
             width: NSCollectionLayoutDimension = .fractionalWidth(1),
             height: NSCollectionLayoutDimension = .estimated(80),
             kind: String,
@@ -32,7 +32,7 @@ extension CompositionalLayout {
             self.offset = offset
         }
         
-        var value: NSCollectionLayoutBoundarySupplementaryItem {
+        public var value: NSCollectionLayoutBoundarySupplementaryItem {
             let result = NSCollectionLayoutBoundarySupplementaryItem(
                 layoutSize: layoutSize,
                 elementKind: kind,
@@ -53,20 +53,20 @@ extension CompositionalLayout {
 
 extension CompositionalLayout {
     
-    struct Decoration: Element {
+    public struct Decoration: Element {
         
-        let kind: String
+        public let kind: String
         
-        var contentInsets: NSDirectionalEdgeInsets = .zero
-        var zIndex: Int = 0
+        public var contentInsets: NSDirectionalEdgeInsets = .zero
+        public var zIndex: Int = 0
         
-        init(
+        public init(
             kind: String
         ) {
             self.kind = kind
         }
         
-        var value: NSCollectionLayoutDecorationItem {
+        public var value: NSCollectionLayoutDecorationItem {
             let result = NSCollectionLayoutDecorationItem.background(
                 elementKind: kind
             )
@@ -83,18 +83,18 @@ extension CompositionalLayout {
 
 extension CompositionalLayout {
     
-    struct Section: Element {
+    public struct Section: Element {
         
-        let group: Group
-        let boundaries: [BoundarySupplementary]
-        let decorations: [Decoration]
+        public let group: Group
+        public let boundaries: [BoundarySupplementary]
+        public let decorations: [Decoration]
         
-        var contentInsets: NSDirectionalEdgeInsets = .zero
-        var interGroupSpacing: CGFloat = 0
+        public var contentInsets: NSDirectionalEdgeInsets = .zero
+        public var interGroupSpacing: CGFloat = 0
         /// 正交方向滚动行为；须设置该属性以使 section 可正交方向滚动
-        var orthogonalScrollingBehavior: UICollectionLayoutSectionOrthogonalScrollingBehavior = .none
+        public var orthogonalScrollingBehavior: UICollectionLayoutSectionOrthogonalScrollingBehavior = .none
         
-        init(
+        public init(
             group: () -> Group
         ) {
             self.group = group()
@@ -102,7 +102,7 @@ extension CompositionalLayout {
             self.decorations = []
         }
         
-        init(
+        public init(
             group: () -> Group,
             @ElementBuilder<BoundarySupplementary> boundaries: () -> [BoundarySupplementary]
         ) {
@@ -111,7 +111,7 @@ extension CompositionalLayout {
             self.decorations = []
         }
         
-        init(
+        public init(
             group: () -> Group,
             @ElementBuilder<Decoration> decorations: () -> [Decoration]
         ) {
@@ -120,7 +120,7 @@ extension CompositionalLayout {
             self.decorations = decorations()
         }
         
-        init(
+        public init(
             group: () -> Group,
             @ElementBuilder<BoundarySupplementary> boundaries: () -> [BoundarySupplementary],
             @ElementBuilder<Decoration> decorations: () -> [Decoration]
@@ -130,7 +130,7 @@ extension CompositionalLayout {
             self.decorations = decorations()
         }
         
-        var value: NSCollectionLayoutSection {
+        public var value: NSCollectionLayoutSection {
             let result: NSCollectionLayoutSection = .init(group: group.value)
             result.boundarySupplementaryItems = boundaries.map({ $0.value })
             result.decorationItems = decorations.map({ $0.value })

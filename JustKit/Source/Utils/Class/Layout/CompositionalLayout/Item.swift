@@ -8,22 +8,22 @@ import UIKit
 
 extension CompositionalLayout {
     
-    struct Supplementary: Element {
+    public struct Supplementary: Element {
         
-        enum Offset {
+        public enum Offset {
             case absolute(CGPoint)
             case fractional(CGPoint)
         }
         
-        let layoutSize: NSCollectionLayoutSize
-        let kind: String
-        let alignment: NSDirectionalRectEdge
-        let offset: Offset // 对齐之后，进行偏移; 只会影响位置，不会影响 cell 布局；
+        public let layoutSize: NSCollectionLayoutSize
+        public let kind: String
+        public let alignment: NSDirectionalRectEdge
+        public let offset: Offset // 对齐之后，进行偏移; 只会影响位置，不会影响 cell 布局；
         
-        var contentInsets: NSDirectionalEdgeInsets = .zero
-        var zIndex: Int = 0
+        public var contentInsets: NSDirectionalEdgeInsets = .zero
+        public var zIndex: Int = 0
         
-        init(
+        public init(
             width: NSCollectionLayoutDimension,
             height: NSCollectionLayoutDimension,
             kind: String,
@@ -36,7 +36,7 @@ extension CompositionalLayout {
             self.offset = offset
         }
         
-        var value: NSCollectionLayoutSupplementaryItem {
+        public var value: NSCollectionLayoutSupplementaryItem {
             let containerAnchor: NSCollectionLayoutAnchor = {
                 switch offset {
                 case .absolute(let point):
@@ -63,14 +63,14 @@ extension CompositionalLayout {
 
 extension CompositionalLayout {
     
-    struct Item: ItemConvertible {
+    public struct Item: ItemConvertible {
         
-        let layoutSize: NSCollectionLayoutSize
-        let supplementaries: [Supplementary]
+        public let layoutSize: NSCollectionLayoutSize
+        public let supplementaries: [Supplementary]
         
-        var contentInsets: NSDirectionalEdgeInsets = .zero
+        public var contentInsets: NSDirectionalEdgeInsets = .zero
         
-        init(
+        public init(
             width: NSCollectionLayoutDimension,
             height: NSCollectionLayoutDimension
         ) {
@@ -78,7 +78,7 @@ extension CompositionalLayout {
             self.supplementaries = []
         }
         
-        init(
+        public init(
             width: NSCollectionLayoutDimension,
             height: NSCollectionLayoutDimension,
             @ElementBuilder<Supplementary> supplementaries: () -> [Supplementary]
@@ -87,7 +87,7 @@ extension CompositionalLayout {
             self.supplementaries = supplementaries()
         }
         
-        var value: NSCollectionLayoutItem {
+        public var value: NSCollectionLayoutItem {
             let result = NSCollectionLayoutItem(
                 layoutSize: layoutSize,
                 supplementaryItems: supplementaries.map({ $0.value })

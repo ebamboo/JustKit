@@ -4,15 +4,15 @@
 
 import UIKit
 
-enum CompositionalLayout {
+public enum CompositionalLayout {
     
     /// 遵循该协议的类型须为 struct；
     /// configured 默认实现通过 var copy = self 值拷贝来实现不可变调用链，class 类型无法正确拷贝。
-    protocol Element {
+    public protocol Element {
         func configured(_ block: (inout Self) -> Void) -> Self
     }
     
-    protocol ItemConvertible: Element {
+    public protocol ItemConvertible: Element {
         associatedtype Value: NSCollectionLayoutItem
         var value: Value { get }
     }
@@ -21,7 +21,7 @@ enum CompositionalLayout {
 
 extension CompositionalLayout.Element {
     
-    func configured(_ block: (inout Self) -> Void) -> Self {
+    public func configured(_ block: (inout Self) -> Void) -> Self {
         var copy = self;  block(&copy); return copy
     }
     
@@ -30,71 +30,71 @@ extension CompositionalLayout.Element {
 extension CompositionalLayout {
     
     @resultBuilder
-    struct ElementBuilder<Expression: Element> {
+    public struct ElementBuilder<Expression: Element> {
         
-        typealias Component = [Expression]
+        public typealias Component = [Expression]
         
-        static func buildExpression(_ expression: Expression) -> Component {
+        public static func buildExpression(_ expression: Expression) -> Component {
             [expression]
         }
         
-        static func buildBlock() -> Component {
+        public static func buildBlock() -> Component {
             []
         }
         
-        static func buildBlock(_ components: Component...) -> Component {
+        public static func buildBlock(_ components: Component...) -> Component {
             components.flatMap { $0 }
         }
         
-        static func buildOptional(_ component: Component?) -> Component {
+        public static func buildOptional(_ component: Component?) -> Component {
             component ?? []
         }
         
-        static func buildEither(first component: Component) -> Component {
+        public static func buildEither(first component: Component) -> Component {
             component
         }
         
-        static func buildEither(second component: Component) -> Component {
+        public static func buildEither(second component: Component) -> Component {
             component
         }
         
-        static func buildArray(_ components: [Component]) -> Component {
+        public static func buildArray(_ components: [Component]) -> Component {
             components.flatMap { $0 }
         }
         
     }
     
     @resultBuilder
-    struct ItemConvertibleBuilder {
+    public struct ItemConvertibleBuilder {
         
-        typealias Expression = any ItemConvertible
-        typealias Component = [Expression]
+        public typealias Expression = any ItemConvertible
+        public typealias Component = [Expression]
         
-        static func buildExpression(_ expression: Expression) -> Component {
+        public static func buildExpression(_ expression: Expression) -> Component {
             [expression]
         }
         
-        static func buildBlock() -> Component {
+        public static func buildBlock() -> Component {
             []
         }
         
-        static func buildBlock(_ components: Component...) -> Component {
+        public static func buildBlock(_ components: Component...) -> Component {
             components.flatMap { $0 }
         }
         
-        static func buildOptional(_ component: Component?) -> Component {
+        public static func buildOptional(_ component: Component?) -> Component {
             component ?? []
         }
         
-        static func buildEither(first component: Component) -> Component {
+        public static func buildEither(first component: Component) -> Component {
             component
         }
         
-        static func buildEither(second component: Component) -> Component {
+        public static func buildEither(second component: Component) -> Component {
             component
         }
         
-        static func buildArray(_ components: [Component]) -> Component {
+        public static func buildArray(_ components: [Component]) -> Component {
             components.flatMap { $0 }
         }
         
