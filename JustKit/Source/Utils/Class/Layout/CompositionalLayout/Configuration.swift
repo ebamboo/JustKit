@@ -11,7 +11,7 @@ extension CompositionalLayout {
     /// 控制 Collection 级别的行为：
     /// - `scrollDirection`：主滚动方向，默认 `.vertical`。
     /// - `interSectionSpacing`：相邻 Section 之间的间距。
-    /// - `boundaries`：全局 Header/Footer，始终固定在 Collection 的首尾，不随单个 Section 滚动。
+    /// - `boundaries`：全局 Header/Footer。
     ///
     /// 与 Section 内的 `BoundarySupplementary` 的区别：
     /// Section 内的 BoundarySupplementary 属于特定 Section，跟随该 Section 出现；

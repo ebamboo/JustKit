@@ -8,7 +8,7 @@ import UIKit
 
 extension CompositionalLayout {
     
-    /// Section 或 Collection 级别的边界附属视图，常用于 SectionHeader、SectionFooter。
+    /// Section 或 Collection 级别的边界附属视图，常用于 Header、Footer。
     ///
     /// 通过 `alignment` 指定位置：`.top` 为 Header，`.bottom` 为 Footer。
     /// 放在 `Section` 中时作用于单个 Section；放在 `Configuration` 中时作用于整个 Collection（全局 Header/Footer）。
@@ -126,7 +126,7 @@ extension CompositionalLayout {
         
         public var contentInsets: NSDirectionalEdgeInsets = .zero
         public var interGroupSpacing: CGFloat = 0
-        /// 正交方向滚动行为；须设置该属性以使 section 可正交方向滚动
+        /// 正交方向滚动行为。须设置该属性以使 section 可正交方向滚动。
         public var orthogonalScrollingBehavior: UICollectionLayoutSectionOrthogonalScrollingBehavior = .none
         
         public init(
