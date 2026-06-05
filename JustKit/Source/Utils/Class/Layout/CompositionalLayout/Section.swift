@@ -111,6 +111,13 @@ extension CompositionalLayout {
 
 extension CompositionalLayout {
     
+    /// CompositionalLayout 的核心分区单元，每个 Section 独立定义自己的布局规则。
+    ///
+    /// 一个 Section 包含一个 `Group`（定义 Cell 的排列方式），
+    /// 以及可选的 `BoundarySupplementary`（Header/Footer）和 `Decoration`（背景装饰）。
+    ///
+    /// 不同 Section 可以拥有完全不同的布局结构，这是 CompositionalLayout 区别于 FlowLayout 的核心能力。
+    /// 通过 `orthogonalScrollingBehavior` 可使单个 Section 支持正交方向（横向）滚动。
     public struct Section: Element {
         
         public let group: Group

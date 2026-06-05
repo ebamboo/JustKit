@@ -77,6 +77,13 @@ extension CompositionalLayout {
 
 extension CompositionalLayout {
     
+    /// CompositionalLayout 中最基本的布局单元，对应一个 Cell。
+    ///
+    /// 通过 `width` 和 `height` 指定尺寸，支持绝对值（`.absolute`）、
+    /// 比例值（`.fractionalWidth` / `.fractionalHeight`）和自适应（`.estimated`）。
+    /// 可携带多个 `Supplementary` 作为附属视图（如角标）。
+    ///
+    /// Item 也是 Group 的子元素；Group 本身同样遵循 `ItemConvertible`，因此支持嵌套组合。
     public struct Item: ItemConvertible {
         
         public let layoutSize: NSCollectionLayoutSize
