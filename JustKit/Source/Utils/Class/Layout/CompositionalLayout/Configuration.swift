@@ -6,27 +6,27 @@ import UIKit
 
 extension CompositionalLayout {
     
-    struct CollectionConfiguration: Element {
+    struct Configuration: Element {
         
         let scrollDirection: UICollectionView.ScrollDirection
-        let boundarys: [CollectionBoundary]
+        let boundaries: [BoundarySupplementary]
         
         var interSectionSpacing: CGFloat = 0
         
         init(
             scrollDirection: UICollectionView.ScrollDirection = .vertical,
-            @CollectionElementBuilder<CollectionBoundary> boundarys: () -> [CollectionBoundary]
+            @ElementBuilder<BoundarySupplementary> boundaries: () -> [BoundarySupplementary]
         ) {
             self.scrollDirection = scrollDirection
-            self.boundarys = boundarys()
+            self.boundaries = boundaries()
         }
 
-        var realValue: UICollectionViewCompositionalLayoutConfiguration {
-            let realConfig = UICollectionViewCompositionalLayoutConfiguration()
-            realConfig.scrollDirection = scrollDirection
-            realConfig.boundarySupplementaryItems = boundarys.map({ $0.realValue })
-            realConfig.interSectionSpacing = interSectionSpacing
-            return realConfig
+        var value: UICollectionViewCompositionalLayoutConfiguration {
+            let result = UICollectionViewCompositionalLayoutConfiguration()
+            result.scrollDirection = scrollDirection
+            result.boundarySupplementaryItems = boundaries.map({ $0.value })
+            result.interSectionSpacing = interSectionSpacing
+            return result
         }
         
     }
