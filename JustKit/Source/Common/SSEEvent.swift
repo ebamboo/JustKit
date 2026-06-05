@@ -5,7 +5,7 @@
 import Foundation
 
 /// Server-Sent Events (SSE) 事件模型
-/// 遵循 W3C SSE 规范: https://html.spec.whatwg.org/multipage/server-sent-events.html
+/// 遵循 WHATWG SSE 规范: https://html.spec.whatwg.org/multipage/server-sent-events.html
 public struct SSEEvent {
     
     /// 事件类型，默认为 "message"
