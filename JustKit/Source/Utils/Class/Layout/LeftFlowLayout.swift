@@ -13,7 +13,7 @@ import UIKit
 /// 适用于标签（Tag）、筛选条件等不定宽度元素的自动换行布局。
 ///
 /// ```swift
-/// let layout = LeftAlignedFlowLayout()
+/// let layout = LeftFlowLayout()
 /// layout.minimumInteritemSpacing = 8
 /// layout.minimumLineSpacing = 8
 /// layout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
@@ -22,7 +22,7 @@ import UIKit
 ///
 /// - Note: `minimumInteritemSpacing` 在此布局中表现为精确的行内间距，而非最小值。
 /// - Important: 仅支持垂直滚动方向（`scrollDirection = .vertical`）。
-public final class LeftAlignedFlowLayout: UICollectionViewFlowLayout {
+public final class LeftFlowLayout: UICollectionViewFlowLayout {
     
     public override func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
         
