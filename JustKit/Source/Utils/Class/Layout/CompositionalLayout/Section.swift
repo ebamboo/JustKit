@@ -8,6 +8,20 @@ import UIKit
 
 extension CompositionalLayout {
     
+    /// Section 或 Collection 级别的边界附属视图，常用于 SectionHeader、SectionFooter。
+    ///
+    /// 通过 `alignment` 指定位置：`.top` 为 Header，`.bottom` 为 Footer。
+    /// 放在 `Section` 中时作用于单个 Section；放在 `Configuration` 中时作用于整个 Collection（全局 Header/Footer）。
+    ///
+    /// **视图注册：**
+    /// 使用 `UICollectionView.register(_:forSupplementaryViewOfKind:withReuseIdentifier:)` 注册，
+    /// `kind` 须与布局中传入的 `kind` 一致；
+    /// 在 `dataSource.supplementaryViewProvider` 或
+    /// `collectionView(_:viewForSupplementaryElementOfKind:at:)` 中提供视图。
+    ///
+    /// **注意事项：**
+    /// - `pinToVisibleBounds = true` 时视图会吸附在可视区域边缘（类似 sticky header），此时 `zIndex` 无效。
+    /// - `offset` 会影响 Section 的布局空间，与 `Supplementary` 的 offset 仅影响位置不同。
     public struct BoundarySupplementary: Element {
         
         public let layoutSize: NSCollectionLayoutSize
@@ -53,6 +67,20 @@ extension CompositionalLayout {
 
 extension CompositionalLayout {
     
+    /// Section 级别的装饰视图，常用于为整个 Section 添加背景色、圆角背景、阴影等装饰效果。
+    ///
+    /// Decoration 不承载数据，不参与 DataSource 流程，仅作为纯视觉装饰层。
+    /// 其尺寸自动匹配所属 Section 的内容区域，无需手动指定 layoutSize。
+    ///
+    /// **视图注册：**
+    /// 与 Supplementary 和 BoundarySupplementary 不同，Decoration 不通过 `UICollectionView` 注册，
+    /// 而是通过 `UICollectionViewCompositionalLayout.register(_:forDecorationViewOfKind:)` 注册。
+    /// 注册的视图须继承 `UICollectionReusableView`。
+    ///
+    /// **注意事项：**
+    /// - 不通过 DataSource 提供视图，因此视图的配置（如背景色）需在自定义 `UICollectionReusableView` 子类中完成。
+    /// - `contentInsets` 可用于让背景相对 Section 内容区域内缩或外扩。
+    /// - `zIndex` 默认为 0，通常位于 Cell 和 Supplementary 之下；若需覆盖在上层，需手动调高。
     public struct Decoration: Element {
         
         public let kind: String

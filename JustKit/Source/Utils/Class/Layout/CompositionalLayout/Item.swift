@@ -8,6 +8,20 @@ import UIKit
 
 extension CompositionalLayout {
     
+    /// Item 级别的附属视图，附着在单个 Item（Cell）上，常用于角标、标签、未读数等装饰。
+    ///
+    /// 通过 `alignment` 指定在 Item 上的锚点位置，通过 `offset` 微调偏移。
+    /// Supplementary 不参与 Item 的布局计算，仅覆盖在 Item 之上，不会撑开或影响 Item 的尺寸。
+    ///
+    /// **视图注册：**
+    /// 使用 `UICollectionView.register(_:forSupplementaryViewOfKind:withReuseIdentifier:)` 注册，
+    /// `kind` 须与布局中传入的 `kind` 一致；
+    /// 在 `dataSource.supplementaryViewProvider` 或
+    /// `collectionView(_:viewForSupplementaryElementOfKind:at:)` 中提供视图。
+    ///
+    /// **注意事项：**
+    /// - `kind` 在同一个 Item 内不可重复，否则会布局异常。
+    /// - `zIndex` 默认为 0，若需要角标显示在其他 Supplementary 之上，可适当调高。
     public struct Supplementary: Element {
         
         public enum Offset {
