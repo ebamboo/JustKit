@@ -253,7 +253,7 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController: UICollectio
                 withReuseIdentifier: "ConvenienceCollectionViewTestSectionFooterView",
                 for: indexPath
             ) as! ConvenienceCollectionViewTestSectionFooterView
-            footer.configure(title: "Collection Footer:\nsubtitle1\nsubtitle2\nsubtitle3")
+            footer.configure(title: "Collection Footer:多行自适应高度\nsubtitle1\nsubtitle2\nsubtitle3")
             footer.backgroundColor = .yellow
             return footer
         case ("badge-1", .banner):
