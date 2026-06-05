@@ -6,7 +6,10 @@ import UIKit
 
 /// 左对齐的 UICollectionViewFlowLayout。
 ///
-/// 修正 UICollectionViewFlowLayout 默认的行内均匀分散行为，使每行元素从左侧紧凑排列。
+/// UICollectionViewFlowLayout 默认将行内剩余空间均分到元素间距中，
+/// 使首尾元素分别贴近行的两端。
+/// 本布局将其修正为左对齐排列，元素间距固定为 `minimumInteritemSpacing`，
+/// 剩余空间保留在行尾。
 /// 适用于标签（Tag）、筛选条件等不定宽度元素的自动换行布局。
 ///
 /// ```swift
