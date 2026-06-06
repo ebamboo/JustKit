@@ -33,10 +33,11 @@ public extension SSEEvent {
         let normalizedMessage = rawMessage
             .replacingOccurrences(of: "\r\n", with: "\n")
             .replacingOccurrences(of: "\r", with: "\n")
+        // 必须保留空子串：SSE 中只含字段名的行（如 "data\n"）解析后 value 为空字符串，属于有效字段
         let lines = normalizedMessage.split(separator: "\n", omittingEmptySubsequences: false)
         for line in lines {
             // 存储从 line 获取的字段名和字段值
-            let couple: (field: String, value: String)
+            let pair: (field: String, value: String)
             
             // MARK: 处理行
             
@@ -54,31 +55,31 @@ public extension SSEEvent {
                 if value.starts(with: " ") {
                     value = value.dropFirst()
                 }
-                couple = (String(field), String(value))
+                pair = (String(field), String(value))
             }
             
             // 规范：不包含冒号 ":"
             // 整行作为 field（字段名），value（字段值）为空字符串
             else {
-                couple = (String(line), "")
+                pair = (String(line), "")
             }
             
             // MARK: 处理字段
             
-            switch couple.field {
+            switch pair.field {
             case "event":
                 // 无条件，覆盖设置
-                eventType = couple.value
+                eventType = pair.value
             case "data":
                 // 无条件，收集所有 data 字段
-                dataLines.append(couple.value)
+                dataLines.append(pair.value)
             case "id":
                 // 满足条件，覆盖设置
                 // 规范：If the field value does not contain U+0000 NULL,
                 // then set the last event ID buffer to the field value.
                 // Otherwise, ignore the field.
-                if !couple.value.contains("\u{0}") {
-                    lastEventId = couple.value
+                if !pair.value.contains("\u{0}") {
+                    lastEventId = pair.value
                 }
             case "retry":
                 // 满足条件，覆盖设置
@@ -86,9 +87,9 @@ public extension SSEEvent {
                 // then interpret the field value as an integer in base ten,
                 // and set the event stream's reconnection time to that integer.
                 // Otherwise, ignore the field.
-                if !couple.value.isEmpty,
-                   couple.value.allSatisfy({ $0.isASCII && $0.isNumber }),
-                   let intVal = Int(couple.value) {
+                if !pair.value.isEmpty,
+                   pair.value.allSatisfy({ $0.isASCII && $0.isNumber }),
+                   let intVal = Int(pair.value) {
                     retryTime = intVal
                 }
             default:
