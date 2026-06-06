@@ -48,7 +48,11 @@ private class SSESession: NSObject, URLSessionDataDelegate {
         configuration.timeoutIntervalForResource = 7 * 24 * 60 * 60 // 请求允许持续的最长时间，到期后系统自动终止
         configuration.httpMaximumConnectionsPerHost = 6 // 同一 Host 允许建立的最大并发网络连接数（HTTP/2 下通常无需调整）
         configuration.requestCachePolicy = .reloadIgnoringLocalCacheData  // 忽略本地缓存，每次从服务端获取最新数据
-        return URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
+        return URLSession(
+            configuration: configuration,
+            delegate: self,
+            delegateQueue: nil // 使用系统串行 Delegate Queue，保证流式数据按接收顺序处理
+        )
     }()
     
     var workList: [Int: SSEWork] = [:]
@@ -97,7 +101,6 @@ private class SSEWork {
     let onEvent: (URLSessionDataTask, SSEEvent) -> Void
     let onCompletion: (URLSessionDataTask, Error?) -> Void
     
-    let lock = NSLock()
     var buffer = Data()
     let maxBufferSize: Int = 2 * 1024 * 1024
     
@@ -110,8 +113,6 @@ private class SSEWork {
     }
     
     func didReceive(data: Data, dataTask: URLSessionDataTask) {
-        lock.lock()
-        defer { lock.unlock() }
         if buffer.count + data.count > maxBufferSize {
             dataTask.cancel()
             return
