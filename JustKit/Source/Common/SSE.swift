@@ -11,6 +11,10 @@ public enum SSE {
     /// 默认以 GET 方式请求，并设置 `Accept: text/event-stream` 请求头。
     /// 如需使用 POST 或自定义请求体，可通过 `requestModifier` 修改。
     ///
+    /// - Note:
+    ///   - 手动取消时不会触发 `completionHandler`。
+    ///   - 缓冲区溢出时，连接会被自动终止，并返回错误 `NSError`（domain: `"SSE"`, code: `-1`）。
+    ///
     /// - Parameters:
     ///   - url: SSE 服务端地址
     ///   - headers: 附加的自定义请求头，会与默认请求头合并（相同 key 时覆盖默认值）
@@ -114,6 +118,8 @@ private class SSEWork {
     
     func didReceive(data: Data, dataTask: URLSessionDataTask) {
         if buffer.count + data.count > maxBufferSize {
+            let error = NSError(domain: "SSE", code: -1)
+            DispatchQueue.main.async { self.onCompletion(dataTask, error) }
             dataTask.cancel()
             return
         }
@@ -133,9 +139,8 @@ private class SSEWork {
     }
     
     func didComplete(with error: Error?, dataTask: URLSessionDataTask) {
-//        if error.code == NSURLErrorCancelled {
-//            return
-//        }
+        // 忽略取消类型错误（包括手动取消和缓冲区超限后的 cancel）
+        if (error as? URLError)?.code == .cancelled { return }
         DispatchQueue.main.async { self.onCompletion(dataTask, error) }
     }
     
