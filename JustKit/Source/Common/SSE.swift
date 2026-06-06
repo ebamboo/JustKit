@@ -6,6 +6,8 @@ import Foundation
 
 public enum SSE {
     
+    private static let session = SSESession()
+    
     /// 发起 SSE 连接的静态方法
     /// - Parameters:
     ///   - url: The endpoint for SSE.
@@ -22,59 +24,91 @@ public enum SSE {
         eventHandler: @escaping (URLSessionDataTask, SSEEvent) -> Void,
         completionHandler: @escaping (URLSessionDataTask, Error?) -> Void
     ) -> URLSessionDataTask {
+        session.dataTask(with: url, headers: headers, requestModifier: requestModifier,
+                         eventHandler: eventHandler, completionHandler: completionHandler)
+    }
+    
+}
+
+/// SSE 会话管理器
+/// 负责 URLSession 生命周期管理、任务映射维护和 delegate 回调分发。
+/// 内部通过串行队列保证 workList 的线程安全访问。
+private class SSESession: NSObject, URLSessionDataDelegate {
+    
+    /// SSE 专用 URLSession
+    /// - timeoutIntervalForRequest: 单次数据接收的最大等待时间，SSE 长连接场景下需要设置较大值
+    /// - timeoutIntervalForResource: 整个请求（从发起到结束）的最大存活时间
+    /// - httpMaximumConnectionsPerHost: 限制对同一 host 只维持一个连接，避免 SSE 连接堆积
+    /// - requestCachePolicy: SSE 是实时事件流，必须忽略缓存
+    /// - delegateQueue: nil 表示由系统创建并发队列执行回调，workList 的线程安全由 workListQueue 保证
+    private lazy var urlSession: URLSession = {
+        let configuration = URLSessionConfiguration.default
+        configuration.timeoutIntervalForRequest = 1200
+        configuration.timeoutIntervalForResource = 3600
+        configuration.httpMaximumConnectionsPerHost = 1
+        configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+        return URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
+    }()
+    
+    /// 任务映射表：以 URLSessionDataTask.taskIdentifier 为 key，关联对应的事件处理器
+    private var workList: [Int: SSEWork] = [:]
+    /// 串行队列，保护 workList 的并发读写安全
+    private let workListQueue = DispatchQueue(label: "sse.session.work")
+    
+    @discardableResult
+    func dataTask(
+        with url: URL,
+        headers: [String: String] = [:],
+        requestModifier: ((inout URLRequest) -> Void)? = nil,
+        eventHandler: @escaping (URLSessionDataTask, SSEEvent) -> Void,
+        completionHandler: @escaping (URLSessionDataTask, Error?) -> Void
+    ) -> URLSessionDataTask {
         var request = URLRequest(url: url)
+        // 默认 GET 请求，Accept 标记为 SSE 事件流类型
+        // 如需 POST 等其他方式，可通过 requestModifier 覆盖
         request.httpMethod = "GET"
         request.setValue("text/event-stream", forHTTPHeaderField: "Accept")
         headers.forEach { key, value in
             request.setValue(value, forHTTPHeaderField: key)
         }
         requestModifier?(&request)
-        let task = session.dataTask(with: request)
+        let task = urlSession.dataTask(with: request)
         let work = SSEWork(onEvent: eventHandler, onCompletion: completionHandler)
-        workList[task.taskIdentifier] = work
+        workListQueue.sync { workList[task.taskIdentifier] = work }
         task.resume()
         return task
     }
     
-    private static let sessionDelegate = SessionDelegate()
-    
-    private static let session: URLSession = {
-        let configuration = URLSessionConfiguration.default
-        configuration.timeoutIntervalForRequest = 1200 // 20分钟 - 单个请求超时
-        configuration.timeoutIntervalForResource = 3600 // 1小时 - 整个资源请求超时
-        configuration.httpMaximumConnectionsPerHost = 1 // 每个主机最多1个连接
-        configuration.requestCachePolicy = .reloadIgnoringLocalCacheData // 忽略缓存
-        return URLSession(configuration: configuration, delegate: sessionDelegate, delegateQueue: nil)
-    }()
-    
-    fileprivate static var workList: [Int: SSEWork] = [:]
-    
-
-    
-}
-
-private class SessionDelegate: NSObject, URLSessionDataDelegate {
+    // MARK: - URLSessionDataDelegate
     
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
-        guard let work = SSE.workList[dataTask.taskIdentifier] else { return }
+        let work = workListQueue.sync { workList[dataTask.taskIdentifier] }
+        guard let work else { return }
         work.didReceive(data: data, dataTask: dataTask)
     }
     
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: (any Error)?) {
-        guard let work = SSE.workList[task.taskIdentifier] else { return }
-        work.didComplete(with: error, dataTask: task)
-        SSE.workList.removeValue(forKey: task.taskIdentifier)
+        let work = workListQueue.sync { workList.removeValue(forKey: task.taskIdentifier) }
+        guard let work, let dataTask = task as? URLSessionDataTask else { return }
+        work.didComplete(with: error, dataTask: dataTask)
     }
     
 }
 
+/// 单个 SSE 任务的事件处理单元
+/// 负责接收原始字节流，按 SSE 规范的事件分隔符拆分，解析后回调给调用方。
+/// 每个 URLSessionDataTask 对应一个 SSEWork 实例。
 private class SSEWork {
     
     private let onEvent: (URLSessionDataTask, SSEEvent) -> Void
     private let onCompletion: (URLSessionDataTask, Error?) -> Void
     
+    /// NSLock 保护 buffer 的并发访问（URLSession 回调可能在并发队列上触发）
     private let lock = NSLock()
+    /// 增量接收缓冲区：URLSession 按 TCP 分包回调数据，一个完整的 SSE 事件可能跨多次回调，
+    /// 因此需要缓冲区拼接，直到检测到完整的事件分隔符后再解析。
     private var buffer = Data()
+    /// 缓冲区上限（200MB），防止异常数据流导致内存无限增长。超限时直接取消任务。
     private let maxBufferSize: Int = 200 * 1024 * 1024
     
     init(
@@ -93,6 +127,8 @@ private class SSEWork {
             return
         }
         buffer.append(data)
+        // SSE 规范：事件之间以空行（"\n\n"）分隔
+        // 参考 https://html.spec.whatwg.org/multipage/server-sent-events.html#parsing-an-event-stream
         let delimiterData = "\n\n".data(using: .utf8)!
         while let delimiterRange = buffer.range(of: delimiterData) {
             let eventData = buffer[..<delimiterRange.lowerBound]
@@ -103,8 +139,8 @@ private class SSEWork {
         }
     }
     
-    func didComplete(with error: Error?, dataTask: URLSessionTask) {
-        onCompletion(dataTask as! URLSessionDataTask, error)
+    func didComplete(with error: Error?, dataTask: URLSessionDataTask) {
+        onCompletion(dataTask, error)
     }
     
 }
