@@ -65,12 +65,9 @@ import UIKit
 /// - Section 的 Group 会被重复使用以填充内容区域，每个 Section 只定义一个 Group。
 /// - Result Builder 支持 `if`/`else`、`for...in` 等控制流，可按数据动态构建布局。
 
-public protocol LayoutElement {
-    func configured(_ block: (inout Self) -> Void) -> Self
-}
-
-extension LayoutElement {
-    public func configured(_ block: (inout Self) -> Void) -> Self {
+public protocol LayoutElement {}
+public extension LayoutElement {
+    func configured(_ block: (inout Self) -> Void) -> Self {
         var copy = self;  block(&copy); return copy
     }
 }
