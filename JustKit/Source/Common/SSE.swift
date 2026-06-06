@@ -87,7 +87,7 @@ private class SSEWork {
     
     let lock = NSLock()
     var buffer = Data()
-    let maxBufferSize: Int = 200 * 1024 * 1024
+    let maxBufferSize: Int = 2 * 1024 * 1024
     
     init(
         onEvent: @escaping (URLSessionDataTask, SSEEvent) -> Void,
@@ -110,14 +110,16 @@ private class SSEWork {
         while let delimiterRange = buffer.range(of: delimiterData) {
             let eventData = buffer[..<delimiterRange.lowerBound]
             if let eventString = String(data: eventData, encoding: .utf8) {
-                onEvent(dataTask, SSEEvent(from: eventString))
+                // 解析在后台线程完成，仅将结果回调派发到主线程
+                let event = SSEEvent(from: eventString)
+                DispatchQueue.main.async { self.onEvent(dataTask, event) }
             }
             buffer.removeSubrange(..<delimiterRange.upperBound)
         }
     }
     
     func didComplete(with error: Error?, dataTask: URLSessionDataTask) {
-        onCompletion(dataTask, error)
+        DispatchQueue.main.async { self.onCompletion(dataTask, error) }
     }
     
 }
