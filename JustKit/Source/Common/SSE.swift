@@ -30,12 +30,12 @@ public enum SSE {
 private class SSESession: NSObject, URLSessionDataDelegate {
     
     lazy var urlSession: URLSession = {
-        // TODO:
+        // Note: 根据实际业务场景调整以下参数
         let configuration = URLSessionConfiguration.default
-        configuration.timeoutIntervalForRequest = 1200
-        configuration.timeoutIntervalForResource = 3600
-        configuration.httpMaximumConnectionsPerHost = 1
-        configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+        configuration.timeoutIntervalForRequest = 120 // 两次数据传输之间允许的最大间隔，收到数据后重新计时
+        configuration.timeoutIntervalForResource = 7 * 24 * 60 * 60 // 请求允许持续的最长时间，到期后系统自动终止
+        configuration.httpMaximumConnectionsPerHost = 6 // 同一 Host 允许建立的最大并发连接数
+        configuration.requestCachePolicy = .reloadIgnoringLocalCacheData  // 忽略本地缓存，每次从服务端获取最新数据
         return URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
     }()
     
@@ -105,7 +105,8 @@ private class SSEWork {
             return
         }
         buffer.append(data)
-        // TODO:
+        // Note: 根据服务端实际使用的行结束符调整
+        // WHATWG SSE 规范支持三种行结束符：LF（\n）、CR（\r）、CRLF（\r\n）
         let delimiterData = "\n\n".data(using: .utf8)!
         while let delimiterRange = buffer.range(of: delimiterData) {
             let eventData = buffer[..<delimiterRange.lowerBound]
