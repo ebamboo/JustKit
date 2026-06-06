@@ -46,7 +46,7 @@ public enum SSE {
 private class SSESession: NSObject, URLSessionDataDelegate {
     
     lazy var urlSession: URLSession = {
-        // Note: 根据实际业务场景调整以下参数
+        // TODO: 请根据实际项目需求配置以下参数
         let configuration = URLSessionConfiguration.default
         configuration.timeoutIntervalForRequest = 120 // 两次数据传输之间允许的最大间隔，收到数据后重新计时
         configuration.timeoutIntervalForResource = 7 * 24 * 60 * 60 // 请求允许持续的最长时间，到期后系统自动终止
@@ -124,8 +124,9 @@ private class SSEConnection {
             return
         }
         buffer.append(data)
-        // Note: 根据服务端实际使用的行结束符调整
+        // TODO: 请根据服务端实际使用的行结束符配置 `delimiterData`
         // WHATWG SSE 规范支持三种行结束符：LF（\n）、CR（\r）、CRLF（\r\n）
+        // 当前实现仅支持 LF（\n） 换行符
         let delimiterData = "\n\n".data(using: .utf8)!
         while let delimiterRange = buffer.range(of: delimiterData) {
             let eventData = buffer[..<delimiterRange.lowerBound]
