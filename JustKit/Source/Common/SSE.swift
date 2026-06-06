@@ -59,8 +59,8 @@ private class SSESession: NSObject, URLSessionDataDelegate {
         )
     }()
     
-    var workList: [Int: SSEWork] = [:]
-    let workListQueue = DispatchQueue(label: "sse.session.work")
+    var connectionList: [Int: SSEConnection] = [:]
+    let connectionListQueue = DispatchQueue(label: "sse.session.connection")
     
     @discardableResult
     func dataTask(
@@ -80,27 +80,27 @@ private class SSESession: NSObject, URLSessionDataDelegate {
         }
         requestModifier?(&request)
         let task = urlSession.dataTask(with: request)
-        let work = SSEWork(onEvent: eventHandler, onCompletion: completionHandler)
-        workListQueue.sync { workList[task.taskIdentifier] = work }
+        let connection = SSEConnection(onEvent: eventHandler, onCompletion: completionHandler)
+        connectionListQueue.sync { connectionList[task.taskIdentifier] = connection }
         task.resume()
         return task
     }
     
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
-        let work = workListQueue.sync { workList[dataTask.taskIdentifier] }
-        guard let work else { return }
-        work.didReceive(data: data, dataTask: dataTask)
+        let connection = connectionListQueue.sync { connectionList[dataTask.taskIdentifier] }
+        guard let connection else { return }
+        connection.didReceive(data: data, dataTask: dataTask)
     }
     
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: (any Error)?) {
-        let work = workListQueue.sync { workList.removeValue(forKey: task.taskIdentifier) }
-        guard let work, let dataTask = task as? URLSessionDataTask else { return }
-        work.didComplete(with: error, dataTask: dataTask)
+        let connection = connectionListQueue.sync { connectionList.removeValue(forKey: task.taskIdentifier) }
+        guard let connection, let dataTask = task as? URLSessionDataTask else { return }
+        connection.didComplete(with: error, dataTask: dataTask)
     }
     
 }
 
-private class SSEWork {
+private class SSEConnection {
     
     let onEvent: (URLSessionDataTask, SSEEvent) -> Void
     let onCompletion: (URLSessionDataTask, Error?) -> Void
