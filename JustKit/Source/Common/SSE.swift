@@ -4,12 +4,9 @@
 
 import Foundation
 
-public class SSESession: NSObject, URLSessionDataDelegate {
+public enum SSE {
     
-    /// shared instance
-    public static let shared = SSESession()
-    
-    /// a instance method request for initiating SSE connections:
+    /// 发起 SSE 连接的静态方法
     /// - Parameters:
     ///   - url: The endpoint for SSE.
     ///   - headers: Custom headers for the request.
@@ -18,7 +15,7 @@ public class SSESession: NSObject, URLSessionDataDelegate {
     ///   - completionHandler: Called when the task completes, with or without error.
     /// - Returns: A URLSessionDataTask that represents the ongoing request.
     @discardableResult
-    public func dataTask(
+    public static func dataTask(
         with url: URL,
         headers: [String: String] = [:],
         requestModifier: ((inout URLRequest) -> Void)? = nil,
@@ -33,36 +30,45 @@ public class SSESession: NSObject, URLSessionDataDelegate {
         }
         requestModifier?(&request)
         let task = session.dataTask(with: request)
-        let work = SSESessionWork(onEvent: eventHandler, onCompletion: completionHandler)
+        let work = SSEWork(onEvent: eventHandler, onCompletion: completionHandler)
         workList[task.taskIdentifier] = work
         task.resume()
         return task
     }
     
-    private lazy var session = {
+    private static let sessionDelegate = SessionDelegate()
+    
+    private static let session: URLSession = {
         let configuration = URLSessionConfiguration.default
         configuration.timeoutIntervalForRequest = 1200 // 20分钟 - 单个请求超时
         configuration.timeoutIntervalForResource = 3600 // 1小时 - 整个资源请求超时
         configuration.httpMaximumConnectionsPerHost = 1 // 每个主机最多1个连接
         configuration.requestCachePolicy = .reloadIgnoringLocalCacheData // 忽略缓存
-        return URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
+        return URLSession(configuration: configuration, delegate: sessionDelegate, delegateQueue: nil)
     }()
-    private var workList: [Int: SSESessionWork] = [:]
     
-    public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
-        guard let work = workList[dataTask.taskIdentifier] else { return }
+    fileprivate static var workList: [Int: SSEWork] = [:]
+    
+
+    
+}
+
+private class SessionDelegate: NSObject, URLSessionDataDelegate {
+    
+    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+        guard let work = SSE.workList[dataTask.taskIdentifier] else { return }
         work.didReceive(data: data, dataTask: dataTask)
     }
     
-    public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: (any Error)?) {
-        guard let work = workList[task.taskIdentifier] else { return }
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: (any Error)?) {
+        guard let work = SSE.workList[task.taskIdentifier] else { return }
         work.didComplete(with: error, dataTask: task)
-        workList.removeValue(forKey: task.taskIdentifier)
+        SSE.workList.removeValue(forKey: task.taskIdentifier)
     }
     
 }
 
-fileprivate class SSESessionWork {
+private class SSEWork {
     
     private let onEvent: (URLSessionDataTask, SSEEvent) -> Void
     private let onCompletion: (URLSessionDataTask, Error?) -> Void
