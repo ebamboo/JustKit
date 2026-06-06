@@ -6,7 +6,7 @@ import UIKit
 
 class ServiceHomeViewController: UIViewController {
     
-    let titles = ["FlowImageView", "Browser Swift", "Browser OC", "Media View", "ScrollView简单嵌套"]
+    let titles = ["FlowImageView", "Browser Swift", "Browser OC", "Media View"]
     
     lazy var tableView: UITableView = {
         let view = UITableView(frame: .zero, style: .grouped)
@@ -59,10 +59,6 @@ extension ServiceHomeViewController: UITableViewDataSource, UITableViewDelegate 
         }
         if indexPath.row == 3 {
             navigationController?.pushViewController(MediaViewTestViewController(), animated: true)
-            return
-        }
-        if indexPath.row == 4 {
-            navigationController?.pushViewController(NestedScrollViewTestViewController(), animated: true)
             return
         }
     }
