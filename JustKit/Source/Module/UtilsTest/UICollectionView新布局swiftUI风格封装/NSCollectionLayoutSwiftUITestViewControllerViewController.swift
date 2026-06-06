@@ -107,12 +107,12 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
         return layout
     }
     
-    var bannerSection: CompositionalLayout.Section {
-        CompositionalLayout.Section {
-            CompositionalLayout.Group(axis: .vertical, width: .absolute(100), height: .absolute(210)) {
+    var bannerSection: LayoutSection {
+        LayoutSection {
+            LayoutGroup(axis: .vertical, width: .absolute(100), height: .absolute(210)) {
                 
-                CompositionalLayout.Item(width: .fractionalWidth(1), height: .fractionalHeight(0.5)) {
-                    CompositionalLayout.Supplementary(
+                LayoutItem(width: .fractionalWidth(1), height: .fractionalHeight(0.5)) {
+                    LayoutSupplementary(
                         width: .absolute(20),
                         height: .absolute(20),
                         kind: "badge-1",
@@ -121,7 +121,7 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
                     ).configured { badge in
                         badge.zIndex = 7
                     }
-                    CompositionalLayout.Supplementary(
+                    LayoutSupplementary(
                         width: .absolute(20),
                         height: .absolute(20),
                         kind: "badge-2",
@@ -143,12 +143,12 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
         }
     }
     
-    var hotSection: CompositionalLayout.Section {
-        CompositionalLayout.Section {
-            CompositionalLayout.Group(width: .fractionalWidth(1), height: .estimated(200)) {
+    var hotSection: LayoutSection {
+        LayoutSection {
+            LayoutGroup(width: .fractionalWidth(1), height: .estimated(200)) {
                 
                 for w in [0.08, 0.12, 0.18] {
-                    CompositionalLayout.Item(width: .fractionalWidth(w), height: .absolute(160))
+                    LayoutItem(width: .fractionalWidth(w), height: .absolute(160))
                 }
                 
             }
@@ -157,13 +157,13 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
             }
         } boundaries: {
             if needHotHeadder {
-                CompositionalLayout.BoundarySupplementary(kind: "section-header", alignment: .top)
+                LayoutBoundary(kind: "section-header", alignment: .top)
                     .configured { header in
                         header.pinToVisibleBounds = true
                     }
             }
             if needHotFooter {
-                CompositionalLayout.BoundarySupplementary(kind: "section-footer", alignment: .bottom)
+                LayoutBoundary(kind: "section-footer", alignment: .bottom)
             }
         }
         .configured { section in
@@ -171,14 +171,14 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
         }
     }
     
-    var shopSection: CompositionalLayout.Section {
-        CompositionalLayout.Section {
-            CompositionalLayout.Group(width: .fractionalWidth(1), height: .estimated(200)) {
+    var shopSection: LayoutSection {
+        LayoutSection {
+            LayoutGroup(width: .fractionalWidth(1), height: .estimated(200)) {
                 
-                CompositionalLayout.Item(width: .fractionalWidth(0.5), height: .fractionalWidth(0.5))
+                LayoutItem(width: .fractionalWidth(0.5), height: .fractionalWidth(0.5))
                 
-                CompositionalLayout.Group(axis: .vertical, width: .fractionalWidth(0.5), height: .fractionalWidth(0.5)) {
-                    CompositionalLayout.Item(width: .fractionalWidth(1), height: .fractionalHeight(0.33333))
+                LayoutGroup(axis: .vertical, width: .fractionalWidth(0.5), height: .fractionalWidth(0.5)) {
+                    LayoutItem(width: .fractionalWidth(1), height: .fractionalHeight(0.33333))
                 }
                 .configured { group in
                     group.interItemSpacing = .fixed(10)
@@ -190,7 +190,7 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
             }
         } decorations: {
             if needBack {
-                CompositionalLayout.Decoration(kind: "ConvenienceCollectionViewTestSectionBackView")
+                LayoutDecoration(kind: "ConvenienceCollectionViewTestSectionBackView")
                     .configured { back in
                         back.contentInsets = .init(top: 10, leading: 10, bottom: 10, trailing: 10)
                     }
@@ -202,10 +202,10 @@ extension NSCollectionLayoutSwiftUITestViewControllerViewController {
         }
     }
     
-    var config: CompositionalLayout.Configuration {
-        CompositionalLayout.Configuration {
-            CompositionalLayout.BoundarySupplementary(kind: "header", alignment: .top)
-            CompositionalLayout.BoundarySupplementary(kind: "footer", alignment: .bottom)
+    var config: LayoutConfiguration {
+        LayoutConfiguration {
+            LayoutBoundary(kind: "header", alignment: .top)
+            LayoutBoundary(kind: "footer", alignment: .bottom)
         }
     }
     
