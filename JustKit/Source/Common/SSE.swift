@@ -6,6 +6,18 @@ import Foundation
 
 public enum SSE {
     
+    /// 发起一个 SSE（Server-Sent Events）连接
+    ///
+    /// 默认以 GET 方式请求，并设置 `Accept: text/event-stream` 请求头。
+    /// 如需使用 POST 或自定义请求体，可通过 `requestModifier` 修改。
+    ///
+    /// - Parameters:
+    ///   - url: SSE 服务端地址
+    ///   - headers: 附加的自定义请求头，会与默认请求头合并（相同 key 时覆盖默认值）
+    ///   - requestModifier: 请求发送前的最终修改机会，可用于设置 httpMethod、httpBody 等
+    ///   - eventHandler: 每收到一个完整的 SSE 事件时调用，回调在主线程执行
+    ///   - completionHandler: 连接结束时调用（正常完成或发生错误），回调在主线程执行
+    /// - Returns: 已启动的 `URLSessionDataTask`，可用于取消请求
     @discardableResult
     public static func dataTask(
         with url: URL,
