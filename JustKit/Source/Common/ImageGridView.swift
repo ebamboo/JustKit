@@ -4,6 +4,8 @@
 
 import UIKit
 
+// MARK: - ImageGridView
+
 class ImageGridView: UICollectionView {
     
     struct Configuration {
@@ -92,13 +94,14 @@ class ImageGridView: UICollectionView {
 // MARK: - DataSource & Delegate
 
 extension ImageGridView: UICollectionViewDataSource, UICollectionViewDelegate {
-
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         showsAddButton ? images.count + 1 : images.count
     }
-
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "ImageGridCell", for: indexPath) as! ImageGridCell
+        let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: "ImageGridCell",
+            for: indexPath
+        ) as! ImageGridCell
         if showsAddButton && indexPath.item == images.count {
             cell.imageView.image = configuration.addIcon
             cell.deleteButton.isHidden = true
@@ -121,7 +124,6 @@ extension ImageGridView: UICollectionViewDataSource, UICollectionViewDelegate {
         }
         return cell
     }
-
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: false)
         if showsAddButton && indexPath.item == images.count {
@@ -132,33 +134,43 @@ extension ImageGridView: UICollectionViewDataSource, UICollectionViewDelegate {
     }
 }
 
-class ImageGridCell: UICollectionViewCell {
-    // MARK: - 应该是什么命名呢
+// MARK: - ImageGridCell
+
+private class ImageGridCell: UICollectionViewCell {
+    // MARK: Interface
     var didTapDeleteButton: (() -> Void)?
-    // MARK: - Components
+    // MARK: Components
     lazy var imageView: UIImageView = {
         let view = UIImageView()
         view.contentMode = .scaleAspectFill
         view.clipsToBounds = true
         return view
     }()
-
     lazy var deleteButton: UIButton = {
         let view = UIButton(type: .custom)
         view.addTarget(self, action: #selector(deleteTapped), for: .touchUpInside)
         return view
     }()
-    // MARK: - Override
+    // MARK: Override
     override init(frame: CGRect) {
         super.init(frame: frame)
         contentView.addSubview(imageView)
         contentView.addSubview(deleteButton)
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        deleteButton.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            imageView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            imageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            imageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            imageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            deleteButton.topAnchor.constraint(equalTo: contentView.topAnchor),
+            deleteButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            deleteButton.widthAnchor.constraint(equalToConstant: 30),
+            deleteButton.heightAnchor.constraint(equalToConstant: 30),
+        ])
     }
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-    @objc private func deleteTapped() {
-        didTapDeleteButton?()
     }
     override func prepareForReuse() {
         super.prepareForReuse()
@@ -166,14 +178,15 @@ class ImageGridCell: UICollectionViewCell {
         deleteButton.isHidden = true
         didTapDeleteButton = nil
     }
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        imageView.frame = contentView.bounds
-        deleteButton.frame = CGRect(x: contentView.bounds.width - 30, y: 0, width: 30, height: 30)
+    // MARK: Actions
+    @objc func deleteTapped() {
+        didTapDeleteButton?()
     }
 }
 
-class ImageGridLayout: UICollectionViewFlowLayout {
+// MARK: - ImageGridLayout
+
+private class ImageGridLayout: UICollectionViewFlowLayout {
     override func prepare() {
         super.prepare()
         guard let gridView = collectionView as? ImageGridView else { return }
