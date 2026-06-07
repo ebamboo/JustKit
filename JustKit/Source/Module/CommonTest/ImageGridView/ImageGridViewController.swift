@@ -8,11 +8,8 @@ class ImageGridViewController: UIViewController {
 
     private lazy var gridView: ImageGridView = {
         var config = ImageGridView.Configuration()
-        config.spacing = 10
-        config.contentInsets = UIEdgeInsets(top: 0, left: 15, bottom: 0, right: 15)
-        config.maximumImageCount = 9
-        config.addIcon = UIImage(named: "bb-image-addition")
-        config.deleteIcon = UIImage(named: "bb-image-deletion")
+        config.contentInsets = UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
+        config.spacing = 12
         config.imageSizeProvider = { gridView in
             let columns: CGFloat = 4
             let insets = gridView.configuration.contentInsets
@@ -21,6 +18,10 @@ class ImageGridViewController: UIViewController {
             let side = floor((gridView.bounds.width - totalSpacing) / columns)
             return CGSize(width: side, height: side)
         }
+        config.addIcon = UIImage(named: "bb-image-addition")
+        config.deleteIcon = UIImage(named: "bb-image-deletion")
+        config.maximumImageCount = 13
+        
         let view = ImageGridView(frame: .zero, configuration: config)
         view.backgroundColor = .systemGroupedBackground
         return view
@@ -45,6 +46,7 @@ class ImageGridViewController: UIViewController {
             modeSwitch.centerXAnchor.constraint(equalTo: view.centerXAnchor),
         ])
 
+        gridView.backgroundColor = .gray
         view.addSubview(gridView)
         gridView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
