@@ -6,6 +6,34 @@ import UIKit
 
 // MARK: - ImageGridView
 
+/// 项目级图片网格组件，迁移到其他项目时需做少量源码适配。
+///
+/// 基于 UICollectionView 封装，支持浏览和编辑两种模式。
+/// 编辑模式下显示添加按钮和删除按钮，图片来源支持本地 UIImage 和远程 URL。
+/// 自身不可滚动，高度随内容自适应，适合嵌入 ScrollView 或表单使用。
+///
+/// ```
+/// var config = ImageGridView.Configuration()
+/// config.spacing = 10
+/// config.contentInsets = UIEdgeInsets(top: 0, left: 15, bottom: 0, right: 15)
+/// config.addIcon = UIImage(named: "add")
+/// config.deleteIcon = UIImage(named: "delete")
+/// config.imageSizeProvider = { gridView in
+///     let columns: CGFloat = 4
+///     let insets = gridView.configuration.contentInsets
+///     let totalSpacing = insets.left + insets.right + gridView.configuration.spacing * (columns - 1)
+///     let side = floor((gridView.bounds.width - totalSpacing) / columns)
+///     return CGSize(width: side, height: side)
+/// }
+///
+/// let gridView = ImageGridView(frame: .zero, configuration: config)
+/// gridView.mode = .edit
+/// gridView.setImages([.image(UIImage(named: "photo")!)])
+///
+/// gridView.didTapAddButton = { /* 选择图片 */ }
+/// gridView.didTapImage = { index, source in /* 预览图片 */ }
+/// gridView.didDeleteImage = { index, source in /* 处理删除 */ }
+/// ```
 class ImageGridView: UICollectionView {
     
     // MARK: Configuration

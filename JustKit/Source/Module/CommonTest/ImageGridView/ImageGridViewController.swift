@@ -34,25 +34,50 @@ class ImageGridViewController: UIViewController {
         return control
     }()
 
+    private lazy var scrollView: UIScrollView = {
+        let sv = UIScrollView()
+        sv.alwaysBounceVertical = true
+        return sv
+    }()
+
+    private lazy var stackView: UIStackView = {
+        let sv = UIStackView()
+        sv.axis = .vertical
+        sv.spacing = 20
+        sv.alignment = .center
+        return sv
+    }()
+
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "ImageGridView"
         view.backgroundColor = .systemBackground
 
-        view.addSubview(modeSwitch)
-        modeSwitch.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(scrollView)
+        scrollView.addSubview(stackView)
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+
         NSLayoutConstraint.activate([
-            modeSwitch.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
-            modeSwitch.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+
+            stackView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor, constant: 20),
+            stackView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
+            stackView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
+            stackView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
+            stackView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
         ])
 
+        stackView.addArrangedSubview(modeSwitch)
+
         gridView.backgroundColor = .gray
-        view.addSubview(gridView)
-        gridView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.addArrangedSubview(gridView)
         NSLayoutConstraint.activate([
-            gridView.topAnchor.constraint(equalTo: modeSwitch.bottomAnchor, constant: 20),
-            gridView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            gridView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            gridView.leadingAnchor.constraint(equalTo: stackView.leadingAnchor),
+            gridView.trailingAnchor.constraint(equalTo: stackView.trailingAnchor),
         ])
 
         gridView.didTapAddButton = { [weak self] in
