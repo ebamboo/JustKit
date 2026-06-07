@@ -14,13 +14,21 @@ public class DashLine: UIView {
     // MARK: - Configuration
 
     /// 是否为水平方向
-    @IBInspectable public var isHorizontal: Bool = true
-    /// 虚线颜色
-    @IBInspectable public var color: UIColor = .gray
+    @IBInspectable public var isHorizontal: Bool = true {
+        didSet { setNeedsDisplay() }
+    }
+    /// 虚线颜色，支持动态颜色（如暗黑模式自适应颜色）
+    @IBInspectable public var color: UIColor = .gray {
+        didSet { setNeedsDisplay() }
+    }
     /// 每段虚线的长度
-    @IBInspectable public var segmentLength: CGFloat = 10
+    @IBInspectable public var segmentLength: CGFloat = 10 {
+        didSet { setNeedsDisplay() }
+    }
     /// 虚线段之间的间距
-    @IBInspectable public var segmentSpacing: CGFloat = 4
+    @IBInspectable public var segmentSpacing: CGFloat = 4 {
+        didSet { setNeedsDisplay() }
+    }
 
     // MARK: - Override
 
