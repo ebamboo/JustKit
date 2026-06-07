@@ -23,22 +23,6 @@ class ImageGridView: UICollectionView {
     var configuration = Configuration() {
         didSet { reloadData() }
     }
-
-    init(frame: CGRect, configuration: Configuration = .init()) {
-        self.configuration = configuration
-        super.init(frame: frame, collectionViewLayout: ImageGridLayout())
-        dataSource = self
-        delegate = self
-        register(ImageGridCell.self, forCellWithReuseIdentifier: "ImageGridCell")
-    }
-
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        collectionViewLayout = ImageGridLayout()
-        dataSource = self
-        delegate = self
-        register(ImageGridCell.self, forCellWithReuseIdentifier: "ImageGridCell")
-    }
     
     // MARK: Mode
     
@@ -78,8 +62,26 @@ class ImageGridView: UICollectionView {
     var didTapImage: ((Int, ImageSource) -> Void)?
     var didDeleteImage: ((Int, ImageSource) -> Void)?
 
-    // MARK: Autosize
+    // MARK: Override
 
+    init(frame: CGRect, configuration: Configuration = .init()) {
+        self.configuration = configuration
+        super.init(frame: frame, collectionViewLayout: ImageGridLayout())
+        isScrollEnabled = false
+        dataSource = self
+        delegate = self
+        register(ImageGridCell.self, forCellWithReuseIdentifier: "ImageGridCell")
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        collectionViewLayout = ImageGridLayout()
+        isScrollEnabled = false
+        dataSource = self
+        delegate = self
+        register(ImageGridCell.self, forCellWithReuseIdentifier: "ImageGridCell")
+    }
+    
     override var contentSize: CGSize {
         didSet { invalidateIntrinsicContentSize() }
     }
