@@ -5,21 +5,15 @@
 import UIKit
 
 class ImageGridView: UICollectionView {
-
-    // MARK: - Configuration & Init
-
+    
     struct Configuration {
-        
         var contentInsets: UIEdgeInsets = .zero
         var spacing: CGFloat = 8
-        var itemSizeProvider: ((_ bounds: CGRect) -> CGSize)?
-        
-        var maximumImageCount: Int = 9
-        
+        var itemSizeProvider: ((_ gridView: ImageGridView) -> CGSize) = { _ in .zero }
         var addIcon: UIImage?
         var deleteIcon: UIImage?
         var imageLoader: ((_ imageView: UIImageView, _ url: URL) -> Void)?
-        
+        var maximumImageCount: Int = 9
     }
 
     var configuration = Configuration() {
@@ -28,22 +22,21 @@ class ImageGridView: UICollectionView {
 
     init(frame: CGRect, configuration: Configuration = .init()) {
         self.configuration = configuration
-        super.init(frame: frame, collectionViewLayout: GridLayout())
+        super.init(frame: frame, collectionViewLayout: ImageGridLayout())
         dataSource = self
         delegate = self
-        register(GridCell.self, forCellWithReuseIdentifier: GridCell.reuseID)
+        register(ImageGridCell.self, forCellWithReuseIdentifier: ImageGridCell.reuseID)
     }
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        collectionViewLayout = GridLayout()
+        collectionViewLayout = ImageGridLayout()
         dataSource = self
         delegate = self
-        register(GridCell.self, forCellWithReuseIdentifier: GridCell.reuseID)
+        register(ImageGridCell.self, forCellWithReuseIdentifier: ImageGridCell.reuseID)
     }
-
-    // MARK: - Mode
-
+    
+    
     enum Mode {
         case browse
         case edit
@@ -52,33 +45,31 @@ class ImageGridView: UICollectionView {
     var mode: Mode = .browse {
         didSet { reloadData() }
     }
-
-    // MARK: - Items
-
+    
+    
     enum ImageSource {
         case image(UIImage)
         case url(URL)
     }
 
-    private(set) var items: [ImageSource] = []
+    private(set) var images: [ImageSource] = []
 
-    func setItems(_ newItems: [ImageSource]) {
-        guard newItems.count <= configuration.maximumImageCount else { return }
-        items = newItems
+    func setImages(_ images: [ImageSource]) {
+        guard images.count <= configuration.maximumImageCount else { return }
+        self.images = images
         reloadData()
     }
 
-    func appendItems(_ newItems: [ImageSource]) {
-        guard items.count + newItems.count <= configuration.maximumImageCount else { return }
-        items += newItems
+    func appendImages(_ images: [ImageSource]) {
+        guard self.images.count + images.count <= configuration.maximumImageCount else { return }
+        self.images += images
         reloadData()
     }
+    
 
-    // MARK: - Callbacks
-
-    var onAddTap: (() -> Void)?
-    var onItemTap: ((_ index: Int) -> Void)?
-    var onItemDelete: ((_ index: Int) -> Void)?
+    var didTapAddButton: (() -> Void)?
+    var didTapImage: ((Int, ImageSource) -> Void)?
+    var didDeleteImage: ((Int, ImageSource) -> Void)?
 
     // MARK: - Autosize
 
@@ -94,7 +85,7 @@ class ImageGridView: UICollectionView {
     // MARK: - Helpers
 
     fileprivate var showsAddButton: Bool {
-        mode == .edit && items.count < configuration.maximumImageCount
+        mode == .edit && images.count < configuration.maximumImageCount
     }
 }
 
@@ -103,17 +94,17 @@ class ImageGridView: UICollectionView {
 extension ImageGridView: UICollectionViewDataSource, UICollectionViewDelegate {
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        showsAddButton ? items.count + 1 : items.count
+        showsAddButton ? images.count + 1 : images.count
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: GridCell.reuseID, for: indexPath) as! GridCell
-        if showsAddButton && indexPath.item == items.count {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ImageGridCell.reuseID, for: indexPath) as! ImageGridCell
+        if showsAddButton && indexPath.item == images.count {
             cell.imageView.image = configuration.addIcon
             cell.deleteButton.isHidden = true
             cell.onDelete = nil
         } else {
-            switch items[indexPath.item] {
+            switch images[indexPath.item] {
             case .image(let image):
                 cell.imageView.image = image
             case .url(let url):
@@ -123,9 +114,9 @@ extension ImageGridView: UICollectionViewDataSource, UICollectionViewDelegate {
             cell.deleteButton.setImage(configuration.deleteIcon, for: .normal)
             cell.onDelete = { [weak self] in
                 guard let self else { return }
-                self.items.remove(at: indexPath.item)
+                let removed = self.images.remove(at: indexPath.item)
                 self.reloadData()
-                self.onItemDelete?(indexPath.item)
+                self.didDeleteImage?(indexPath.item, removed)
             }
         }
         return cell
@@ -133,81 +124,54 @@ extension ImageGridView: UICollectionViewDataSource, UICollectionViewDelegate {
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: false)
-        if showsAddButton && indexPath.item == items.count {
-            onAddTap?()
+        if showsAddButton && indexPath.item == images.count {
+            didTapAddButton?()
         } else {
-            onItemTap?(indexPath.item)
+            didTapImage?(indexPath.item, images[indexPath.item])
         }
     }
 }
 
-// MARK: - GridCell
+class ImageGridCell: UICollectionViewCell {
+    static let reuseID = "ImageGridCell"
+    lazy var imageView: UIImageView = {
+        let view = UIImageView()
+        view.contentMode = .scaleAspectFill
+        view.clipsToBounds = true
+        contentView.insertSubview(view, at: 0)
+        return view
+    }()
 
-extension ImageGridView {
-
-    fileprivate class GridCell: UICollectionViewCell {
-
-        static let reuseID = "ImageGridView.GridCell"
-
-        lazy var imageView: UIImageView = {
-            let view = UIImageView()
-            view.contentMode = .scaleAspectFill
-            view.clipsToBounds = true
-            contentView.insertSubview(view, at: 0)
-            return view
-        }()
-
-        lazy var deleteButton: UIButton = {
-            let view = UIButton(type: .custom)
-            view.addTarget(self, action: #selector(deleteTapped), for: .touchUpInside)
-            contentView.addSubview(view)
-            return view
-        }()
-
-        var onDelete: (() -> Void)?
-
-        override func prepareForReuse() {
-            super.prepareForReuse()
-            imageView.image = nil
-            deleteButton.isHidden = true
-            onDelete = nil
-        }
-
-        override func layoutSubviews() {
-            super.layoutSubviews()
-            imageView.frame = contentView.bounds
-            deleteButton.frame = CGRect(x: contentView.bounds.width - 30, y: 0, width: 30, height: 30)
-        }
-
-        @objc private func deleteTapped() {
-            onDelete?()
-        }
+    lazy var deleteButton: UIButton = {
+        let view = UIButton(type: .custom)
+        view.addTarget(self, action: #selector(deleteTapped), for: .touchUpInside)
+        contentView.addSubview(view)
+        return view
+    }()
+    var onDelete: (() -> Void)?
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        imageView.image = nil
+        deleteButton.isHidden = true
+        onDelete = nil
+    }
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        imageView.frame = contentView.bounds
+        deleteButton.frame = CGRect(x: contentView.bounds.width - 30, y: 0, width: 30, height: 30)
+    }
+    @objc private func deleteTapped() {
+        onDelete?()
     }
 }
 
-// MARK: - GridLayout
-
-extension ImageGridView {
-
-    fileprivate class GridLayout: UICollectionViewFlowLayout {
-        override func prepare() {
-            super.prepare()
-            guard let gridView = collectionView as? ImageGridView else { return }
-            if let provider = gridView.configuration.itemSizeProvider {
-                itemSize = provider(gridView.bounds)
-            } else {
-                let columns: CGFloat = 4
-                let insets = gridView.configuration.contentInsets
-                let totalSpacing = insets.left + insets.right + gridView.configuration.spacing * (columns - 1)
-                let side = floor((gridView.bounds.width - totalSpacing) / columns)
-                itemSize = CGSize(width: side, height: side)
-            }
-            sectionInset = gridView.configuration.contentInsets
-            minimumInteritemSpacing = gridView.configuration.spacing
-            minimumLineSpacing = gridView.configuration.spacing
-        }
-//        override func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {
-//            collectionView?.bounds.width != newBounds.width
-//        }
+class ImageGridLayout: UICollectionViewFlowLayout {
+    override func prepare() {
+        super.prepare()
+        guard let gridView = collectionView as? ImageGridView else { return }
+        sectionInset = gridView.configuration.contentInsets
+        minimumInteritemSpacing = gridView.configuration.spacing
+        minimumLineSpacing = gridView.configuration.spacing
+        itemSize = gridView.configuration.itemSizeProvider(gridView)
     }
 }

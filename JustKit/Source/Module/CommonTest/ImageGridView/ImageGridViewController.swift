@@ -13,10 +13,12 @@ class ImageGridViewController: UIViewController {
         config.maximumImageCount = 9
         config.addIcon = UIImage(named: "bb-image-addition")
         config.deleteIcon = UIImage(named: "bb-image-deletion")
-        config.itemSizeProvider = { bounds in
+        config.itemSizeProvider = { gridView in
             let columns: CGFloat = 4
-            let totalSpacing = config.contentInsets.left + config.contentInsets.right + config.spacing * (columns - 1)
-            let side = floor((bounds.width - totalSpacing) / columns)
+            let insets = gridView.configuration.contentInsets
+            let spacing = gridView.configuration.spacing
+            let totalSpacing = insets.left + insets.right + spacing * (columns - 1)
+            let side = floor((gridView.bounds.width - totalSpacing) / columns)
             return CGSize(width: side, height: side)
         }
         let view = ImageGridView(frame: .zero, configuration: config)
@@ -51,15 +53,15 @@ class ImageGridViewController: UIViewController {
             gridView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
         ])
 
-        gridView.onAddTap = { [weak self] in
+        gridView.didTapAddButton = { [weak self] in
             guard let self else { return }
             let image = ImageGridView.ImageSource.image(UIImage(named: "16")!)
-            self.gridView.appendItems([image])
+            self.gridView.appendImages([image])
         }
-        gridView.onItemTap = { index in
+        gridView.didTapImage = { index, source in
             print("tap index = \(index)")
         }
-        gridView.onItemDelete = { index in
+        gridView.didDeleteImage = { index, source in
             print("delete index = \(index)")
         }
 
@@ -69,7 +71,7 @@ class ImageGridViewController: UIViewController {
         }
         gridView.mode = .edit
         modeSwitch.selectedSegmentIndex = 1
-        gridView.setItems(images)
+        gridView.setImages(images)
     }
 
     @objc private func modeChanged() {
