@@ -25,7 +25,7 @@ class ImageGridView: UICollectionView {
         super.init(frame: frame, collectionViewLayout: ImageGridLayout())
         dataSource = self
         delegate = self
-        register(ImageGridCell.self, forCellWithReuseIdentifier: ImageGridCell.reuseID)
+        register(ImageGridCell.self, forCellWithReuseIdentifier: "ImageGridCell")
     }
 
     required init?(coder: NSCoder) {
@@ -33,7 +33,7 @@ class ImageGridView: UICollectionView {
         collectionViewLayout = ImageGridLayout()
         dataSource = self
         delegate = self
-        register(ImageGridCell.self, forCellWithReuseIdentifier: ImageGridCell.reuseID)
+        register(ImageGridCell.self, forCellWithReuseIdentifier: "ImageGridCell")
     }
     
     
@@ -98,11 +98,11 @@ extension ImageGridView: UICollectionViewDataSource, UICollectionViewDelegate {
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ImageGridCell.reuseID, for: indexPath) as! ImageGridCell
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "ImageGridCell", for: indexPath) as! ImageGridCell
         if showsAddButton && indexPath.item == images.count {
             cell.imageView.image = configuration.addIcon
             cell.deleteButton.isHidden = true
-            cell.onDelete = nil
+            cell.didTapDeleteButton = nil
         } else {
             switch images[indexPath.item] {
             case .image(let image):
@@ -112,7 +112,7 @@ extension ImageGridView: UICollectionViewDataSource, UICollectionViewDelegate {
             }
             cell.deleteButton.isHidden = mode != .edit
             cell.deleteButton.setImage(configuration.deleteIcon, for: .normal)
-            cell.onDelete = { [weak self] in
+            cell.didTapDeleteButton = { [weak self] in
                 guard let self else { return }
                 let removed = self.images.remove(at: indexPath.item)
                 self.reloadData()
@@ -133,35 +133,43 @@ extension ImageGridView: UICollectionViewDataSource, UICollectionViewDelegate {
 }
 
 class ImageGridCell: UICollectionViewCell {
-    static let reuseID = "ImageGridCell"
+    // MARK: - 应该是什么命名呢
+    var didTapDeleteButton: (() -> Void)?
+    // MARK: - Components
     lazy var imageView: UIImageView = {
         let view = UIImageView()
         view.contentMode = .scaleAspectFill
         view.clipsToBounds = true
-        contentView.insertSubview(view, at: 0)
         return view
     }()
 
     lazy var deleteButton: UIButton = {
         let view = UIButton(type: .custom)
         view.addTarget(self, action: #selector(deleteTapped), for: .touchUpInside)
-        contentView.addSubview(view)
         return view
     }()
-    var onDelete: (() -> Void)?
+    // MARK: - Override
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        contentView.addSubview(imageView)
+        contentView.addSubview(deleteButton)
+    }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    @objc private func deleteTapped() {
+        didTapDeleteButton?()
+    }
     override func prepareForReuse() {
         super.prepareForReuse()
         imageView.image = nil
         deleteButton.isHidden = true
-        onDelete = nil
+        didTapDeleteButton = nil
     }
     override func layoutSubviews() {
         super.layoutSubviews()
         imageView.frame = contentView.bounds
         deleteButton.frame = CGRect(x: contentView.bounds.width - 30, y: 0, width: 30, height: 30)
-    }
-    @objc private func deleteTapped() {
-        onDelete?()
     }
 }
 
