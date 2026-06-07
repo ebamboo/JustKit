@@ -8,10 +8,12 @@ import UIKit
 
 class ImageGridView: UICollectionView {
     
+    // MARK: Configuration
+    
     struct Configuration {
         var contentInsets: UIEdgeInsets = .zero
         var spacing: CGFloat = 8
-        var itemSizeProvider: ((_ gridView: ImageGridView) -> CGSize) = { _ in .zero }
+        var imageSizeProvider: ((_ gridView: ImageGridView) -> CGSize) = { _ in .zero }
         var addIcon: UIImage?
         var deleteIcon: UIImage?
         var imageLoader: ((_ imageView: UIImageView, _ url: URL) -> Void)?
@@ -38,6 +40,7 @@ class ImageGridView: UICollectionView {
         register(ImageGridCell.self, forCellWithReuseIdentifier: "ImageGridCell")
     }
     
+    // MARK: Mode
     
     enum Mode {
         case browse
@@ -48,6 +51,7 @@ class ImageGridView: UICollectionView {
         didSet { reloadData() }
     }
     
+    // MARK: Images
     
     enum ImageSource {
         case image(UIImage)
@@ -68,12 +72,13 @@ class ImageGridView: UICollectionView {
         reloadData()
     }
     
-
+    // MARK: Callbacks
+    
     var didTapAddButton: (() -> Void)?
     var didTapImage: ((Int, ImageSource) -> Void)?
     var didDeleteImage: ((Int, ImageSource) -> Void)?
 
-    // MARK: - Autosize
+    // MARK: Autosize
 
     override var contentSize: CGSize {
         didSet { invalidateIntrinsicContentSize() }
@@ -84,11 +89,12 @@ class ImageGridView: UICollectionView {
         return contentSize
     }
 
-    // MARK: - Helpers
+    // MARK: Helpers
 
-    fileprivate var showsAddButton: Bool {
+    private var showsAddButton: Bool {
         mode == .edit && images.count < configuration.maximumImageCount
     }
+    
 }
 
 // MARK: - DataSource & Delegate
@@ -115,8 +121,10 @@ extension ImageGridView: UICollectionViewDataSource, UICollectionViewDelegate {
             }
             cell.deleteButton.isHidden = mode != .edit
             cell.deleteButton.setImage(configuration.deleteIcon, for: .normal)
-            cell.didTapDeleteButton = { [weak self] in
-                guard let self else { return }
+            cell.didTapDeleteButton = { [weak self, weak cell] in
+                guard let self,
+                      let cell,
+                      let indexPath = self.indexPath(for: cell) else { return }
                 let removed = self.images.remove(at: indexPath.item)
                 self.reloadData()
                 self.didDeleteImage?(indexPath.item, removed)
@@ -193,6 +201,6 @@ private class ImageGridLayout: UICollectionViewFlowLayout {
         sectionInset = gridView.configuration.contentInsets
         minimumInteritemSpacing = gridView.configuration.spacing
         minimumLineSpacing = gridView.configuration.spacing
-        itemSize = gridView.configuration.itemSizeProvider(gridView)
+        itemSize = gridView.configuration.imageSizeProvider(gridView)
     }
 }

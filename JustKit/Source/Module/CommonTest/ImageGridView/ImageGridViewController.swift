@@ -13,7 +13,7 @@ class ImageGridViewController: UIViewController {
         config.maximumImageCount = 9
         config.addIcon = UIImage(named: "bb-image-addition")
         config.deleteIcon = UIImage(named: "bb-image-deletion")
-        config.itemSizeProvider = { gridView in
+        config.imageSizeProvider = { gridView in
             let columns: CGFloat = 4
             let insets = gridView.configuration.contentInsets
             let spacing = gridView.configuration.spacing
