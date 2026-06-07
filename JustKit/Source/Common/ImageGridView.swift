@@ -13,7 +13,7 @@ class ImageGridView: UICollectionView {
     struct Configuration {
         var contentInsets: UIEdgeInsets = .zero
         var spacing: CGFloat = 8
-        var imageSizeProvider: ((_ gridView: ImageGridView) -> CGSize) = { _ in .zero }
+        var imageSizeProvider: ((_ gridView: ImageGridView) -> CGSize) = { _ in .init(width: 120, height: 120) }
         var addIcon: UIImage?
         var deleteIcon: UIImage?
         var imageLoader: ((_ imageView: UIImageView, _ url: URL) -> Void)?
@@ -164,21 +164,19 @@ private class ImageGridCell: UICollectionViewCell {
         super.init(frame: frame)
         contentView.addSubview(imageView)
         contentView.addSubview(deleteButton)
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        deleteButton.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            imageView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            imageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            imageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            imageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            deleteButton.topAnchor.constraint(equalTo: contentView.topAnchor),
-            deleteButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            deleteButton.widthAnchor.constraint(equalToConstant: 30),
-            deleteButton.heightAnchor.constraint(equalToConstant: 30),
-        ])
     }
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        imageView.frame = contentView.bounds
+        deleteButton.frame = CGRect(
+            x: contentView.bounds.size.width - 30,
+            y: 0,
+            width: 30,
+            height: 30
+        )
     }
     override func prepareForReuse() {
         super.prepareForReuse()
