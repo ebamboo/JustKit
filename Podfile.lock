@@ -1,6 +1,5 @@
 PODS:
   - Alamofire (5.10.2)
-  - BBPlayerView (1.2.1)
   - MBProgressHUD (1.2.0)
   - SDWebImage (5.20.0):
     - SDWebImage/Core (= 5.20.0)
@@ -8,23 +7,20 @@ PODS:
 
 DEPENDENCIES:
   - Alamofire
-  - BBPlayerView
   - MBProgressHUD
   - SDWebImage
 
 SPEC REPOS:
   https://mirrors.tuna.tsinghua.edu.cn/git/CocoaPods/Specs.git:
     - Alamofire
-    - BBPlayerView
     - MBProgressHUD
     - SDWebImage
 
 SPEC CHECKSUMS:
   Alamofire: 7193b3b92c74a07f85569e1a6c4f4237291e7496
-  BBPlayerView: 34a46cf2cf375d7e4b127e3be34e3d8262cd47d8
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
   SDWebImage: 73c6079366fea25fa4bb9640d5fb58f0893facd8
 
-PODFILE CHECKSUM: bef5ac5a099942b90a8e722497df0a0c162b36c6
+PODFILE CHECKSUM: 1ffcfe332d917db3966d69eff5acf01775586066
 
 COCOAPODS: 1.16.2

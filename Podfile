@@ -9,7 +9,6 @@ target 'JustKit' do
   pod 'Alamofire'
   pod 'SDWebImage'
   pod 'MBProgressHUD'
-  pod 'BBPlayerView'
 
 end
 

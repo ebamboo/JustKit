@@ -3,7 +3,6 @@
 //
 
 import UIKit
-import BBPlayerView
 
 class MediaBrowserVideoCell: UICollectionViewCell {
     
