@@ -17,7 +17,7 @@ class ExperienceHomeViewController: UIViewController, UITableViewDataSource, UIT
         "原生UICollectionView拖动动画", "Xib或Storyboard添加Object",
         "UIScrollView 嵌套", "UICollectionView新布局方式和数据源",
         "视频图片混合 Browser Swift", "视频图片混合 Browser OC", "视频图片混合 Media View",
-        "单视频播放", "视频播放列表",
+        "单视频播放", "视频播放列表", "图片浏览器",
     ]
     
     // MARK: - life cirle
@@ -139,6 +139,10 @@ class ExperienceHomeViewController: UIViewController, UITableViewDataSource, UIT
         }
         if indexPath.row == 20 {
             navigationController?.pushViewController(MultiVideoViewController(), animated: true)
+            return
+        }
+        if indexPath.row == 21 {
+            navigationController?.pushViewController(RootViewController(), animated: true)
             return
         }
     }
