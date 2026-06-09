@@ -16,6 +16,7 @@ class ExperienceHomeViewController: UIViewController, UITableViewDataSource, UIT
         "自定义相机并模仿系统相机旋转逻辑", "自定义 UICollectionViewFlowLayout",
         "原生UICollectionView拖动动画", "Xib或Storyboard添加Object",
         "UIScrollView 嵌套", "UICollectionView新布局方式和数据源",
+        "Browser Swift", "Browser OC", "Media View",
     ]
     
     // MARK: - life cirle
@@ -117,6 +118,18 @@ class ExperienceHomeViewController: UIViewController, UITableViewDataSource, UIT
         }
         if indexPath.row == 15 {
             navigationController?.pushViewController(NewCollectionViewController(), animated: true)
+            return
+        }
+        if indexPath.row == 16 {
+            navigationController?.pushViewController(BrowserTestSwiftViewController(), animated: true)
+            return
+        }
+        if indexPath.row == 17 {
+            navigationController?.pushViewController(BrowserTestOCViewController(), animated: true)
+            return
+        }
+        if indexPath.row == 18 {
+            navigationController?.pushViewController(MediaViewTestViewController(), animated: true)
             return
         }
     }

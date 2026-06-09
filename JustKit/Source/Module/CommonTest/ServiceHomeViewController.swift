@@ -6,7 +6,7 @@ import UIKit
 
 class ServiceHomeViewController: UIViewController {
     
-    let titles = ["工具已删除", "ImageGridView", "Browser Swift", "Browser OC", "Media View"]
+    let titles = ["ImageGridView", ]
     
     lazy var tableView: UITableView = {
         let view = UITableView(frame: .zero, style: .grouped)
@@ -46,23 +46,7 @@ extension ServiceHomeViewController: UITableViewDataSource, UITableViewDelegate 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: false)
         if indexPath.row == 0 {
-            
-            return
-        }
-        if indexPath.row == 1 {
             navigationController?.pushViewController(ImageGridViewController(), animated: true)
-            return
-        }
-        if indexPath.row == 2 {
-            navigationController?.pushViewController(BrowserTestSwiftViewController(), animated: true)
-            return
-        }
-        if indexPath.row == 3 {
-            navigationController?.pushViewController(BrowserTestOCViewController(), animated: true)
-            return
-        }
-        if indexPath.row == 4 {
-            navigationController?.pushViewController(MediaViewTestViewController(), animated: true)
             return
         }
     }
