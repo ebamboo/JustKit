@@ -4,3 +4,5 @@
 
 #import "BrowserTestOCViewController.h"
 #import "BBPlayerView.h"
+#import "SingleVideoViewController.h"
+#import "MultiVideoViewController.h"
