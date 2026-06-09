@@ -16,7 +16,7 @@ class ExperienceHomeViewController: UIViewController, UITableViewDataSource, UIT
         "自定义相机并模仿系统相机旋转逻辑", "自定义 UICollectionViewFlowLayout",
         "原生UICollectionView拖动动画", "Xib或Storyboard添加Object",
         "UIScrollView 嵌套", "UICollectionView新布局方式和数据源",
-        "Browser Swift", "Browser OC", "Media View",
+        "视频图片混合 Browser Swift", "视频图片混合 Browser OC", "视频图片混合 Media View",
     ]
     
     // MARK: - life cirle
