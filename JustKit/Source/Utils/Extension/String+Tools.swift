@@ -23,13 +23,6 @@ public extension String {
         return size.width + 1
     }
     
-    /// 打电话
-    func call() {
-        if let url = URL(string: "telprompt://\(self)"), UIApplication.shared.canOpenURL(url) {
-            UIApplication.shared.open(url, options: [:], completionHandler: nil)
-        }
-    }
-    
     /// URL方式编码字符串
     /// 除指定字符外，其他所有的字符都用百分号形式表示
     /// 适用场景：遍历 query 参数字典，对 value 进行编码，然后拼接至 URL
