@@ -13,7 +13,7 @@ public extension UIView {
     ///
     /// - Note: 上下文菜单仅支持系统手势触发，无法通过编程方式主动唤起。
     ///   若需要点击触发菜单，请改用 `UIButton.menu` 配合 `showsMenuAsPrimaryAction`。
-    var customContextMenu: UIMenu? {
+    var contextMenu: UIMenu? {
         get {
             objc_getAssociatedObject(self, &Self.context_menu_key) as? UIMenu
         }

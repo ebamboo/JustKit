@@ -19,7 +19,7 @@ class ContextMenuTestViewController: UIViewController {
     
     @IBOutlet weak var testView: UIView! {
         didSet {
-            testView.customContextMenu = testMenu
+            testView.contextMenu = testMenu
         }
     }
     
