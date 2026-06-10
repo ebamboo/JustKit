@@ -47,13 +47,13 @@ public enum Keychain {
     ///   - accessGroup: 访问组，`nil` 表示不限定。
     ///   - synchronizable: 是否为可同步条目。
     /// - Returns: 匹配条目的密码数据。无匹配条目时返回 `nil`。
-    /// - Throws: ``KeychainError``。
+    /// - Throws: ``Keychain.Error``。
     public static func data(
         forAccount account: String,
         service: String,
         accessGroup: String? = nil,
         synchronizable: Bool = false
-    ) throws(KeychainError) -> Data? {
+    ) throws(Error) -> Data? {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -72,11 +72,11 @@ public enum Keychain {
             return nil
         case errSecSuccess:
             guard let data = result as? Data else {
-                throw KeychainError.invalidDataFormat
+                throw Error.invalidDataFormat
             }
             return data
         default:
-            throw KeychainError.operationFailed(status: status)
+            throw Error.operationFailed(status: status)
         }
     }
     
@@ -91,7 +91,7 @@ public enum Keychain {
     ///   - accessGroup: 访问组。
     ///     当为 `nil` 时，更新操作匹配所有可访问组，新增操作使用系统默认访问组。
     ///   - synchronizable: 是否为可同步条目。
-    /// - Throws: ``KeychainError``。
+    /// - Throws: ``Keychain.Error``。
     ///   若 `synchronizable` 为 `true` 且 `accessible` 为 `ThisDeviceOnly` 级别，则参数无效，抛出错误。
     public static func setData(
         _ data: Data,
@@ -100,9 +100,9 @@ public enum Keychain {
         service: String,
         accessGroup: String? = nil,
         synchronizable: Bool = false
-    ) throws(KeychainError) {
+    ) throws(Error) {
         if synchronizable, let accessible, accessible.isThisDeviceOnly {
-            throw KeychainError.operationFailed(status: errSecParam)
+            throw Error.operationFailed(status: errSecParam)
         }
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
@@ -133,10 +133,10 @@ public enum Keychain {
                 nil
             )
             guard addStatus == errSecSuccess else {
-                throw KeychainError.operationFailed(status: addStatus)
+                throw Error.operationFailed(status: addStatus)
             }
         default:
-            throw KeychainError.operationFailed(status: updateStatus)
+            throw Error.operationFailed(status: updateStatus)
         }
     }
     
@@ -148,7 +148,7 @@ public enum Keychain {
     ///   - accessGroup: 访问组，`nil` 表示不限定。
     ///   - synchronizable: 是否为可同步条目，`nil` 表示不限定。
     /// - Returns: 匹配的条目列表。无匹配条目时返回空数组。自动过滤无效条目。返回顺序未定义。
-    /// - Throws: ``KeychainError``。
+    /// - Throws: ``Keychain.Error``。
     ///
     /// - Note:
     ///   本方法仅返回匹配条目的元信息。
@@ -161,7 +161,7 @@ public enum Keychain {
         account: String? = nil,
         accessGroup: String? = nil,
         synchronizable: Bool? = nil
-    ) throws(KeychainError) -> [Item] {
+    ) throws(Error) -> [Item] {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -182,7 +182,7 @@ public enum Keychain {
             return []
         case errSecSuccess:
             guard let list = result as? [[String: Any]] else {
-                throw KeychainError.invalidDataFormat
+                throw Error.invalidDataFormat
             }
             return list.compactMap { info in
                 guard
@@ -208,7 +208,7 @@ public enum Keychain {
                 )
             }
         default:
-            throw KeychainError.operationFailed(status: status)
+            throw Error.operationFailed(status: status)
         }
     }
     
@@ -219,13 +219,13 @@ public enum Keychain {
     ///   - account: 账户标识，`nil` 表示不限定。
     ///   - accessGroup: 访问组，`nil` 表示不限定。
     ///   - synchronizable: 是否为可同步条目，`nil` 表示不限定。
-    /// - Throws: ``KeychainError``。无匹配条目时视为成功，不会抛出错误。
+    /// - Throws: ``Keychain.Error``。无匹配条目时视为成功，不会抛出错误。
     public static func deleteItems(
         forService service: String,
         account: String? = nil,
         accessGroup: String? = nil,
         synchronizable: Bool? = nil
-    ) throws(KeychainError) {
+    ) throws(Error) {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -239,7 +239,7 @@ public enum Keychain {
         }
         let status = SecItemDelete(query as CFDictionary)
         guard status == errSecItemNotFound || status == errSecSuccess else {
-            throw KeychainError.operationFailed(status: status)
+            throw Error.operationFailed(status: status)
         }
     }
     
@@ -258,9 +258,18 @@ public extension Keychain {
         public let modificationDate: Date?
     }
     
-    enum KeychainError: Error {
+    enum Error: LocalizedError {
         case invalidDataFormat
-        case operationFailed(status: Int32)
+        case operationFailed(status: OSStatus)
+        public var errorDescription: String {
+            switch self {
+            case .invalidDataFormat:
+                return "Keychain 返回的数据无法解析"
+            case .operationFailed(let status):
+                let message = SecCopyErrorMessageString(status, nil) as String? ?? "未知错误"
+                return "Keychain 操作失败：\(message)（OSStatus \(status)）"
+            }
+        }
     }
     
     enum Accessibility {
