@@ -13,12 +13,11 @@ struct BusinessBody<T: Decodable>: Decodable {
     let data: T?
 }
 
-enum BusinessError: Error {
+enum BusinessError: LocalizedError {
     case business(message: String?)
     case decoding(reason: String)
     case underlying(error: HTTPError)
-
-    var toast: String {
+    var errorDescription: String {
         switch self {
         case .business(let message):
             return message ?? "服务器未返回错误说明"
