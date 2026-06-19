@@ -13,7 +13,12 @@ import UIKit
 /// LayoutGroup 内部的子元素排列规则由 `subitems` 数组中各元素的尺寸比例共同决定。
 public struct LayoutGroup: LayoutItemConvertible {
     
-    public let axis: NSLayoutConstraint.Axis
+    public enum Axis {
+        case horizontal
+        case vertical
+    }
+    
+    public let axis: Axis
     public let layoutSize: NSCollectionLayoutSize
     public let subitems: [any LayoutItemConvertible]
     
@@ -21,7 +26,7 @@ public struct LayoutGroup: LayoutItemConvertible {
     public var interItemSpacing: NSCollectionLayoutSpacing?
     
     public init(
-        axis: NSLayoutConstraint.Axis = .horizontal,
+        axis: Axis = .horizontal,
         width: NSCollectionLayoutDimension,
         height: NSCollectionLayoutDimension,
         @LayoutItemConvertibleBuilder subitems: () -> [any LayoutItemConvertible]
@@ -39,7 +44,7 @@ public struct LayoutGroup: LayoutItemConvertible {
                 layoutSize: layoutSize,
                 subitems: subitems.map({ $0.value })
             )
-        default:
+        case .horizontal:
             result = NSCollectionLayoutGroup.horizontal(
                 layoutSize: layoutSize,
                 subitems: subitems.map({ $0.value })
