@@ -11,13 +11,16 @@
 // - UIKit：MBProgressHUD 默认 isUserInteractionEnabled = true，自动拦截其下方视图的触摸事件。
 // - SwiftUI：通过 .allowsHitTesting(item != nil) 控制 overlay 层是否拦截触摸。
 //
-// ## 新值替换旧值
-// 无论是 Toast 还是 Loading，新值传入时都会立即结束当前正在展示的 HUD 并开始新的展示。
+// ## Toast 新值替换旧值
+// 新 Toast 传入时立即结束当前正在展示的 Toast 并开始新的展示。
 // - UIKit：方法开头调用 MBProgressHUD.forView(self)?.hide(animated: false) 立即停止旧 HUD。
-//   注意：hide 方法会触发旧 HUD 的 completionBlock（MBProgressHUD 内部行为）。
-// - SwiftUI Toast：被替换的 Toast 其 completion 仍会执行（立即触发），
+//   hide 方法会触发旧 HUD 的 completionBlock（MBProgressHUD 内部行为）。
+// - SwiftUI：被替换的 Toast 其 completion 仍会执行（立即触发），
 //   id 校验仅保护 item 置空——确保不会误清新 Toast 的状态。
-// - SwiftUI Loading：纯状态驱动，无 completion 概念。
+//
+// ## Loading 新值替换旧值
+// Loading 为纯状态驱动，新值传入时直接更新当前 HUD 的展示内容（无销毁重建）。
+// 若 HUD 已存在则仅更新文案，否则创建新 HUD；置 nil（UIKit 调用 hideLoading）时隐藏。
 //
 
 import UIKit
@@ -45,21 +48,24 @@ extension UIView {
         hud.hide(animated: true, afterDelay: duration)
     }
     
-    func startLoading(message: String? = nil, detail: String? = nil) {
-        MBProgressHUD.forView(self)?.hide(animated: false)
-        
-        let hud = MBProgressHUD.showAdded(to: self, animated: true)
-        hud.mode = .indeterminate
-        hud.removeFromSuperViewOnHide = true
-        hud.contentColor = UIView.hudForegroundColor
-        hud.bezelView.color = UIView.hudBackgroundColor
-        hud.bezelView.style = .solidColor
-        
-        hud.label.text = message
-        hud.detailsLabel.text = detail
+    func showLoading(message: String? = nil, detail: String? = nil) {
+        if let hud = MBProgressHUD.forView(self) {
+            hud.label.text = message
+            hud.detailsLabel.text = detail
+        } else {
+            let hud = MBProgressHUD.showAdded(to: self, animated: true)
+            hud.mode = .indeterminate
+            hud.removeFromSuperViewOnHide = true
+            hud.contentColor = UIView.hudForegroundColor
+            hud.bezelView.color = UIView.hudBackgroundColor
+            hud.bezelView.style = .solidColor
+            
+            hud.label.text = message
+            hud.detailsLabel.text = detail
+        }
     }
     
-    func stopLoading() {
+    func hideLoading() {
         let hud = MBProgressHUD.forView(self)
         hud?.hide(animated: true)
     }
@@ -102,20 +108,14 @@ private struct ToastModifier: ViewModifier {
     
     func body(content: Content) -> some View {
         content.overlay {
-            ToastBridgeView(item: $item)
+            ToastContainerView(item: $item)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .allowsHitTesting(item != nil)
         }
     }
     
-    struct ToastBridgeView: UIViewRepresentable {
+    struct ToastContainerView: UIViewRepresentable {
         @Binding var item: ToastItem?
-        
-        class Coordinator {
-            var lastID: UUID?
-        }
-        
-        func makeCoordinator() -> Coordinator { Coordinator() }
         
         func makeUIView(context: Context) -> UIView {
             let view = UIView()
@@ -124,23 +124,30 @@ private struct ToastModifier: ViewModifier {
         }
         
         func updateUIView(_ uiView: UIView, context: Context) {
-            guard let toast = item, toast.id != context.coordinator.lastID else { return }
-            context.coordinator.lastID = toast.id
-            MBProgressHUD.forView(uiView)?.hide(animated: false)
-            uiView.showToast(message: toast.message, detail: toast.detail, duration: toast.duration) { [currentItem = toast] in
-                currentItem.completion?()
-                if self.item?.id == currentItem.id {
-                    self.item = nil
+            if let toast = item {
+                guard toast.id != context.coordinator.lastID else { return }
+                context.coordinator.lastID = toast.id
+                uiView.showToast(message: toast.message, detail: toast.detail, duration: toast.duration) { [currentItem = toast] in
+                    currentItem.completion?()
+                    if self.item?.id == currentItem.id {
+                        self.item = nil
+                    }
                 }
+            } else {
+                MBProgressHUD.forView(uiView)?.hide(animated: false)
             }
         }
+        
+        class Coordinator { var lastID: UUID? }
+        func makeCoordinator() -> Coordinator { Coordinator() }
+        
     }
 
 }
 
 // MARK: - Loading
 
-struct LoadingItem: Equatable {
+struct LoadingItem {
     let message: String?
     let detail: String?
     
@@ -155,13 +162,13 @@ private struct LoadingModifier: ViewModifier {
     
     func body(content: Content) -> some View {
         content.overlay {
-            LoadingBridgeView(item: $item)
+            LoadingContainerView(item: $item)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .allowsHitTesting(item != nil)
         }
     }
     
-    struct LoadingBridgeView: UIViewRepresentable {
+    struct LoadingContainerView: UIViewRepresentable {
         @Binding var item: LoadingItem?
         
         func makeUIView(context: Context) -> UIView {
@@ -172,16 +179,9 @@ private struct LoadingModifier: ViewModifier {
         
         func updateUIView(_ uiView: UIView, context: Context) {
             if let loading = item {
-                if let hud = MBProgressHUD.forView(uiView) {
-                    // HUD 已存在，仅更新文案
-                    hud.label.text = loading.message
-                    hud.detailsLabel.text = loading.detail
-                } else {
-                    // 创建新 HUD
-                    uiView.startLoading(message: loading.message, detail: loading.detail)
-                }
+                uiView.showLoading(message: loading.message, detail: loading.detail)
             } else {
-                uiView.stopLoading()
+                uiView.hideLoading()
             }
         }
     }
