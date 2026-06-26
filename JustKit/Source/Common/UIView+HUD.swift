@@ -81,9 +81,16 @@ extension View {
 struct ToastItem: Equatable {
     let id = UUID()
     let message: String
-    var detail: String? = nil
-    var duration: TimeInterval = 1.5
-    var completion: (() -> Void)? = nil
+    let detail: String?
+    let duration: TimeInterval
+    let completion: (() -> Void)?
+    
+    init(message: String, detail: String? = nil, duration: TimeInterval = 1.5, completion: (() -> Void)? = nil) {
+        self.message = message
+        self.detail = detail
+        self.duration = duration
+        self.completion = completion
+    }
     
     static func == (lhs: ToastItem, rhs: ToastItem) -> Bool {
         lhs.id == rhs.id
@@ -92,11 +99,10 @@ struct ToastItem: Equatable {
 
 private struct ToastModifier: ViewModifier {
     @Binding var item: ToastItem?
-    @State var lastID: UUID? // 用于防止 SwiftUI 多次调用 updateUIView 时重复展示同一条 Toast
     
     func body(content: Content) -> some View {
         content.overlay {
-            ToastBridgeView(item: $item, lastID: $lastID)
+            ToastBridgeView(item: $item)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .allowsHitTesting(item != nil)
         }
@@ -104,7 +110,12 @@ private struct ToastModifier: ViewModifier {
     
     struct ToastBridgeView: UIViewRepresentable {
         @Binding var item: ToastItem?
-        @Binding var lastID: UUID?
+        
+        class Coordinator {
+            var lastID: UUID?
+        }
+        
+        func makeCoordinator() -> Coordinator { Coordinator() }
         
         func makeUIView(context: Context) -> UIView {
             let view = UIView()
@@ -113,21 +124,13 @@ private struct ToastModifier: ViewModifier {
         }
         
         func updateUIView(_ uiView: UIView, context: Context) {
-            // guard 放在 async 内部，确保检查 lastID 时取到的是最新值，
-            // 避免 updateUIView 被连续调用时因 async 延迟导致重复展示
-            DispatchQueue.main.async { // 使用主线程包裹是为了避免在 SwiftUI 视图更新周期内修改状态再次引起 Swiftui 更新
-                guard let toast = item, toast.id != lastID else { return }
-                lastID = toast.id
-                // 新 Toast 到来时，立即隐藏旧 HUD，避免叠加
-                MBProgressHUD.forView(uiView)?.hide(animated: false)
-                let currentID = toast.id
-                let userCompletion = toast.completion
-                uiView.showToast(message: toast.message, detail: toast.detail, duration: toast.duration) {
-                    userCompletion?()
-                    // 仅当 item 未被新 Toast 覆盖时才置空，避免误清后续 Toast
-                    if item?.id == currentID {
-                        item = nil
-                    }
+            guard let toast = item, toast.id != context.coordinator.lastID else { return }
+            context.coordinator.lastID = toast.id
+            MBProgressHUD.forView(uiView)?.hide(animated: false)
+            uiView.showToast(message: toast.message, detail: toast.detail, duration: toast.duration) { [currentItem = toast] in
+                currentItem.completion?()
+                if self.item?.id == currentItem.id {
+                    self.item = nil
                 }
             }
         }
@@ -138,8 +141,13 @@ private struct ToastModifier: ViewModifier {
 // MARK: - Loading
 
 struct LoadingItem: Equatable {
-    var message: String? = nil
-    var detail: String? = nil
+    let message: String?
+    let detail: String?
+    
+    init(message: String? = nil, detail: String? = nil) {
+        self.message = message
+        self.detail = detail
+    }
 }
 
 private struct LoadingModifier: ViewModifier {
