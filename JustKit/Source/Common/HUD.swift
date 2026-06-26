@@ -7,20 +7,16 @@
 // 基于 MBProgressHUD 封装，同时提供 UIKit（UIView 扩展）和 SwiftUI（ViewModifier）两套 API。
 //
 // ## 交互阻断
-// 展示期间容器视图不响应用户交互：
-// - UIKit：MBProgressHUD 默认 isUserInteractionEnabled = true，自动拦截其下方视图的触摸事件。
-// - SwiftUI：通过 .allowsHitTesting(item != nil) 控制 overlay 层是否拦截触摸。
+// HUD 展示期间容器视图不响应用户交互：
 //
 // ## Toast 新值替换旧值
-// 新 Toast 传入时立即结束当前正在展示的 Toast 并开始新的展示。
-// - UIKit：方法开头调用 MBProgressHUD.forView(self)?.hide(animated: false) 立即停止旧 HUD。
-//   hide 方法会触发旧 HUD 的 completionBlock（MBProgressHUD 内部行为）。
-// - SwiftUI：被替换的 Toast 其 completion 仍会执行（立即触发），
-//   id 校验仅保护 item 置空——确保不会误清新 Toast 的状态。
-//
+// 新 Toast 传入时立即结束当前正在展示的 Toast 并开始新的展示（新创建 hud）。
+// 置 nil（MBProgressHUD 调用 hide）时隐藏。
+// 如果 completionBlock 存在，总会被调用。
+
 // ## Loading 新值替换旧值
-// Loading 为纯状态驱动，新值传入时直接更新当前 HUD 的展示内容（无销毁重建）。
-// 若 HUD 已存在则仅更新文案，否则创建新 HUD；置 nil（UIKit 调用 hideLoading）时隐藏。
+// 若 HUD 已存在则仅更新文案，否则创建新 HUD；
+// 置 nil（UIKit 调用 hideLoading）时隐藏。
 //
 
 import UIKit
@@ -134,7 +130,7 @@ private struct ToastModifier: ViewModifier {
                     }
                 }
             } else {
-                MBProgressHUD.forView(uiView)?.hide(animated: false)
+                MBProgressHUD.forView(uiView)?.hide(animated: true)
             }
         }
         
