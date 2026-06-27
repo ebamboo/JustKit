@@ -1,77 +1,8 @@
 //
-//  Created by 姚旭 on 2021/5/17.
+//  Created by 姚旭 on 2026/6/27.
 //
 
-import UIKit
-import MBProgressHUD
 import SwiftUI
-
-//
-//  HUD 工具（Toast & Loading）
-//
-//  基于 MBProgressHUD 封装，同时提供 ）和 两套 API。
-//
-// ## 交互阻断
-// HUD 展示期间容器视图不响应用户交互：
-//
-// ## Toast 新值替换旧值
-// 新 Toast 传入时立即结束当前正在展示的 Toast 并开始新的展示（新创建 hud）。
-// 置 nil（MBProgressHUD 调用 hide）时隐藏。
-// 如果 completionBlock 存在，总会被调用。
-
-// ## Loading 新值替换旧值
-// 若 HUD 已存在则仅更新文案，否则创建新 HUD；
-// 置 nil（UIKit 调用 hideLoading）时隐藏。
-//
-
-private let hudForegroundColor = UIColor.white
-private let hudBackgroundColor = UIColor.black
-
-// MARK: - UIKit（UIView）拓展
-
-extension UIView {
-    
-    func showToast(message: String, detail: String? = nil, duration: TimeInterval = 1.5, completion: (() -> Void)? = nil) {
-        MBProgressHUD.forView(self)?.hide(animated: false)
-        
-        let hud = MBProgressHUD.showAdded(to: self, animated: true)
-        hud.mode = .text
-        hud.removeFromSuperViewOnHide = true
-        hud.contentColor = hudForegroundColor
-        hud.bezelView.color = hudBackgroundColor
-        hud.bezelView.style = .solidColor
-        
-        hud.label.text = message
-        hud.detailsLabel.text = detail
-        hud.completionBlock = completion
-        hud.hide(animated: true, afterDelay: duration)
-    }
-    
-    func showLoading(message: String? = nil, detail: String? = nil) {
-        if let hud = MBProgressHUD.forView(self) {
-            hud.label.text = message
-            hud.detailsLabel.text = detail
-        } else {
-            let hud = MBProgressHUD.showAdded(to: self, animated: true)
-            hud.mode = .indeterminate
-            hud.removeFromSuperViewOnHide = true
-            hud.contentColor = hudForegroundColor
-            hud.bezelView.color = hudBackgroundColor
-            hud.bezelView.style = .solidColor
-            
-            hud.label.text = message
-            hud.detailsLabel.text = detail
-        }
-    }
-    
-    func hideLoading() {
-        let hud = MBProgressHUD.forView(self)
-        hud?.hide(animated: true)
-    }
-    
-}
-
-// MARK: - SwiftUI（View）拓展
 
 struct ToastItem {
     let id = UUID()
@@ -137,7 +68,7 @@ private struct ToastModifier: ViewModifier {
                     }
                 }
             } else {
-                MBProgressHUD.forView(uiView)?.hide(animated: true)
+                uiView.hideToast()
             }
         }
         class Coordinator { var lastID: UUID? }
