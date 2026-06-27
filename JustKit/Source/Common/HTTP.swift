@@ -1,94 +1,12 @@
 //
 //  Created by 姚旭 on 2021/11/19.
 //
+// 可参考 Alamofire 中 `AuthenticationInterceptor` 实现自动刷新 Token 逻辑。
+// https://github.com/Alamofire/Alamofire/blob/master/Documentation/AdvancedUsage.md#authenticationinterceptor
+//
 
 import Alamofire
-import Combine
 
-/*
-
- # HTTP 网络请求工具
-
- 基于 Alamofire 封装的协议驱动式 HTTP 网络请求工具。
- 通过 `HTTPRequest` 协议定义接口，推荐以枚举方式组织 API，每个 case 对应一个具体接口。
-
- ## 核心能力
- - `HTTP.dataRequest`     — 普通数据请求（GET / POST / PUT / DELETE 等）
- - `HTTP.uploadRequest`   — 文件上传（支持 multipart、fileData、fileURL）
- - `HTTP.downloadRequest` — 文件下载（返回本地存储路径）
-
- ## 请求体格式（HTTP.Body）
- `none` / `binary` / `plain` / `json` / `form` / `multipart` / `fileData` / `fileURL`
-
- ## 全局错误监听
- 订阅 `HTTPRequestDidFail`（Combine PassthroughSubject）可统一拦截请求失败，
- 适用于 401 未授权跳转登录、网络异常提示等全局场景。
-
- ## 自动刷新 Token
- 所有请求方法均支持传入 `interceptor` 参数。
- 可在业务工具层基于 Alamofire 的 `AuthenticationInterceptor` 封装自动刷新 Token 逻辑，
- 实现 Token 过期后自动刷新并重发请求，对业务调用方完全透明。
- 参考：https://github.com/Alamofire/Alamofire/blob/master/Documentation/AdvancedUsage.md#authenticationinterceptor
-
- ---
-
- ## 定义 API
-
- ```swift
- enum TestAPI: HTTPRequest {
-     case login(account: String, password: String)
-     case userInfo(userId: Int)
- }
-
- extension TestAPI {
-
-     var method: HTTP.Method {
-         switch self {
-         case .login:   return .post
-         case .userInfo: return .get
-         }
-     }
-
-     var url: String {
-         switch self {
-         case .login:           return "https://api.example.com/login"
-         case .userInfo(let id): return "https://api.example.com/users/\(id)"
-         }
-     }
-
-     var headers: [String: String] { ["Token": "xxx"] }
-
-     var body: HTTP.Body {
-         switch self {
-         case .login(let account, let password):
-             return .json(["account": account, "password": password])
-         case .userInfo:
-             return .none
-         }
-     }
-
- }
- ```
-
- ## 实际调用
-
- ```swift
- let api = TestAPI.login(account: "test", password: "123")
- HTTP.dataRequest(api) { result in
-     switch result {
-     case .success(let response):
-         print(response.headers)
-         print(response.body ?? Data())
-     case .failure(let error):
-         print(error)
-     }
- }
- ```
- 
-*/
-
-/// HTTP 请求协议，定义请求的基本要素
-/// 推荐定义一个枚举类型来遵循此协议，每个 case 表示一个具体的 API 接口
 protocol HTTPRequest {
     
     /// HTTP 请求方法（GET、POST、PUT、DELETE 等）
@@ -108,7 +26,6 @@ protocol HTTPRequest {
     
 }
 
-/// HTTP 响应结构体，封装了 HTTP 请求的响应信息
 struct HTTPResponse {
     
     /// HTTP 响应头部字段字典
@@ -120,22 +37,7 @@ struct HTTPResponse {
     
 }
 
-/// HTTP 请求失败返回的错误信息
 typealias HTTPError = AFError
-
-/// HTTP 请求失败全局发布者（工具内部已保证在主线程发送）
-/// 可选择性地订阅此消息，统一处理某些失败情况
-/// 例如：response?.statusCode == 401 表示未登录或登录失效可以提示用户登录
-let HTTPRequestDidFail = PassthroughSubject<HTTPRequestFailureContext, Never>()
-/// HTTP 请求失败上下文信息
-struct HTTPRequestFailureContext {
-    /// 由 Alamofire 产生的错误对象
-    let error: HTTPError
-    /// 实际发送给服务器的 URL 请求。请求创建阶段出错时可能为 nil
-    let request: URLRequest?
-    /// 服务器返回的 HTTP 响应。若请求未到达服务器、网络中断等情况下可能为 nil
-    let response: HTTPURLResponse?
-}
 
 extension HTTP {
     
@@ -175,13 +77,6 @@ extension HTTP {
         task.response(queue: .main) { dataResponse in
             let result: Result<HTTPResponse, HTTPError>
             if let error = dataResponse.error {
-                HTTPRequestDidFail.send(
-                    .init(
-                        error: error,
-                        request: dataResponse.request,
-                        response: dataResponse.response
-                    )
-                )
                 result = .failure(error)
             } else {
                 let headers = dataResponse.response?.allHeaderFields as? [String: String] ?? [:]
@@ -253,13 +148,6 @@ extension HTTP {
         task.response(queue: .main) { uploadResponse in
             let result: Result<Data?, HTTPError>
             if let error = uploadResponse.error {
-                HTTPRequestDidFail.send(
-                    .init(
-                        error: error,
-                        request: uploadResponse.request,
-                        response: uploadResponse.response
-                    )
-                )
                 result = .failure(error)
             } else {
                 result = .success(uploadResponse.data)
@@ -313,13 +201,6 @@ extension HTTP {
         task.response(queue: .main) { downloadResponse in
             let result: Result<URL?, HTTPError>
             if let error = downloadResponse.error {
-                HTTPRequestDidFail.send(
-                    .init(
-                        error: error,
-                        request: downloadResponse.request,
-                        response: downloadResponse.response
-                    )
-                )
                 result = .failure(error)
             } else {
                 result = .success(downloadResponse.fileURL)
