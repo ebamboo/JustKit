@@ -2,9 +2,14 @@
 //  Created by 姚旭 on 2021/5/17.
 //
 
-// MARK: - HUD 工具（Toast & Loading）
+import UIKit
+import MBProgressHUD
+import SwiftUI
+
 //
-// 基于 MBProgressHUD 封装，同时提供 UIKit（UIView 扩展）和 SwiftUI（ViewModifier）两套 API。
+//  HUD 工具（Toast & Loading）
+//
+//  基于 MBProgressHUD 封装，同时提供 ）和 两套 API。
 //
 // ## 交互阻断
 // HUD 展示期间容器视图不响应用户交互：
@@ -19,14 +24,12 @@
 // 置 nil（UIKit 调用 hideLoading）时隐藏。
 //
 
-import UIKit
-import MBProgressHUD
-import SwiftUI
+private let hudForegroundColor = UIColor.white
+private let hudBackgroundColor = UIColor.black
+
+// MARK: - UIKit（UIView）拓展
 
 extension UIView {
-    
-    private static let hudForegroundColor = UIColor.white
-    private static let hudBackgroundColor = UIColor.black
     
     func showToast(message: String, detail: String? = nil, duration: TimeInterval = 1.5, completion: (() -> Void)? = nil) {
         MBProgressHUD.forView(self)?.hide(animated: false)
@@ -34,8 +37,8 @@ extension UIView {
         let hud = MBProgressHUD.showAdded(to: self, animated: true)
         hud.mode = .text
         hud.removeFromSuperViewOnHide = true
-        hud.contentColor = UIView.hudForegroundColor
-        hud.bezelView.color = UIView.hudBackgroundColor
+        hud.contentColor = hudForegroundColor
+        hud.bezelView.color = hudBackgroundColor
         hud.bezelView.style = .solidColor
         
         hud.label.text = message
@@ -52,8 +55,8 @@ extension UIView {
             let hud = MBProgressHUD.showAdded(to: self, animated: true)
             hud.mode = .indeterminate
             hud.removeFromSuperViewOnHide = true
-            hud.contentColor = UIView.hudForegroundColor
-            hud.bezelView.color = UIView.hudBackgroundColor
+            hud.contentColor = hudForegroundColor
+            hud.bezelView.color = hudBackgroundColor
             hud.bezelView.style = .solidColor
             
             hud.label.text = message
@@ -68,6 +71,31 @@ extension UIView {
     
 }
 
+// MARK: - SwiftUI（View）拓展
+
+struct ToastItem {
+    let id = UUID()
+    let message: String
+    let detail: String?
+    let duration: TimeInterval
+    let completion: (() -> Void)?
+    init(message: String, detail: String? = nil, duration: TimeInterval = 1.5, completion: (() -> Void)? = nil) {
+        self.message = message
+        self.detail = detail
+        self.duration = duration
+        self.completion = completion
+    }
+}
+
+struct LoadingItem {
+    let message: String?
+    let detail: String?
+    init(message: String? = nil, detail: String? = nil) {
+        self.message = message
+        self.detail = detail
+    }
+}
+
 extension View {
     
     func toast(item: Binding<ToastItem?>) -> some View {
@@ -80,28 +108,9 @@ extension View {
     
 }
 
-struct ToastItem: Equatable {
-    let id = UUID()
-    let message: String
-    let detail: String?
-    let duration: TimeInterval
-    let completion: (() -> Void)?
-    
-    init(message: String, detail: String? = nil, duration: TimeInterval = 1.5, completion: (() -> Void)? = nil) {
-        self.message = message
-        self.detail = detail
-        self.duration = duration
-        self.completion = completion
-    }
-    
-    static func == (lhs: ToastItem, rhs: ToastItem) -> Bool {
-        lhs.id == rhs.id
-    }
-}
-
 private struct ToastModifier: ViewModifier {
-    @Binding var item: ToastItem?
     
+    @Binding var item: ToastItem?
     func body(content: Content) -> some View {
         content.overlay {
             ToastContainerView(item: $item)
@@ -112,13 +121,11 @@ private struct ToastModifier: ViewModifier {
     
     struct ToastContainerView: UIViewRepresentable {
         @Binding var item: ToastItem?
-        
         func makeUIView(context: Context) -> UIView {
             let view = UIView()
             view.backgroundColor = .clear
             return view
         }
-        
         func updateUIView(_ uiView: UIView, context: Context) {
             if let toast = item {
                 guard toast.id != context.coordinator.lastID else { return }
@@ -133,27 +140,14 @@ private struct ToastModifier: ViewModifier {
                 MBProgressHUD.forView(uiView)?.hide(animated: true)
             }
         }
-        
         class Coordinator { var lastID: UUID? }
         func makeCoordinator() -> Coordinator { Coordinator() }
-        
     }
 
-}
-
-// MARK: - Loading
-
-struct LoadingItem {
-    let message: String?
-    let detail: String?
-    
-    init(message: String? = nil, detail: String? = nil) {
-        self.message = message
-        self.detail = detail
-    }
 }
 
 private struct LoadingModifier: ViewModifier {
+    
     @Binding var item: LoadingItem?
     
     func body(content: Content) -> some View {
@@ -166,13 +160,11 @@ private struct LoadingModifier: ViewModifier {
     
     struct LoadingContainerView: UIViewRepresentable {
         @Binding var item: LoadingItem?
-        
         func makeUIView(context: Context) -> UIView {
             let view = UIView()
             view.backgroundColor = .clear
             return view
         }
-        
         func updateUIView(_ uiView: UIView, context: Context) {
             if let loading = item {
                 uiView.showLoading(message: loading.message, detail: loading.detail)
