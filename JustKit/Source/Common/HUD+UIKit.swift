@@ -12,21 +12,10 @@ import MBProgressHUD
 /// ## 交互行为
 /// HUD 显示期间会阻断宿主视图的用户交互。
 ///
-/// ## Toast
-/// - 同一容器同时仅展示一个 Toast。
-/// - 新 Toast 会替换当前 Toast
-/// - Toast 消失时始终触发 completion，包括自然结束、主动隐藏、被替换三种情况。
-///
-/// ## Loading
-/// - 同一容器同时仅展示一个 Loading HUD。
-/// - 更新绑定值时优先复用现有 HUD，仅更新显示内容。
-///
 extension UIView {
     
-    enum HUD {
-        fileprivate static let foregroundColor = UIColor.white
-        fileprivate static let backgroundColor = UIColor.black
-    }
+    private static let hudForegroundColor = UIColor.white
+    private static let hudBackgroundColor = UIColor.black
 
     func showToast(
         message: String,
@@ -39,8 +28,8 @@ extension UIView {
         let hud = MBProgressHUD.showAdded(to: self, animated: true)
         hud.mode = .text
         hud.removeFromSuperViewOnHide = true
-        hud.contentColor = HUD.foregroundColor
-        hud.bezelView.color = HUD.backgroundColor
+        hud.contentColor = UIView.hudForegroundColor
+        hud.bezelView.color = UIView.hudBackgroundColor
         hud.bezelView.style = .solidColor
         
         hud.label.text = message
@@ -65,8 +54,8 @@ extension UIView {
             let hud = MBProgressHUD.showAdded(to: self, animated: true)
             hud.mode = .indeterminate
             hud.removeFromSuperViewOnHide = true
-            hud.contentColor = HUD.foregroundColor
-            hud.bezelView.color = HUD.backgroundColor
+            hud.contentColor = UIView.hudForegroundColor
+            hud.bezelView.color = UIView.hudBackgroundColor
             hud.bezelView.style = .solidColor
             
             hud.label.text = message
