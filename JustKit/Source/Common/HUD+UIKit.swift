@@ -8,10 +8,9 @@ import MBProgressHUD
 /// HUD 工具（Toast & Loading）
 ///
 /// 基于 `MBProgressHUD` 封装，同时提供 UIKit（`UIView` 扩展）和 SwiftUI（`ViewModifier` ）两套接口。
+/// SwiftUI 侧为 UIKit 侧的桥接封装，配置变更仅需修改 UIView 扩展。
 ///
-/// ## 交互行为
-/// HUD 显示期间会阻断宿主视图的用户交互。
-///
+/// - Note: HUD 展示期间宿主视图不响应用户交互。
 extension UIView {
     
     private static let hudForegroundColor = UIColor.white
