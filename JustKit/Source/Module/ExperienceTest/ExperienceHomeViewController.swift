@@ -18,6 +18,7 @@ class ExperienceHomeViewController: UIViewController, UITableViewDataSource, UIT
         "UIScrollView 嵌套", "UICollectionView新布局方式和数据源",
         "视频图片混合 Browser Swift", "视频图片混合 Browser OC", "视频图片混合 Media View",
         "单视频播放", "视频播放列表", "图片浏览器",
+        "侧边栏菜单",
     ]
     
     // MARK: - life cirle
@@ -143,6 +144,10 @@ class ExperienceHomeViewController: UIViewController, UITableViewDataSource, UIT
         }
         if indexPath.row == 21 {
             navigationController?.pushViewController(RootViewController(), animated: true)
+            return
+        }
+        if indexPath.row == 22 {
+            navigationController?.pushViewController(SideBarTestViewController(), animated: true)
             return
         }
     }
