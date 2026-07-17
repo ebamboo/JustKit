@@ -6,7 +6,6 @@ import UIKit
 
 class ExperienceHomeViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
-    let tableView = UITableView()
     let titleList = [
         "系统原生导航栏、分栏设置说明（陈旧）", "评论类似的显示和隐藏输入框",
         "系统原生分享", "文件预览、打开、分享",
@@ -28,16 +27,16 @@ class ExperienceHomeViewController: UIViewController, UITableViewDataSource, UIT
         
         view.backgroundColor = UIColor.systemGroupedBackground
         
+        let tableView = UITableView()
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
         view.addSubview(tableView)
-    }
-
-    override func viewWillLayoutSubviews() {
-        super.viewWillLayoutSubviews()
-        let frame = CGRect.init(x: view.safeAreaInsets.left, y: view.safeAreaInsets.top, width: view.bounds.size.width - view.safeAreaInsets.left - view.safeAreaInsets.right, height: view.bounds.size.height - view.safeAreaInsets.top - view.safeAreaInsets.bottom)
-        tableView.frame = frame
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        tableView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
+        tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
     }
     
     // MARK: - table view
